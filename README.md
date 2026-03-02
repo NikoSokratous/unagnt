@@ -343,20 +343,9 @@ Built with:
 
 ---
 
-## 💬 Community
-
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/agentruntime/agentruntime/discussions)
-- **Discord**: [Join our community](https://discord.gg/agentruntime)
-- **Twitter**: [@agentruntime](https://twitter.com/agentruntime)
-- **Blog**: [blog.agentruntime.io](https://blog.agentruntime.io)
-
----
-
 ## 📞 Support
 
-- **Documentation**: [docs.agentruntime.io](https://docs.agentruntime.io)
 - **Issues**: [GitHub Issues](https://github.com/agentruntime/agentruntime/issues)
-- **Commercial Support**: [contact@agentruntime.io](mailto:contact@agentruntime.io)
 
 ---
 
