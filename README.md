@@ -297,7 +297,7 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 
 ## 📊 Project Stats
 
-- **Language**: Go 1.25
+- **Language**: Go 1.22
 - **LOC**: ~50,000 lines of production code
 - **Tests**: 500+ unit and integration tests
 - **Coverage**: 75%+

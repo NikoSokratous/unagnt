@@ -1,6 +1,6 @@
 module github.com/agentruntime/agentruntime
 
-go 1.25.1
+go 1.25.0
 
 require (
 	github.com/chzyer/readline v1.5.1
@@ -14,7 +14,6 @@ require (
 	github.com/graphql-go/graphql v0.8.1
 	github.com/lib/pq v1.11.2
 	github.com/mark3labs/mcp-go v0.44.1
-	github.com/mattn/go-sqlite3 v1.14.34
 	github.com/olekukonko/tablewriter v1.1.3
 	github.com/prometheus/client_golang v1.23.2
 	github.com/qdrant/go-client v1.17.1
