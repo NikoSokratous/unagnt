@@ -14,9 +14,9 @@ import (
 
 // AnalyticsAPI handles analytics endpoints
 type AnalyticsAPI struct {
-	costTracker  *cost.CostTracker
-	slaMonitor   *monitoring.SLAMonitor
-	auditLogger  *policy.AuditLogger // optional
+	costTracker *cost.CostTracker
+	slaMonitor  *monitoring.SLAMonitor
+	auditLogger *policy.AuditLogger // optional
 }
 
 // NewAnalyticsAPI creates a new analytics API
@@ -271,7 +271,7 @@ func (api *AnalyticsAPI) GetPolicyDenials(w http.ResponseWriter, r *http.Request
 	}
 	start, end := parseTimeRange(timeRange)
 	filter := policy.AuditFilter{
-		Decision: "deny",
+		Decision:  "deny",
 		StartTime: start,
 		EndTime:   end,
 		Limit:     limit,
@@ -290,8 +290,8 @@ func (api *AnalyticsAPI) GetPolicyDenialsStats(w http.ResponseWriter, r *http.Re
 	if api.auditLogger == nil {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"denied":            0,
-			"allowed":           0,
+			"denied":           0,
+			"allowed":          0,
 			"top_deny_reasons": []interface{}{},
 		})
 		return
@@ -321,7 +321,7 @@ func (api *AnalyticsAPI) ExportAuditLogs(w http.ResponseWriter, r *http.Request)
 	timeRange := r.URL.Query().Get("range")
 	start, end := parseTimeRange(timeRange)
 	filter := policy.AuditFilter{
-		AgentName: r.URL.Query().Get("agent_name"),
+		AgentName:  r.URL.Query().Get("agent_name"),
 		PolicyName: r.URL.Query().Get("policy_name"),
 		Decision:   r.URL.Query().Get("decision"),
 		StartTime:  start,

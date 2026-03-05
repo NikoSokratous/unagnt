@@ -27,14 +27,14 @@ type Agent struct {
 // AgentSpec defines the desired state of Agent
 // +kubebuilder:object:generate=true
 type AgentSpec struct {
-	Role     string   `json:"role"`
-	Goal     string   `json:"goal,omitempty"`
-	LLM      LLMSpec  `json:"llm"`
-	Tools    []string `json:"tools,omitempty"`
-	Memory   *MemorySpec     `json:"memory,omitempty"`
-	Replicas int      `json:"replicas,omitempty"`
-	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
-	Autoscaling *AutoscalingSpec `json:"autoscaling,omitempty"`
+	Role        string                      `json:"role"`
+	Goal        string                      `json:"goal,omitempty"`
+	LLM         LLMSpec                     `json:"llm"`
+	Tools       []string                    `json:"tools,omitempty"`
+	Memory      *MemorySpec                 `json:"memory,omitempty"`
+	Replicas    int                         `json:"replicas,omitempty"`
+	Resources   corev1.ResourceRequirements `json:"resources,omitempty"`
+	Autoscaling *AutoscalingSpec            `json:"autoscaling,omitempty"`
 }
 
 // LLMSpec defines LLM configuration
@@ -57,19 +57,19 @@ type MemorySpec struct {
 // AutoscalingSpec defines autoscaling configuration
 // +kubebuilder:object:generate=true
 type AutoscalingSpec struct {
-	Enabled                bool `json:"enabled"`
-	MinReplicas            int  `json:"minReplicas,omitempty"`
-	MaxReplicas            int  `json:"maxReplicas,omitempty"`
-	TargetCPUUtilization   int  `json:"targetCPUUtilization,omitempty"`
+	Enabled              bool `json:"enabled"`
+	MinReplicas          int  `json:"minReplicas,omitempty"`
+	MaxReplicas          int  `json:"maxReplicas,omitempty"`
+	TargetCPUUtilization int  `json:"targetCPUUtilization,omitempty"`
 }
 
 // AgentStatus defines the observed state of Agent
 // +kubebuilder:object:generate=true
 type AgentStatus struct {
-	Phase          string              `json:"phase,omitempty"`
-	Replicas       int32               `json:"replicas,omitempty"`
-	ReadyReplicas  int32               `json:"readyReplicas,omitempty"`
-	Conditions     []metav1.Condition  `json:"conditions,omitempty"`
+	Phase         string             `json:"phase,omitempty"`
+	Replicas      int32              `json:"replicas,omitempty"`
+	ReadyReplicas int32              `json:"readyReplicas,omitempty"`
+	Conditions    []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -175,11 +175,11 @@ type PolicyRule struct {
 // PolicyStatus defines the observed state of Policy
 // +kubebuilder:object:generate=true
 type PolicyStatus struct {
-	Active         bool               `json:"active,omitempty"`
-	LastApplied    *metav1.Time       `json:"lastApplied,omitempty"`
-	Violations     int                `json:"violations,omitempty"`
-	Approvals      int                `json:"approvals,omitempty"`
-	Conditions     []metav1.Condition `json:"conditions,omitempty"`
+	Active      bool               `json:"active,omitempty"`
+	LastApplied *metav1.Time       `json:"lastApplied,omitempty"`
+	Violations  int                `json:"violations,omitempty"`
+	Approvals   int                `json:"approvals,omitempty"`
+	Conditions  []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true

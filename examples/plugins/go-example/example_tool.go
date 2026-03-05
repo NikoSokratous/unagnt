@@ -62,26 +62,26 @@ func (t *ExampleTool) Execute(ctx context.Context, input json.RawMessage) (map[s
 		Message   string `json:"message"`
 		Uppercase bool   `json:"uppercase"`
 	}
-	
+
 	if err := json.Unmarshal(input, &params); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
-	
+
 	// Validate required fields
 	if params.Message == "" {
 		return nil, fmt.Errorf("message is required")
 	}
-	
+
 	result := params.Message
 	if params.Uppercase {
 		result = strings.ToUpper(result)
 	}
-	
+
 	return map[string]any{
-		"result":     result,
-		"length":     len(result),
-		"uppercase":  params.Uppercase,
-		"processed":  true,
+		"result":    result,
+		"length":    len(result),
+		"uppercase": params.Uppercase,
+		"processed": true,
 	}, nil
 }
 
