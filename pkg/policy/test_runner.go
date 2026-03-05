@@ -97,12 +97,7 @@ func (r *TestRunner) RunTest(ctx context.Context, test *PolicyTest) (*TestResult
 		TestCases:  make([]TestCaseResult, 0, len(test.Tests)),
 	}
 
-	// Load policy version
-	version := test.Version
-	if version == "" {
-		version = "latest"
-	}
-
+	// Load policy
 	policy, err := r.store.GetActiveVersion(ctx, test.Policy)
 	if err != nil {
 		return nil, fmt.Errorf("load policy: %w", err)

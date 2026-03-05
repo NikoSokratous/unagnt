@@ -140,7 +140,6 @@ func runDebugLive(configFile, goal string) error {
 
 		switch command {
 		case "continue", "c":
-			stepMode = false
 			fmt.Println(green("Continuing execution..."))
 			_, err := engine.Run(ctx)
 			if err != nil {
