@@ -501,11 +501,11 @@ func (e *RiskEngine) makeDecision(score RiskScore, ctx ActionContext) RiskDecisi
 // containsPII checks for common PII patterns using regex.
 // Uses heuristics for SSN, email, credit card, phone; production may integrate dedicated PII detection.
 var (
-	piiSSN       = regexp.MustCompile(`\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b`)
-	piiEmail     = regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
+	piiSSN        = regexp.MustCompile(`\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b`)
+	piiEmail      = regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 	piiCreditCard = regexp.MustCompile(`\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b`)
-	piiPhone     = regexp.MustCompile(`(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b`)
-	piiKeywords  = regexp.MustCompile(`(?i)\b(?:ssn|social\s*security|credit\s*card|password|secret|api[_-]?key|token)\b`)
+	piiPhone      = regexp.MustCompile(`(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b`)
+	piiKeywords   = regexp.MustCompile(`(?i)\b(?:ssn|social\s*security|credit\s*card|password|secret|api[_-]?key|token)\b`)
 )
 
 func containsPII(input string) bool {

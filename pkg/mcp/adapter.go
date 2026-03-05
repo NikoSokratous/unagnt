@@ -10,8 +10,8 @@ import (
 
 // MCPToolAdapter adapts an MCP tool to the tool.Tool interface.
 type MCPToolAdapter struct {
-	mcpTool  mcp.Tool
-	client   *MCPClient
+	mcpTool      mcp.Tool
+	client       *MCPClient
 	prefixedName string
 }
 

@@ -137,13 +137,13 @@ func newPolicyApplyCmd() *cobra.Command {
 			}
 
 			pv := &policy.PolicyVersion{
-				PolicyName:  name,
-				Version:     ver,
-				Content:     content,
-				Format:      "yaml",
-				Author:      author,
-				Changelog:   changelog,
-				Active:      activate,
+				PolicyName: name,
+				Version:    ver,
+				Content:    content,
+				Format:     "yaml",
+				Author:     author,
+				Changelog:  changelog,
+				Active:     activate,
 			}
 
 			ctx := context.Background()
