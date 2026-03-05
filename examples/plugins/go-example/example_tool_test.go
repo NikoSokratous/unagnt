@@ -8,15 +8,15 @@ import (
 
 func TestExampleToolInterface(t *testing.T) {
 	tool := &ExampleTool{}
-	
+
 	if tool.Name() != "example_plugin" {
 		t.Errorf("Expected name 'example_plugin', got '%s'", tool.Name())
 	}
-	
+
 	if tool.Version() != "1.0.0" {
 		t.Errorf("Expected version '1.0.0', got '%s'", tool.Version())
 	}
-	
+
 	desc := tool.Description()
 	if desc == "" {
 		t.Error("Description should not be empty")
@@ -25,17 +25,17 @@ func TestExampleToolInterface(t *testing.T) {
 
 func TestExampleToolSchema(t *testing.T) {
 	tool := &ExampleTool{}
-	
+
 	schema, err := tool.InputSchema()
 	if err != nil {
 		t.Fatalf("InputSchema failed: %v", err)
 	}
-	
+
 	var schemaObj map[string]interface{}
 	if err := json.Unmarshal(schema, &schemaObj); err != nil {
 		t.Fatalf("Schema is not valid JSON: %v", err)
 	}
-	
+
 	if schemaObj["type"] != "object" {
 		t.Error("Schema type should be 'object'")
 	}
@@ -43,12 +43,12 @@ func TestExampleToolSchema(t *testing.T) {
 
 func TestExampleToolPermissions(t *testing.T) {
 	tool := &ExampleTool{}
-	
+
 	perms := tool.Permissions()
 	if len(perms) == 0 {
 		t.Error("Expected at least 1 permission")
 	}
-	
+
 	if perms[0].Scope != "compute:cpu" {
 		t.Errorf("Expected permission 'compute:cpu', got '%s'", perms[0].Scope)
 	}
@@ -57,7 +57,7 @@ func TestExampleToolPermissions(t *testing.T) {
 func TestExampleToolExecute(t *testing.T) {
 	tool := &ExampleTool{}
 	ctx := context.Background()
-	
+
 	tests := []struct {
 		name      string
 		input     string
@@ -103,22 +103,22 @@ func TestExampleToolExecute(t *testing.T) {
 			checkFunc: nil,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			output, err := tool.Execute(ctx, json.RawMessage(tt.input))
-			
+
 			if tt.wantError {
 				if err == nil {
 					t.Error("Expected error but got none")
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Fatalf("Execute failed: %v", err)
 			}
-			
+
 			if tt.checkFunc != nil {
 				tt.checkFunc(t, output)
 			}
@@ -130,10 +130,10 @@ func TestExampleToolConcurrency(t *testing.T) {
 	tool := &ExampleTool{}
 	ctx := context.Background()
 	input := json.RawMessage(`{"message":"test"}`)
-	
+
 	// Run multiple concurrent executions
 	done := make(chan bool, 10)
-	
+
 	for i := 0; i < 10; i++ {
 		go func() {
 			_, err := tool.Execute(ctx, input)
@@ -143,7 +143,7 @@ func TestExampleToolConcurrency(t *testing.T) {
 			done <- true
 		}()
 	}
-	
+
 	// Wait for all to complete
 	for i := 0; i < 10; i++ {
 		<-done

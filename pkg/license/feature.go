@@ -13,9 +13,9 @@ const (
 	FeatureAirGappedDeploy Feature = "air_gapped"
 
 	// Enterprise (gated; require license in commercial build)
-	FeatureSSO           Feature = "sso"
-	FeatureCompliancePack Feature = "compliance_pack"
-	FeatureHostedTier     Feature = "hosted_tier"
+	FeatureSSO             Feature = "sso"
+	FeatureCompliancePack  Feature = "compliance_pack"
+	FeatureHostedTier      Feature = "hosted_tier"
 	FeaturePaidMarketplace Feature = "paid_marketplace"
 )
 

@@ -35,7 +35,7 @@ type SAMLConfig struct {
 
 // SAMLProvider implements a SAML Service Provider using samlsp.
 type SAMLProvider struct {
-	config    *SAMLConfig
+	config     *SAMLConfig
 	middleware *samlsp.Middleware
 }
 
@@ -110,7 +110,7 @@ func NewSAMLProvider(ctx context.Context, config *SAMLConfig) (*SAMLProvider, er
 	}
 
 	return &SAMLProvider{
-		config:    config,
+		config:     config,
 		middleware: middleware,
 	}, nil
 }

@@ -105,9 +105,9 @@ func (r *PolicyReconciler) applyPolicy(ctx context.Context, policy *agentruntime
 	// 1. Register policy rules with the policy engine
 	// 2. Set up webhooks for policy enforcement
 	// 3. Configure audit logging
-	
+
 	logger.Info("Applied policy", "name", policy.Name, "rules", len(policy.Spec.Rules))
-	
+
 	return nil
 }
 

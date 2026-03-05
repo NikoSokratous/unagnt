@@ -51,7 +51,7 @@ func TestEndToEndAgentExecution(t *testing.T) {
 		Autonomy:  runtime.AutonomyStandard,
 		MaxSteps:  5,
 	}
-	
+
 	engine := runtime.NewEngine(cfg, mockPlanner, tool.NewExecutor(registry))
 
 	// Run engine
@@ -66,7 +66,7 @@ func TestEndToEndAgentExecution(t *testing.T) {
 	t.Logf("Final state: %+v", state)
 	t.Logf("Step count: %d", state.StepCount)
 	t.Logf("Final status: %v", state.Current)
-	
+
 	if state.Current != runtime.StateCompleted && state.Current != runtime.StateFailed {
 		t.Errorf("Expected state Completed or Failed, got %v", state.Current)
 	}
@@ -120,7 +120,7 @@ func TestStoreOperations(t *testing.T) {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
-	
+
 	err = st.SaveRun(ctx, run)
 	if err != nil {
 		t.Fatalf("SaveRun failed: %v", err)
@@ -150,7 +150,7 @@ func TestStoreOperations(t *testing.T) {
 			Name:     "test-model",
 		},
 	}
-	
+
 	err = st.SaveEvent(ctx, "test-run-1", evt)
 	if err != nil {
 		t.Fatalf("SaveEvent failed: %v", err)

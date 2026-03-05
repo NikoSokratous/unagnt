@@ -68,16 +68,16 @@ func (r *WorkflowReconciler) handleScheduledWorkflow(ctx context.Context, workfl
 		}
 		return ctrl.Result{}, err
 	}
-	
+
 	logger.Info("Scheduled workflow", "schedule", workflow.Spec.Schedule)
-	
+
 	now := time.Now()
-	
+
 	// Calculate next run time
 	nextTime := schedule.Next(now)
 	nextScheduleTime := metav1.NewTime(nextTime)
 	workflow.Status.NextScheduleTime = &nextScheduleTime
-	
+
 	// Check if it's time to run
 	shouldRun := false
 	if workflow.Status.LastScheduleTime == nil {
@@ -86,25 +86,25 @@ func (r *WorkflowReconciler) handleScheduledWorkflow(ctx context.Context, workfl
 	} else {
 		lastRun := workflow.Status.LastScheduleTime.Time
 		expectedNextRun := schedule.Next(lastRun)
-		
+
 		// If current time is past the expected next run, execute now
 		if now.After(expectedNextRun) || now.Equal(expectedNextRun) {
 			shouldRun = true
 		}
 	}
-	
+
 	if shouldRun {
 		// Update last schedule time
 		lastScheduleTime := metav1.Now()
 		workflow.Status.LastScheduleTime = &lastScheduleTime
-		
+
 		// Execute the workflow
 		if _, err := r.handleWorkflowExecution(ctx, workflow); err != nil {
 			logger.Error(err, "Failed to execute scheduled workflow")
 			// Don't return error - continue scheduling
 		}
 	}
-	
+
 	// Update status
 	if err := r.Status().Update(ctx, workflow); err != nil {
 		return ctrl.Result{}, err
@@ -118,7 +118,7 @@ func (r *WorkflowReconciler) handleScheduledWorkflow(ctx context.Context, workfl
 	if requeueAfter < 0 {
 		requeueAfter = 10 * time.Second
 	}
-	
+
 	return ctrl.Result{RequeueAfter: requeueAfter}, nil
 }
 
@@ -252,8 +252,8 @@ steps:
 			Name:      fmt.Sprintf("%s-workflow", workflow.Name),
 			Namespace: workflow.Namespace,
 			Labels: map[string]string{
-				"app":                       "agentruntime",
-				"unagnt.io/workflow":  workflow.Name,
+				"app":                "agentruntime",
+				"unagnt.io/workflow": workflow.Name,
 			},
 		},
 		Data: map[string]string{
@@ -268,7 +268,7 @@ steps:
 // jobForWorkflow creates a Job to execute the workflow
 func (r *WorkflowReconciler) jobForWorkflow(workflow *agentruntimev1.Workflow) *batchv1.Job {
 	labels := map[string]string{
-		"app":                      "unagnt",
+		"app":                "unagnt",
 		"unagnt.io/workflow": workflow.Name,
 	}
 

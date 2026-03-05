@@ -6,16 +6,16 @@ import (
 
 // AuthConfig is the top-level auth configuration schema for Web UI and API.
 type AuthConfig struct {
-	Enabled    bool           `yaml:"enabled"`
-	Providers  []AuthProvider `yaml:"providers"`
-	Session    SessionConfig  `yaml:"session"`
+	Enabled      bool               `yaml:"enabled"`
+	Providers    []AuthProvider     `yaml:"providers"`
+	Session      SessionConfig      `yaml:"session"`
 	Entitlements EntitlementsConfig `yaml:"entitlements"`
 }
 
 // AuthProvider configures a single identity provider.
 type AuthProvider struct {
 	ID       string `yaml:"id"`
-	Type     string `yaml:"type"` // oauth2, oidc, saml
+	Type     string `yaml:"type"`     // oauth2, oidc, saml
 	Priority int    `yaml:"priority"` // Lower = preferred
 
 	OAuth2 *OAuth2ProviderConfig `yaml:"oauth2,omitempty"`

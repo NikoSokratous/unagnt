@@ -25,17 +25,17 @@ func NewTeamsConnector(cfg *Config) *TeamsConnector {
 
 // teamsPayload is the Teams Adaptive Card / webhook format.
 type teamsPayload struct {
-	Type       string        `json:"@type"`
-	Context    string        `json:"@context"`
-	Summary    string        `json:"summary"`
-	Sections   []teamsSection `json:"sections"`
+	Type     string         `json:"@type"`
+	Context  string         `json:"@context"`
+	Summary  string         `json:"summary"`
+	Sections []teamsSection `json:"sections"`
 }
 
 type teamsSection struct {
-	ActivityTitle    string         `json:"activityTitle,omitempty"`
-	ActivitySubtitle string         `json:"activitySubtitle,omitempty"`
-	Text             string         `json:"text,omitempty"`
-	PotentialAction  []teamsAction  `json:"potentialAction,omitempty"`
+	ActivityTitle    string        `json:"activityTitle,omitempty"`
+	ActivitySubtitle string        `json:"activitySubtitle,omitempty"`
+	Text             string        `json:"text,omitempty"`
+	PotentialAction  []teamsAction `json:"potentialAction,omitempty"`
 }
 
 type teamsAction struct {
@@ -64,9 +64,9 @@ func (t *TeamsConnector) Send(ctx context.Context, msg *Message) error {
 		})
 	}
 	payload := teamsPayload{
-		Type:    "MessageCard",
-		Context: "http://schema.org/extensions",
-		Summary: msg.Title,
+		Type:     "MessageCard",
+		Context:  "http://schema.org/extensions",
+		Summary:  msg.Title,
 		Sections: []teamsSection{section},
 	}
 	body, err := json.Marshal(payload)

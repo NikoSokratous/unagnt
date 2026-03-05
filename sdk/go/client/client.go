@@ -65,12 +65,12 @@ func (c *Client) CreateRun(ctx context.Context, agentName, goal string) (*Create
 		AgentName: agentName,
 		Goal:      goal,
 	}
-	
+
 	var resp CreateRunResponse
 	if err := c.doRequest(ctx, "POST", "/v1/runs", req, &resp); err != nil {
 		return nil, err
 	}
-	
+
 	return &resp, nil
 }
 
@@ -88,13 +88,13 @@ func (c *Client) ListRuns(ctx context.Context, limit int) (*ListRunsResponse, er
 	if limit <= 0 {
 		limit = 100
 	}
-	
+
 	var resp ListRunsResponse
 	url := fmt.Sprintf("/v1/runs?limit=%d", limit)
 	if err := c.doRequest(ctx, "GET", url, nil, &resp); err != nil {
 		return nil, err
 	}
-	
+
 	return &resp, nil
 }
 
@@ -109,10 +109,10 @@ func (c *Client) WaitForRun(ctx context.Context, runID string, pollInterval time
 	if pollInterval == 0 {
 		pollInterval = 2 * time.Second
 	}
-	
+
 	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -122,7 +122,7 @@ func (c *Client) WaitForRun(ctx context.Context, runID string, pollInterval time
 			if err != nil {
 				return nil, err
 			}
-			
+
 			// Check if terminal state
 			if run.State == "completed" || run.State == "failed" || run.State == "cancelled" {
 				return run, nil
@@ -137,17 +137,17 @@ func (c *Client) HealthCheck(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("health check failed: %d", resp.StatusCode)
 	}
-	
+
 	return nil
 }
 
@@ -161,35 +161,35 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body, resul
 		}
 		reqBody = bytes.NewReader(b)
 	}
-	
+
 	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, reqBody)
 	if err != nil {
 		return err
 	}
-	
+
 	if c.apiKey != "" {
 		req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	}
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		msg, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("API error %d: %s", resp.StatusCode, string(msg))
 	}
-	
+
 	if result != nil {
 		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 			return fmt.Errorf("decode response: %w", err)
 		}
 	}
-	
+
 	return nil
 }

@@ -16,12 +16,12 @@ type Connector interface {
 
 // Message represents an outbound integration message.
 type Message struct {
-	Type       string            `json:"type"`       // approval_request, alert, notification
-	Title      string            `json:"title"`
-	Body       string            `json:"body"`
-	Actions    []Action          `json:"actions,omitempty"`
-	Metadata   map[string]string `json:"metadata,omitempty"`
-	TenantID   string            `json:"tenant_id,omitempty"`
+	Type     string            `json:"type"` // approval_request, alert, notification
+	Title    string            `json:"title"`
+	Body     string            `json:"body"`
+	Actions  []Action          `json:"actions,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
+	TenantID string            `json:"tenant_id,omitempty"`
 }
 
 // Action represents an actionable button (e.g. Approve/Deny).
@@ -33,10 +33,10 @@ type Action struct {
 
 // Config holds connector configuration per tenant.
 type Config struct {
-	Type   string            `yaml:"type"`   // slack, teams, webhook
-	WebhookURL string        `yaml:"webhook_url"`
-	Token  string            `yaml:"token,omitempty"`
-	Extra  map[string]string `yaml:"extra,omitempty"`
+	Type       string            `yaml:"type"` // slack, teams, webhook
+	WebhookURL string            `yaml:"webhook_url"`
+	Token      string            `yaml:"token,omitempty"`
+	Extra      map[string]string `yaml:"extra,omitempty"`
 }
 
 // NewConnector creates a connector from config.
@@ -65,7 +65,7 @@ type WebhookConnector struct {
 // NewWebhookConnector creates a generic webhook connector.
 func NewWebhookConnector(cfg *Config) *WebhookConnector {
 	return &WebhookConnector{
-		url: cfg.WebhookURL,
+		url:    cfg.WebhookURL,
 		client: &http.Client{Timeout: 10 * time.Second},
 	}
 }

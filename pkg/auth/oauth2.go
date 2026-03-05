@@ -131,16 +131,16 @@ func (p *OAuth2Provider) RefreshToken(ctx context.Context, token *oauth2.Token) 
 
 // UserInfo represents authenticated user information.
 type UserInfo struct {
-	ID            string            `json:"id"`
-	Email         string            `json:"email"`
-	Name          string            `json:"name"`
-	Picture       string            `json:"picture,omitempty"`
-	EmailVerified bool              `json:"email_verified"`
-	Provider      string            `json:"provider"`
-	CreatedAt     time.Time         `json:"created_at"`
-	Entitlements  []string          `json:"entitlements,omitempty"` // Roles, groups, permissions from IdP
-	Groups        []string          `json:"groups,omitempty"`
-	RawClaims     map[string]any    `json:"-"` // Original claims for custom mapping
+	ID            string         `json:"id"`
+	Email         string         `json:"email"`
+	Name          string         `json:"name"`
+	Picture       string         `json:"picture,omitempty"`
+	EmailVerified bool           `json:"email_verified"`
+	Provider      string         `json:"provider"`
+	CreatedAt     time.Time      `json:"created_at"`
+	Entitlements  []string       `json:"entitlements,omitempty"` // Roles, groups, permissions from IdP
+	Groups        []string       `json:"groups,omitempty"`
+	RawClaims     map[string]any `json:"-"` // Original claims for custom mapping
 }
 
 // GenerateState generates a secure random state parameter.

@@ -9,12 +9,12 @@ var ErrPermissionDenied = errors.New("permission denied")
 
 // RoleTemplate defines a custom role derived from a base role with extra permissions.
 type RoleTemplate struct {
-	ID             string       `json:"id"`
-	Name           string       `json:"name"`
-	BaseRole       Role         `json:"base_role"`
-	ExtraPerms     []Permission `json:"extra_permissions"`
-	RevokedPerms   []Permission `json:"revoked_permissions,omitempty"`
-	Description    string       `json:"description"`
+	ID           string       `json:"id"`
+	Name         string       `json:"name"`
+	BaseRole     Role         `json:"base_role"`
+	ExtraPerms   []Permission `json:"extra_permissions"`
+	RevokedPerms []Permission `json:"revoked_permissions,omitempty"`
+	Description  string       `json:"description"`
 }
 
 // OrgUnit represents an organizational unit in a hierarchy.

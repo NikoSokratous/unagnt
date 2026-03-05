@@ -22,9 +22,9 @@ type PendingRequest struct {
 }
 
 var (
-	mu       sync.Mutex
-	pending  = make(map[string]*PendingRequest)
-	waiters  = make(map[string]chan bool)
+	mu      sync.Mutex
+	pending = make(map[string]*PendingRequest)
+	waiters = make(map[string]chan bool)
 )
 
 func main() {
