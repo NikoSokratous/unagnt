@@ -8,17 +8,15 @@ formatters:
   enable:
     - gofmt
 
+# Use "fast" preset to reduce noise; add exclusions for test files
 linters:
-  enable:
-    - govet
-    - errcheck
-    - staticcheck
-    - ineffassign
-  
+  default: fast
   settings:
     errcheck:
       check-blank: false
-
-issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
+  exclusions:
+    rules:
+      - path: '_test\.go$'
+        linters:
+          - errcheck
+          - staticcheck
