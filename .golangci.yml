@@ -5,9 +5,12 @@ run:
   timeout: 5m
   tests: false
 
-linters:
+formatters:
   enable:
     - gofmt
+
+linters:
+  enable:
     - govet
     - errcheck
     - staticcheck
