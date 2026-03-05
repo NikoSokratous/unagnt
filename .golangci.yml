@@ -14,12 +14,10 @@ linters:
     - errcheck
     - staticcheck
     - ineffassign
-
-linters-settings:
-  errcheck:
-    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
-    # Default: false
-    check-type-assertions: false
+  
+  settings:
+    errcheck:
+      check-blank: false
 
 issues:
   max-issues-per-linter: 0
