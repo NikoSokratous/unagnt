@@ -27,11 +27,11 @@ type AgentConfig struct {
 
 // BudgetConfig configures budget limits and alerts.
 type BudgetConfig struct {
-	Limit          float64 `yaml:"budget_limit" json:"budget_limit"`                   // Hard cap in USD (0 = no limit)
-	AlertThreshold float64 `yaml:"alert_threshold" json:"alert_threshold"`             // Fraction to alert (e.g. 0.8 = 80%)
-	AlertWebhook   string  `yaml:"alert_webhook" json:"alert_webhook"`                 // URL to POST when alert fires
-	Period         string  `yaml:"period" json:"period"`                               // daily, weekly, monthly
-	TenantID       string  `yaml:"tenant_id" json:"tenant_id"`                         // Optional scope
+	Limit          float64 `yaml:"budget_limit" json:"budget_limit"`       // Hard cap in USD (0 = no limit)
+	AlertThreshold float64 `yaml:"alert_threshold" json:"alert_threshold"` // Fraction to alert (e.g. 0.8 = 80%)
+	AlertWebhook   string  `yaml:"alert_webhook" json:"alert_webhook"`     // URL to POST when alert fires
+	Period         string  `yaml:"period" json:"period"`                   // daily, weekly, monthly
+	TenantID       string  `yaml:"tenant_id" json:"tenant_id"`             // Optional scope
 }
 
 // MCPSourceConfig configures an MCP tool source (stdio or http).

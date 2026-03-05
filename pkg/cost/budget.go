@@ -97,11 +97,11 @@ func (g *BudgetGuard) periodRange() (time.Time, time.Time) {
 
 func (g *BudgetGuard) fireAlert(current, limit float64) {
 	body, _ := json.Marshal(map[string]interface{}{
-		"event":           "budget_alert",
-		"current_spend":   current,
-		"budget_limit":    limit,
-		"percent_used":    current / limit * 100,
-		"tenant_id":       g.config.TenantID,
+		"event":         "budget_alert",
+		"current_spend": current,
+		"budget_limit":  limit,
+		"percent_used":  current / limit * 100,
+		"tenant_id":     g.config.TenantID,
 	})
 	resp, err := http.Post(g.config.AlertWebhook, "application/json", bytes.NewReader(body))
 	if err != nil {

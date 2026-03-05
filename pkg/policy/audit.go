@@ -305,8 +305,8 @@ func (a *AuditLogger) Export(ctx context.Context, filter AuditFilter, format str
 // CEF:Version|Device Vendor|Device Product|Device Version|Signature ID|Name|Severity|Extension
 func (a *AuditLogger) exportCEF(logs []AuditLog) ([]byte, error) {
 	const (
-		cefVersion   = "0"
-		deviceVendor = "AgentRuntime"
+		cefVersion    = "0"
+		deviceVendor  = "AgentRuntime"
 		deviceProduct = "PolicyEngine"
 		deviceVersion = "1.0"
 	)
