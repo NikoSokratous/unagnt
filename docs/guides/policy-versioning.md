@@ -2,7 +2,7 @@
 
 ## Overview
 
-Policy versioning in AgentRuntime v0.5 provides a complete audit trail of all policy changes, enabling safe policy evolution, rollback capabilities, and compliance tracking.
+Policy versioning in Unagnt v0.5 provides a complete audit trail of all policy changes, enabling safe policy evolution, rollback capabilities, and compliance tracking.
 
 ## Key Concepts
 
@@ -27,7 +27,7 @@ package main
 
 import (
     "context"
-    "github.com/agentruntime/agentruntime/pkg/policy"
+    "github.com/Unagnt/Unagnt/pkg/policy"
 )
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 #### List All Policies
 
 ```bash
-$ agentctl policy list
+$ unagnt policy list
 
 POLICY NAME         ACTIVE VERSION  LAST UPDATED
 security-policy     1.2.0          2026-02-26 14:30
@@ -64,7 +64,7 @@ compliance          1.5.3          2026-02-24 16:45
 #### View Policy History
 
 ```bash
-$ agentctl policy versions security-policy
+$ unagnt policy versions security-policy
 
 VERSION  AUTHOR                   CREATED           ACTIVE  CHANGELOG
 1.2.0    security@company.com    2026-02-26 14:30  ✓      Added PII protection rules
@@ -75,7 +75,7 @@ VERSION  AUTHOR                   CREATED           ACTIVE  CHANGELOG
 #### Activate a Specific Version
 
 ```bash
-$ agentctl policy activate security-policy 1.1.0
+$ unagnt policy activate security-policy 1.1.0
 ✓ Activated security-policy@1.1.0
 ```
 
@@ -87,10 +87,10 @@ To rollback to a previous version:
 
 ```bash
 # View history
-$ agentctl policy versions security-policy
+$ unagnt policy versions security-policy
 
 # Rollback to previous version
-$ agentctl policy activate security-policy 1.1.0
+$ unagnt policy activate security-policy 1.1.0
 ```
 
 ## Best Practices
@@ -132,13 +132,13 @@ Always test a new policy version before activating:
 
 ```bash
 # Test the policy
-$ agentctl policy test security-policy --file tests.yaml
+$ unagnt policy test security-policy --file tests.yaml
 
 # Simulate against historical runs
-$ agentctl policy simulate security-policy 2.0.0 --run run-123
+$ unagnt policy simulate security-policy 2.0.0 --run run-123
 
 # If tests pass, activate
-$ agentctl policy activate security-policy 2.0.0
+$ unagnt policy activate security-policy 2.0.0
 ```
 
 ### 4. Gradual Rollout
@@ -222,10 +222,10 @@ For compliance audits:
 
 ```bash
 # Export all versions
-$ agentctl policy versions security-policy --format json > audit.json
+$ unagnt policy versions security-policy --format json > audit.json
 
 # Show who changed what when
-$ agentctl policy versions security-policy
+$ unagnt policy versions security-policy
 ```
 
 ## API Reference
@@ -276,27 +276,27 @@ type PolicyVersion struct {
 ### Version Not Found
 
 ```bash
-$ agentctl policy activate security-policy 1.5.0
+$ unagnt policy activate security-policy 1.5.0
 Error: policy version not found: security-policy@1.5.0
 ```
 
 Check available versions:
 ```bash
-$ agentctl policy versions security-policy
+$ unagnt policy versions security-policy
 ```
 
 ### Cannot Activate
 
 Ensure the version exists:
 ```bash
-$ agentctl policy versions security-policy | grep 1.5.0
+$ unagnt policy versions security-policy | grep 1.5.0
 ```
 
 ### Rollback Issues
 
 If rollback fails, check policy audit logs:
 ```bash
-$ agentctl policy audit query --policy security-policy --limit 100
+$ unagnt policy audit query --policy security-policy --limit 100
 ```
 
 ## Examples
@@ -305,43 +305,43 @@ $ agentctl policy audit query --policy security-policy --limit 100
 
 ```bash
 # Production issue detected
-$ agentctl policy activate security-policy 1.1.0
+$ unagnt policy activate security-policy 1.1.0
 
 # Verify rollback
-$ agentctl policy list | grep security-policy
+$ unagnt policy list | grep security-policy
 security-policy     1.1.0          2026-02-26 15:45
 
 # Check impact
-$ agentctl policy audit stats --days 1
+$ unagnt policy audit stats --days 1
 ```
 
 ### Example 2: Gradual Migration
 
 ```bash
 # Step 1: Test new version
-$ agentctl policy test security-policy-v2 --file tests.yaml
+$ unagnt policy test security-policy-v2 --file tests.yaml
 
 # Step 2: Shadow test
-$ agentctl policy simulate security-policy 2.0.0 \
+$ unagnt policy simulate security-policy 2.0.0 \
     --mode shadow --duration 1h
 
 # Step 3: Analyze shadow results
-$ agentctl policy audit query --policy security-policy \
+$ unagnt policy audit query --policy security-policy \
     --decision deny --limit 100
 
 # Step 4: Activate if safe
-$ agentctl policy activate security-policy 2.0.0
+$ unagnt policy activate security-policy 2.0.0
 ```
 
 ### Example 3: Compliance Audit
 
 ```bash
 # Generate compliance report
-$ agentctl policy versions security-policy --format json \
+$ unagnt policy versions security-policy --format json \
     > compliance/policy-history-$(date +%Y%m%d).json
 
 # Export decisions
-$ agentctl policy audit export \
+$ unagnt policy audit export \
     --days 90 \
     --format csv \
     --output compliance/audit-q1-2026.csv

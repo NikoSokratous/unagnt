@@ -4,9 +4,9 @@
 *.dll
 *.so
 *.dylib
-# Binary names at repo root only (not cmd/agentctl, cmd/agentd)
-/agentctl
-/agentd
+# Binary names at repo root only (not cmd/unagnt, cmd/unagntd)
+/unagnt
+/unagntd
 
 # Test binary
 *.test

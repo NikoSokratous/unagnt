@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: agentd
+  name: unagntd
   labels:
-    app: agentd
+    app: unagntd
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: agentd
+      app: unagntd
   template:
     metadata:
       labels:
-        app: agentd
+        app: unagntd
     spec:
       containers:
-        - name: agentd
-          image: agentruntime/agentd:latest
+        - name: unagntd
+          image: Unagnt/unagntd:latest
           ports:
             - containerPort: 8080
           env:
@@ -34,10 +34,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: agentd
+  name: unagntd
 spec:
   selector:
-    app: agentd
+    app: unagntd
   ports:
     - port: 80
       targetPort: 8080

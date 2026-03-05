@@ -1,13 +1,13 @@
 # Air-Gapped Deployment (v2.0)
 
-Deploy AgentRuntime with no outbound internet. Use local LLMs (e.g. Ollama) only.
+Deploy Unagnt with no outbound internet. Use local LLMs (e.g. Ollama) only.
 
 ## Quick Start
 
 1. Build offline bundle (from machine with network): `./scripts/offline-install.sh bundle`
 2. Transfer the generated `.tar.gz` to the air-gapped environment.
-3. Unpack and run: `tar -xzf agentruntime-air-gapped-*.tar.gz && cd agentruntime-air-gapped && ./install.sh`
-4. Configure `config/agentruntime.yaml` with `llm.default_provider: ollama` and your in-network Ollama URL.
+3. Unpack and run: `tar -xzf Unagnt-air-gapped-*.tar.gz && cd Unagnt-air-gapped && ./install.sh`
+4. Configure `config/Unagnt.yaml` with `llm.default_provider: ollama` and your in-network Ollama URL.
 
 ## Scripts
 

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/llm"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
 
 // ContextEngine orchestrates context assembly from multiple providers.

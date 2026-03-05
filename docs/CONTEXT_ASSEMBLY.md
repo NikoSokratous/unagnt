@@ -13,7 +13,7 @@ Traditional agent frameworks require developers to manually build prompts by:
 - Managing token budgets manually
 - Debugging black-box prompt construction
 
-AgentRuntime's Context Assembly Engine handles all of this automatically through a declarative, configurable pipeline.
+Unagnt's Context Assembly Engine handles all of this automatically through a declarative, configurable pipeline.
 
 ## Architecture
 
@@ -183,8 +183,8 @@ agent:
 
 ```go
 import (
-    "github.com/agentruntime/agentruntime/pkg/context"
-    "github.com/agentruntime/agentruntime/pkg/llm"
+    "github.com/Unagnt/Unagnt/pkg/context"
+    "github.com/Unagnt/Unagnt/pkg/llm"
 )
 
 // Create context engine
@@ -220,13 +220,13 @@ planner := &llm.PlannerAdapter{
 View assembled context for a run:
 
 ```bash
-agentctl context inspect <run-id>
+unagnt context inspect <run-id>
 
 # Inspect specific step
-agentctl context inspect <run-id> --step 5
+unagnt context inspect <run-id> --step 5
 
 # JSON output
-agentctl context inspect <run-id> --format json
+unagnt context inspect <run-id> --format json
 ```
 
 Output shows:
@@ -240,7 +240,7 @@ Output shows:
 Understand why each piece was included:
 
 ```bash
-agentctl context explain <run-id> --step 5
+unagnt context explain <run-id> --step 5
 ```
 
 Shows:
@@ -253,16 +253,16 @@ Shows:
 
 ```bash
 # Ingest documents into knowledge base
-agentctl context ingest ./docs --source "documentation"
+unagnt context ingest ./docs --source "documentation"
 
 # List ingested documents
-agentctl context knowledge list
+unagnt context knowledge list
 
 # Search knowledge base
-agentctl context search "how do I configure policies?" --top-k 5
+unagnt context search "how do I configure policies?" --top-k 5
 
 # Clear knowledge base
-agentctl context knowledge clear --yes
+unagnt context knowledge clear --yes
 ```
 
 ### Compare Context
@@ -270,7 +270,7 @@ agentctl context knowledge clear --yes
 Diff context between runs:
 
 ```bash
-agentctl context diff <run-1> <run-2>
+unagnt context diff <run-1> <run-2>
 ```
 
 Shows:
@@ -283,7 +283,7 @@ Shows:
 View performance metrics:
 
 ```bash
-agentctl context stats <run-id>
+unagnt context stats <run-id>
 ```
 
 Shows:
@@ -297,7 +297,7 @@ Shows:
 Check context assembly config:
 
 ```bash
-agentctl context validate agent.yaml
+unagnt context validate agent.yaml
 ```
 
 Validates:
@@ -310,10 +310,10 @@ Validates:
 
 ### Interactive Debugger
 
-Enhanced `agentctl debug` with context inspection:
+Enhanced `unagnt debug` with context inspection:
 
 ```bash
-agentctl debug --config agent.yaml --goal "Research AI papers"
+unagnt debug --config agent.yaml --goal "Research AI papers"
 ```
 
 Commands:
@@ -466,7 +466,7 @@ Watch for:
 Always validate configuration:
 
 ```bash
-agentctl context validate agent.yaml
+unagnt context validate agent.yaml
 ```
 
 ## Comparison with Other Frameworks
@@ -496,7 +496,7 @@ def build_context(state):
     return messages
 ```
 
-**AgentRuntime:**
+**Unagnt:**
 ```yaml
 # Automatic context assembly
 context_assembly:
@@ -631,6 +631,6 @@ func (p *CustomProvider) Fetch(ctx context.Context, input ContextInput) (*Contex
 
 ## Support
 
-- GitHub Issues: [Report bugs](https://github.com/NikoSokratous/agentctl/issues)
-- Discussions: [Ask questions](https://github.com/NikoSokratous/agentctl/discussions)
-- Discord: [Join community](https://discord.gg/agentruntime)
+- GitHub Issues: [Report bugs](https://github.com/NikoSokratous/unagnt/issues)
+- Discussions: [Ask questions](https://github.com/NikoSokratous/unagnt/discussions)
+- Discord: [Join community](https://discord.gg/Unagnt)

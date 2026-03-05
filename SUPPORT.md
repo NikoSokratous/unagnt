@@ -1,6 +1,6 @@
 # Support
 
-Support options for AgentRuntime.
+Support options for Unagnt.
 
 ## Tiers
 
@@ -12,15 +12,15 @@ Support options for AgentRuntime.
 
 ## Community (OSS)
 
-- **Issues**: [GitHub Issues](https://github.com/NikoSokratous/agentctl/issues) for bugs and feature requests.
-- **Discussions**: [GitHub Discussions](https://github.com/NikoSokratous/agentctl/discussions) for questions and ideas.
+- **Issues**: [GitHub Issues](https://github.com/NikoSokratous/unagnt/issues) for bugs and feature requests.
+- **Discussions**: [GitHub Discussions](https://github.com/NikoSokratous/unagnt/discussions) for questions and ideas.
 - **Docs**: [Documentation](docs/) and [Quick Start](QUICKSTART.md).
 
 ## Pro and Enterprise
 
 For Pro and Enterprise tiers (paid support, SLAs, professional services):
 
-- **Contact**: [contact@agentruntime.io](mailto:contact@agentruntime.io)
+- **Contact**: [contact@Unagnt.io](mailto:contact@Unagnt.io)
 - **Pricing**: See [docs/PRICING.md](docs/PRICING.md) or the website.
 - **SOW templates**: Available for implementation, training, and custom integrations; request via contact above.
 

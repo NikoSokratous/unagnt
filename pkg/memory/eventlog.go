@@ -3,7 +3,7 @@ package memory
 import (
 	"context"
 
-	"github.com/agentruntime/agentruntime/pkg/observe"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
 )
 
 // EventLog is the interface for the immutable append-only execution log.

@@ -3,6 +3,6 @@ version: 1.0.0
 type: wasm
 binary: ./example_wasm_tool.wasm
 description: Example WASM tool for demonstration
-author: AgentRuntime Team
+author: Unagnt Team
 permissions:
   - compute:cpu

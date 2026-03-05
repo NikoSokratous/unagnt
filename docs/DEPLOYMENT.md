@@ -1,8 +1,8 @@
-# AgentRuntime Deployment Guide
+# Unagnt Deployment Guide
 
 **Last Updated**: v1.0.0 | 2026-02-27
 
-Complete guide for deploying AgentRuntime to production environments.
+Complete guide for deploying Unagnt to production environments.
 
 ---
 
@@ -73,11 +73,11 @@ Complete guide for deploying AgentRuntime to production environments.
 
 ```bash
 # Clone repository
-git clone https://github.com/NikoSokratous/agentctl.git
-cd agentruntime
+git clone https://github.com/NikoSokratous/unagnt.git
+cd Unagnt
 
 # Build Docker image
-docker build -t agentruntime:latest .
+docker build -t Unagnt:latest .
 ```
 
 #### 2. Run Container
@@ -85,23 +85,23 @@ docker build -t agentruntime:latest .
 ```bash
 # Run with SQLite (simple)
 docker run -d \
-  --name agentruntime \
+  --name Unagnt \
   -p 8080:8080 \
   -p 3000:3000 \
   -e OPENAI_API_KEY="sk-..." \
-  -e DATABASE_URL="sqlite:///data/agentruntime.db" \
+  -e DATABASE_URL="sqlite:///data/Unagnt.db" \
   -v $(pwd)/data:/data \
-  agentruntime:latest
+  Unagnt:latest
 
 # Run with PostgreSQL (recommended)
 docker run -d \
-  --name agentruntime \
+  --name Unagnt \
   -p 8080:8080 \
   -p 3000:3000 \
   -e OPENAI_API_KEY="sk-..." \
-  -e DATABASE_URL="postgresql://user:pass@host:5432/agentruntime" \
+  -e DATABASE_URL="postgresql://user:pass@host:5432/Unagnt" \
   -e REDIS_URL="redis://host:6379" \
-  agentruntime:latest
+  Unagnt:latest
 ```
 
 #### 3. Verify
@@ -111,7 +111,7 @@ docker run -d \
 curl http://localhost:8080/health
 
 # Check logs
-docker logs -f agentruntime
+docker logs -f Unagnt
 ```
 
 ### Option 2: Docker Compose
@@ -122,14 +122,14 @@ docker logs -f agentruntime
 version: '3.8'
 
 services:
-  agentruntime:
+  Unagnt:
     build: .
     ports:
       - "8080:8080"
       - "3000:3000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - DATABASE_URL=postgresql://agentruntime:password@postgres:5432/agentruntime
+      - DATABASE_URL=postgresql://Unagnt:password@postgres:5432/Unagnt
       - REDIS_URL=redis://redis:6379
       - QDRANT_URL=http://qdrant:6333
       - LOG_LEVEL=info
@@ -145,9 +145,9 @@ services:
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_USER=agentruntime
+      - POSTGRES_USER=Unagnt
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=agentruntime
+      - POSTGRES_DB=Unagnt
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -213,7 +213,7 @@ LOG_LEVEL=info
 docker-compose up -d
 
 # View logs
-docker-compose logs -f agentruntime
+docker-compose logs -f Unagnt
 
 # Stop services
 docker-compose down
@@ -226,10 +226,10 @@ docker-compose down -v
 
 ```bash
 # Run migrations
-docker-compose exec agentruntime ./bin/agentctl init
+docker-compose exec Unagnt ./bin/unagnt init
 
 # Seed templates
-docker-compose exec agentruntime ./bin/seed-templates
+docker-compose exec Unagnt ./bin/seed-templates
 ```
 
 ---
@@ -241,8 +241,8 @@ docker-compose exec agentruntime ./bin/seed-templates
 #### 1. Add Helm Repository
 
 ```bash
-# Add AgentRuntime Helm repo
-helm repo add agentruntime https://helm.agentruntime.io
+# Add Unagnt Helm repo
+helm repo add Unagnt https://helm.Unagnt.io
 helm repo update
 
 # Or use local charts
@@ -256,7 +256,7 @@ cd k8s/helm
 replicaCount: 3
 
 image:
-  repository: agentruntime/agentruntime
+  repository: Unagnt/Unagnt
   tag: "1.0.0"
   pullPolicy: IfNotPresent
 
@@ -286,14 +286,14 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: agentruntime.example.com
+    - host: Unagnt.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: agentruntime-tls
+    - secretName: Unagnt-tls
       hosts:
-        - agentruntime.example.com
+        - Unagnt.example.com
 
 # External secrets (if using external-secrets operator)
 externalSecrets:
@@ -309,9 +309,9 @@ secrets:
 postgresql:
   enabled: true
   auth:
-    username: agentruntime
+    username: Unagnt
     password: ""  # Auto-generated
-    database: agentruntime
+    database: Unagnt
   primary:
     persistence:
       enabled: true
@@ -370,17 +370,17 @@ istio:
 
 ```bash
 # Create namespace
-kubectl create namespace agentruntime
+kubectl create namespace Unagnt
 
 # Install with Helm
-helm install agentruntime agentruntime/agentruntime \
-  --namespace agentruntime \
+helm install Unagnt Unagnt/Unagnt \
+  --namespace Unagnt \
   --values values-production.yaml \
   --wait
 
 # Or from local charts
-helm install agentruntime ./k8s/helm \
-  --namespace agentruntime \
+helm install Unagnt ./k8s/helm \
+  --namespace Unagnt \
   --values values-production.yaml \
   --wait
 ```
@@ -389,19 +389,19 @@ helm install agentruntime ./k8s/helm \
 
 ```bash
 # Check pods
-kubectl get pods -n agentruntime
+kubectl get pods -n Unagnt
 
 # Check services
-kubectl get svc -n agentruntime
+kubectl get svc -n Unagnt
 
 # Check ingress
-kubectl get ingress -n agentruntime
+kubectl get ingress -n Unagnt
 
 # View logs
-kubectl logs -n agentruntime -l app=agentruntime -f
+kubectl logs -n Unagnt -l app=Unagnt -f
 
 # Port forward for testing
-kubectl port-forward -n agentruntime svc/agentruntime 8080:80
+kubectl port-forward -n Unagnt svc/Unagnt 8080:80
 ```
 
 ### Option 2: Manual Kubernetes Manifests
@@ -409,15 +409,15 @@ kubectl port-forward -n agentruntime svc/agentruntime 8080:80
 #### 1. Create Namespace
 
 ```bash
-kubectl create namespace agentruntime
+kubectl create namespace Unagnt
 ```
 
 #### 2. Create Secrets
 
 ```bash
 # Create API key secret
-kubectl create secret generic agentruntime-secrets \
-  --namespace agentruntime \
+kubectl create secret generic Unagnt-secrets \
+  --namespace Unagnt \
   --from-literal=openai-api-key='sk-...' \
   --from-literal=anthropic-api-key='sk-ant-...' \
   --from-literal=database-password='secure-password'
@@ -435,10 +435,10 @@ kubectl apply -f k8s/manifests/redis.yaml
 # Qdrant
 kubectl apply -f k8s/manifests/qdrant.yaml
 
-# AgentRuntime
-kubectl apply -f k8s/manifests/agentruntime-deployment.yaml
-kubectl apply -f k8s/manifests/agentruntime-service.yaml
-kubectl apply -f k8s/manifests/agentruntime-ingress.yaml
+# Unagnt
+kubectl apply -f k8s/manifests/Unagnt-deployment.yaml
+kubectl apply -f k8s/manifests/Unagnt-service.yaml
+kubectl apply -f k8s/manifests/Unagnt-ingress.yaml
 
 # Operator (for CRDs)
 kubectl apply -f k8s/manifests/operator.yaml
@@ -452,7 +452,7 @@ kubectl apply -f k8s/crds/
 kubectl apply -f k8s/manifests/migrations-job.yaml
 
 # Check migration status
-kubectl logs -n agentruntime job/agentruntime-migrations
+kubectl logs -n Unagnt job/Unagnt-migrations
 ```
 
 ---
@@ -471,7 +471,7 @@ LOG_LEVEL=info              # debug, info, warn, error
 ENVIRONMENT=production      # dev, staging, production
 
 # Database
-DATABASE_URL=postgresql://user:pass@host:5432/agentruntime
+DATABASE_URL=postgresql://user:pass@host:5432/Unagnt
 DATABASE_MAX_CONNS=25
 DATABASE_MAX_IDLE_CONNS=5
 
@@ -610,9 +610,9 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'agentruntime'
+  - job_name: 'Unagnt'
     static_configs:
-      - targets: ['agentruntime:9090']
+      - targets: ['Unagnt:9090']
     metrics_path: '/metrics'
 
   - job_name: 'postgres'
@@ -628,7 +628,7 @@ scrape_configs:
 
 Import pre-built dashboards:
 
-1. **AgentRuntime Overview** (ID: TBD)
+1. **Unagnt Overview** (ID: TBD)
    - Active runs
    - Success/failure rates
    - P50/P95/P99 latencies
@@ -657,7 +657,7 @@ docker run -d \
   jaegertracing/all-in-one:latest
 ```
 
-Configure AgentRuntime:
+Configure Unagnt:
 ```bash
 export TRACING_ENABLED=true
 export OTLP_ENDPOINT=jaeger:4317
@@ -673,13 +673,13 @@ export OTLP_ENDPOINT=jaeger:4317
 
 ```bash
 # Manual backup
-kubectl exec -n agentruntime postgres-0 -- \
-  pg_dump -U agentruntime agentruntime | gzip > backup.sql.gz
+kubectl exec -n Unagnt postgres-0 -- \
+  pg_dump -U Unagnt Unagnt | gzip > backup.sql.gz
 
 # Restore
 gunzip < backup.sql.gz | \
-  kubectl exec -i -n agentruntime postgres-0 -- \
-  psql -U agentruntime agentruntime
+  kubectl exec -i -n Unagnt postgres-0 -- \
+  psql -U Unagnt Unagnt
 
 # Automated with CronJob
 apiVersion: batch/v1
@@ -698,7 +698,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            - pg_dump -U agentruntime agentruntime | gzip | aws s3 cp - s3://backups/$(date +%Y%m%d).sql.gz
+            - pg_dump -U Unagnt Unagnt | gzip | aws s3 cp - s3://backups/$(date +%Y%m%d).sql.gz
 ```
 
 ### Volume Backups
@@ -709,20 +709,20 @@ Using Velero:
 # Install Velero
 velero install \
   --provider aws \
-  --bucket agentruntime-backups \
+  --bucket Unagnt-backups \
   --secret-file ./credentials-velero
 
 # Backup namespace
-velero backup create agentruntime-$(date +%Y%m%d) \
-  --include-namespaces agentruntime
+velero backup create Unagnt-$(date +%Y%m%d) \
+  --include-namespaces Unagnt
 
 # Schedule daily backups
-velero schedule create agentruntime-daily \
+velero schedule create Unagnt-daily \
   --schedule="@daily" \
-  --include-namespaces agentruntime
+  --include-namespaces Unagnt
 
 # Restore
-velero restore create --from-backup agentruntime-20240101
+velero restore create --from-backup Unagnt-20240101
 ```
 
 ---
@@ -735,12 +735,12 @@ velero restore create --from-backup agentruntime-20240101
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: agentruntime-hpa
+  name: Unagnt-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: agentruntime
+    name: Unagnt
   minReplicas: 3
   maxReplicas: 20
   metrics:
@@ -780,7 +780,7 @@ postgresql:
 Configure connection pooling:
 ```go
 // Use pgbouncer or connection pool
-DATABASE_URL=postgresql://user:pass@pgbouncer:5432/agentruntime?pool_size=25
+DATABASE_URL=postgresql://user:pass@pgbouncer:5432/Unagnt?pool_size=25
 ```
 
 ### Caching Strategy
@@ -802,11 +802,11 @@ LLM_RESPONSE_CACHE=true
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: agentruntime-network-policy
+  name: Unagnt-network-policy
 spec:
   podSelector:
     matchLabels:
-      app: agentruntime
+      app: Unagnt
   policyTypes:
   - Ingress
   - Egress
@@ -841,7 +841,7 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: agentruntime
+  name: Unagnt
 spec:
   securityContext:
     runAsNonRoot: true
@@ -850,7 +850,7 @@ spec:
     seccompProfile:
       type: RuntimeDefault
   containers:
-  - name: agentruntime
+  - name: Unagnt
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
@@ -877,14 +877,14 @@ spec:
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: agentruntime-secrets
+  name: Unagnt-secrets
 spec:
   refreshInterval: 1h
   secretStoreRef:
     name: gcpsm-secret-store
     kind: SecretStore
   target:
-    name: agentruntime-secrets
+    name: Unagnt-secrets
   data:
   - secretKey: openai-api-key
     remoteRef:
@@ -901,10 +901,10 @@ spec:
 
 ```bash
 # Check pod status
-kubectl describe pod -n agentruntime <pod-name>
+kubectl describe pod -n Unagnt <pod-name>
 
 # Check logs
-kubectl logs -n agentruntime <pod-name>
+kubectl logs -n Unagnt <pod-name>
 
 # Common causes:
 # - ImagePullBackOff: Check image name/tag
@@ -916,28 +916,28 @@ kubectl logs -n agentruntime <pod-name>
 
 ```bash
 # Test connection
-kubectl exec -n agentruntime <pod-name> -- \
-  psql -h postgres -U agentruntime -d agentruntime -c "SELECT 1"
+kubectl exec -n Unagnt <pod-name> -- \
+  psql -h postgres -U Unagnt -d Unagnt -c "SELECT 1"
 
 # Check service
-kubectl get svc -n agentruntime postgres
+kubectl get svc -n Unagnt postgres
 
 # Check network policy
-kubectl get networkpolicy -n agentruntime
+kubectl get networkpolicy -n Unagnt
 ```
 
 #### 3. High Memory Usage
 
 ```bash
 # Check metrics
-kubectl top pods -n agentruntime
+kubectl top pods -n Unagnt
 
 # Increase limits
-kubectl set resources deployment agentruntime \
+kubectl set resources deployment Unagnt \
   --limits=memory=8Gi
 
 # Check for memory leaks
-kubectl exec -n agentruntime <pod-name> -- \
+kubectl exec -n Unagnt <pod-name> -- \
   curl http://localhost:8080/debug/pprof/heap
 ```
 
@@ -951,17 +951,17 @@ open http://localhost:16686
 curl http://localhost:9090/api/v1/query?query=http_request_duration_seconds
 
 # Increase replicas
-kubectl scale deployment agentruntime --replicas=10
+kubectl scale deployment Unagnt --replicas=10
 ```
 
 ### Debug Mode
 
 ```bash
 # Enable debug logging
-kubectl set env deployment/agentruntime LOG_LEVEL=debug
+kubectl set env deployment/Unagnt LOG_LEVEL=debug
 
 # View debug logs
-kubectl logs -n agentruntime -l app=agentruntime -f --tail=100
+kubectl logs -n Unagnt -l app=Unagnt -f --tail=100
 ```
 
 ---
@@ -987,7 +987,7 @@ kubectl logs -n agentruntime -l app=agentruntime -f --tail=100
 
 ## Support
 
-- **Documentation**: [docs.agentruntime.io](https://docs.agentruntime.io)
-- **Issues**: [GitHub](https://github.com/NikoSokratous/agentctl/issues)
-- **Discord**: [Community](https://discord.gg/agentruntime)
-- **Commercial**: [contact@agentruntime.io](mailto:contact@agentruntime.io)
+- **Documentation**: [docs.Unagnt.io](https://docs.Unagnt.io)
+- **Issues**: [GitHub](https://github.com/NikoSokratous/unagnt/issues)
+- **Discord**: [Community](https://discord.gg/Unagnt)
+- **Commercial**: [contact@Unagnt.io](mailto:contact@Unagnt.io)

@@ -1,4 +1,4 @@
-# AgentRuntime Web UI
+# Unagnt Web UI
 
 Modern web interface for monitoring and managing agent runs.
 
@@ -17,7 +17,7 @@ npm install
 npm run dev
 ```
 
-The dev server runs on `http://localhost:3000` and proxies API requests to `agentd` on port 8080.
+The dev server runs on `http://localhost:3000` and proxies API requests to `unagntd` on port 8080.
 
 ## Build
 
@@ -25,7 +25,7 @@ The dev server runs on `http://localhost:3000` and proxies API requests to `agen
 npm run build
 ```
 
-Builds to `dist/` directory, ready for embedding in `agentd`.
+Builds to `dist/` directory, ready for embedding in `unagntd`.
 
 ## Tech Stack
 

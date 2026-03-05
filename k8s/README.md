@@ -1,10 +1,10 @@
-# AgentRuntime Kubernetes Operator
+# Unagnt Kubernetes Operator
 
-Complete Kubernetes operator for managing AgentRuntime resources with production-grade features.
+Complete Kubernetes operator for managing Unagnt resources with production-grade features.
 
 ## Overview
 
-The AgentRuntime operator enables declarative management of:
+The Unagnt operator enables declarative management of:
 - **Agents**: AI agents with LLM configurations, tools, and autoscaling
 - **Workflows**: DAG-based multi-agent workflows with scheduling
 - **Policies**: Governance rules for safety and compliance
@@ -24,15 +24,15 @@ kubectl apply -f k8s/crds/
 kubectl apply -f k8s/operator/deploy/
 
 # Using Helm
-helm install agentruntime ./k8s/helm \
-  --namespace agentruntime \
+helm install Unagnt ./k8s/helm \
+  --namespace Unagnt \
   --create-namespace
 ```
 
 ### Create an Agent
 
 ```yaml
-apiVersion: agentruntime.io/v1
+apiVersion: Unagnt.io/v1
 kind: Agent
 metadata:
   name: coder-agent
@@ -92,8 +92,8 @@ Enforces governance rules with:
 ### Installation
 
 ```bash
-helm repo add agentruntime https://charts.agentruntime.io
-helm install agentruntime agentruntime/agentruntime
+helm repo add Unagnt https://charts.Unagnt.io
+helm install Unagnt Unagnt/Unagnt
 ```
 
 ### Configuration
@@ -132,19 +132,19 @@ observability:
 
 **Development**:
 ```bash
-helm install agentruntime ./k8s/helm \
+helm install Unagnt ./k8s/helm \
   -f k8s/helm/values-dev.yaml
 ```
 
 **Staging**:
 ```bash
-helm install agentruntime ./k8s/helm \
+helm install Unagnt ./k8s/helm \
   -f k8s/helm/values-staging.yaml
 ```
 
 **Production**:
 ```bash
-helm install agentruntime ./k8s/helm \
+helm install Unagnt ./k8s/helm \
   -f k8s/helm/values-prod.yaml
 ```
 
@@ -212,7 +212,7 @@ autoscaling:
 ### Agent-Specific Autoscaling
 
 ```yaml
-apiVersion: agentruntime.io/v1
+apiVersion: Unagnt.io/v1
 kind: Agent
 metadata:
   name: my-agent
@@ -315,14 +315,14 @@ backup:
   retention: 7
   storage:
     type: s3
-    bucket: agentruntime-backups
+    bucket: Unagnt-backups
 ```
 
 ### Point-in-Time Recovery
 
 ```bash
 # Restore from backup
-helm upgrade agentruntime ./k8s/helm \
+helm upgrade Unagnt ./k8s/helm \
   --set backup.restore.enabled=true \
   --set backup.restore.timestamp="2026-02-26T14:00:00Z"
 ```
@@ -364,7 +364,7 @@ See `k8s/examples/` for:
 ### Check Operator Logs
 
 ```bash
-kubectl logs -n agentruntime-system \
+kubectl logs -n Unagnt-system \
   -l control-plane=controller-manager \
   -f
 ```
@@ -373,14 +373,14 @@ kubectl logs -n agentruntime-system \
 
 ```bash
 kubectl describe agent my-agent
-kubectl logs -l agentruntime.io/agent=my-agent
+kubectl logs -l Unagnt.io/agent=my-agent
 ```
 
 ### Debug Workflow
 
 ```bash
 kubectl describe workflow my-workflow
-kubectl get jobs -l agentruntime.io/workflow=my-workflow
+kubectl get jobs -l Unagnt.io/workflow=my-workflow
 ```
 
 ## Development
@@ -411,7 +411,7 @@ make manifests
 │           Kubernetes Cluster                │
 │                                             │
 │  ┌─────────────────────────────────────┐  │
-│  │   AgentRuntime Operator             │  │
+│  │   Unagnt Operator             │  │
 │  │                                     │  │
 │  │  ┌─────────┐  ┌─────────┐         │  │
 │  │  │ Agent   │  │Workflow │         │  │
@@ -446,7 +446,7 @@ make manifests
 - [CRD Reference](./crds/README.md)
 - [Helm Values](./helm/values.yaml)
 - [Examples](./examples/)
-- [API Documentation](https://docs.agentruntime.io/api)
+- [API Documentation](https://docs.Unagnt.io/api)
 
 ## License
 

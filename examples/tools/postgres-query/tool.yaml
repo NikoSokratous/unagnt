@@ -2,12 +2,12 @@ metadata:
   id: postgres-query
   name: postgres-query
   version: 1.0.0
-  author: AgentRuntime Team
+  author: Unagnt Team
   description: Execute SQL queries and manage PostgreSQL databases
   type: tool
   runtime: go
   license: MIT
-  repository: https://github.com/NikoSokratous/agentctl
+  repository: https://github.com/NikoSokratous/unagnt
   permissions:
     - network
     - database

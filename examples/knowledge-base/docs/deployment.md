@@ -2,7 +2,7 @@
 
 ## Overview
 
-AgentRuntime agents can be deployed in multiple ways:
+Unagnt agents can be deployed in multiple ways:
 - Local development
 - Docker containers
 - Kubernetes clusters
@@ -13,23 +13,23 @@ AgentRuntime agents can be deployed in multiple ways:
 ### Prerequisites
 
 - Go 1.21+
-- AgentRuntime CLI installed
+- Unagnt CLI installed
 
 ### Steps
 
 1. Build your agent configuration:
    ```bash
-   agentctl init my-agent
+   unagnt init my-agent
    ```
 
 2. Test locally:
    ```bash
-   agentctl run --agent agent.yaml --goal "test goal"
+   unagnt run --agent agent.yaml --goal "test goal"
    ```
 
 3. Run in daemon mode:
    ```bash
-   agentctl daemon --agent agent.yaml
+   unagnt daemon --agent agent.yaml
    ```
 
 ## Docker Deployment
@@ -42,12 +42,12 @@ Create a `Dockerfile`:
 FROM golang:1.21 as builder
 WORKDIR /app
 COPY . .
-RUN go build -o agentruntime
+RUN go build -o Unagnt
 
 FROM debian:bookworm-slim
-COPY --from=builder /app/agentruntime /usr/local/bin/
-COPY agent.yaml /etc/agentruntime/
-CMD ["agentruntime", "daemon", "--config", "/etc/agentruntime/agent.yaml"]
+COPY --from=builder /app/Unagnt /usr/local/bin/
+COPY agent.yaml /etc/Unagnt/
+CMD ["Unagnt", "daemon", "--config", "/etc/Unagnt/agent.yaml"]
 ```
 
 Build and run:

@@ -1,8 +1,8 @@
-# AgentRuntime Architecture
+# Unagnt Architecture
 
 **Last Updated**: v2.0.0 | March 2026
 
-This document provides a comprehensive overview of AgentRuntime's architecture, design principles, and implementation details.
+This document provides a comprehensive overview of Unagnt's architecture, design principles, and implementation details.
 
 ---
 
@@ -21,7 +21,7 @@ This document provides a comprehensive overview of AgentRuntime's architecture, 
 
 ## Overview
 
-AgentRuntime is a **layered, microservices-ready platform** for orchestrating autonomous AI agents at scale. It follows clean architecture principles with clear separation of concerns.
+Unagnt is a **layered, microservices-ready platform** for orchestrating autonomous AI agents at scale. It follows clean architecture principles with clear separation of concerns.
 
 ### Key Characteristics
 
@@ -74,7 +74,7 @@ AgentRuntime is a **layered, microservices-ready platform** for orchestrating au
 │                        Client Layer                              │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │   Web UI     │  │ CLI (agentctl)│  │  SDKs       │          │
+│  │   Web UI     │  │ CLI (unagnt)│  │  SDKs       │          │
 │  │   (React)    │  │    (Go)      │  │ (Go/Python) │          │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘          │
 │         │                  │                  │                  │
@@ -350,7 +350,7 @@ type LLMProvider interface {
 ```
 1. Client Request
    ├─ HTTP POST /api/v1/agents/:id/run
-   └─ agentctl agent run <name>
+   └─ unagnt agent run <name>
        ↓
 2. Authentication & Authorization
    ├─ Validate Bearer token / API key
@@ -448,7 +448,7 @@ type LLMProvider interface {
 │  └────────────────────────┬───────────────────────────────┘ │
 │                            │                                 │
 │  ┌────────────────────────┴───────────────────────────────┐ │
-│  │  AgentRuntime Pods (Deployment)                        │ │
+│  │  Unagnt Pods (Deployment)                        │ │
 │  │  - API Server                                          │ │
 │  │  - Workflow Engine                                     │ │
 │  │  - Policy Engine                                       │ │
@@ -456,7 +456,7 @@ type LLMProvider interface {
 │  └────────────────────────┬───────────────────────────────┘ │
 │                            │                                 │
 │  ┌────────────────────────┴───────────────────────────────┐ │
-│  │  AgentRuntime Operator (StatefulSet)                   │ │
+│  │  Unagnt Operator (StatefulSet)                   │ │
 │  │  - Watches Agent/Workflow CRDs                         │ │
 │  │  - Reconciliation loop                                 │ │
 │  │  - Scheduled workflow execution                        │ │
@@ -683,4 +683,4 @@ Run `make generate-operator` (or `controller-gen` per [k8s/operator/BUILD_NOTES.
 
 ---
 
-**Questions?** Open an issue or join our [Discord](https://discord.gg/agentruntime)!
+**Questions?** Open an issue or join our [Discord](https://discord.gg/Unagnt)!

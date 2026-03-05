@@ -4,11 +4,11 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o /agentctl ./cmd/agentctl
-RUN go build -o /agentd ./cmd/agentd
+RUN go build -o /unagnt ./cmd/unagnt
+RUN go build -o /unagntd ./cmd/unagntd
 
 FROM alpine:3.19
 RUN apk add --no-cache ca-certificates
-COPY --from=builder /agentctl /usr/local/bin/
-COPY --from=builder /agentd /usr/local/bin/
-ENTRYPOINT ["/usr/local/bin/agentd"]
+COPY --from=builder /unagnt /usr/local/bin/
+COPY --from=builder /unagntd /usr/local/bin/
+ENTRYPOINT ["/usr/local/bin/unagntd"]

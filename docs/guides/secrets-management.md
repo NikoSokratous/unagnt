@@ -1,6 +1,6 @@
 # Secrets Management
 
-AgentRuntime supports pluggable secret backends so production deployments can avoid environment variables and plaintext config.
+Unagnt supports pluggable secret backends so production deployments can avoid environment variables and plaintext config.
 
 ## Supported Backends
 
@@ -43,15 +43,15 @@ auth:
     - id: okta
       type: oidc
       oidc:
-        client_secret: secret:ref:agentruntime/okta#client_secret
+        client_secret: secret:ref:Unagnt/okta#client_secret
 ```
 
 ## Vault Setup
 
 1. Enable KV v2: `vault secrets enable -path=secret kv-v2`
-2. Store a secret: `vault kv put secret/agentruntime/okta client_secret=xxx`
+2. Store a secret: `vault kv put secret/Unagnt/okta client_secret=xxx`
 3. Set `VAULT_ADDR` and `VAULT_TOKEN` (or token in config for dev only).
-4. Config: `secret:ref:agentruntime/okta#client_secret`
+4. Config: `secret:ref:Unagnt/okta#client_secret`
 
 ## AWS Secrets Manager
 

@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/agentruntime/agentruntime/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 )
 
 // PolicyPlaygroundAPI serves the policy playground endpoint.

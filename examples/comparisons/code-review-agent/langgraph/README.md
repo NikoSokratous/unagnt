@@ -2,7 +2,7 @@
 
 This is the **same code review agent** implemented with LangGraph, showing what you need to build yourself.
 
-## What's Missing vs AgentRuntime
+## What's Missing vs Unagnt
 
 ❌ No built-in policy enforcement  
 ❌ No cost tracking (must implement)  
@@ -189,7 +189,7 @@ def build_graph():
     return workflow.compile()
 ```
 
-**AgentRuntime**:
+**Unagnt**:
 ```yaml
 # Declarative YAML - just describe the flow
 steps:
@@ -217,17 +217,17 @@ steps:
 ### Error Handling
 
 **LangGraph**: Must wrap everything in try/catch
-**AgentRuntime**: Built-in retry with backoff
+**Unagnt**: Built-in retry with backoff
 
 ### Cost Tracking
 
 **LangGraph**: Manual calculation for every LLM call
-**AgentRuntime**: Automatic with per-agent/tenant attribution
+**Unagnt**: Automatic with per-agent/tenant attribution
 
 ### Debugging
 
 **LangGraph**: Add print statements, check logs
-**AgentRuntime**: `agentctl replay <run-id>` - deterministic replay
+**Unagnt**: `unagnt replay <run-id>` - deterministic replay
 
 ## Production Readiness
 
@@ -268,4 +268,4 @@ LangGraph is powerful and flexible, but you're responsible for implementing all 
 - Custom logic requirements
 - Learning graph-based agent architectures
 
-For production systems with governance, cost control, and observability requirements, AgentRuntime provides these out-of-the-box.
+For production systems with governance, cost control, and observability requirements, Unagnt provides these out-of-the-box.

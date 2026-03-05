@@ -51,7 +51,7 @@ func newCostsCmd() *cobra.Command {
 				return err
 			}
 			if _, err := os.Stat(absPath); os.IsNotExist(err) {
-				return fmt.Errorf("database not found at %s (run agentd or agentctl run first to create cost data)", absPath)
+				return fmt.Errorf("database not found at %s (run unagntd or unagnt run first to create cost data)", absPath)
 			}
 
 			db, err := sql.Open("sqlite", absPath)

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/llm"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
 
 func TestNewEngine(t *testing.T) {

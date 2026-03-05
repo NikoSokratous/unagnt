@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/agentruntime/agentruntime/internal/store"
-	"github.com/agentruntime/agentruntime/pkg/orchestrate"
+	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	}
 
 	srv := orchestrate.NewServer(*addr, st, apiKeys)
-	fmt.Printf("agentd listening on %s (store: %s)\n", *addr, *storePath)
+	fmt.Printf("unagntd listening on %s (store: %s)\n", *addr, *storePath)
 	if err := srv.Run(); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}

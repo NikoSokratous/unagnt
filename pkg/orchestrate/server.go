@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/agentruntime/agentruntime/internal/store"
-	"github.com/agentruntime/agentruntime/pkg/api"
-	"github.com/agentruntime/agentruntime/pkg/observe"
+	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/api"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

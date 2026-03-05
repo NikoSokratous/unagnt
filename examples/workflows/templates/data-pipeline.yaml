@@ -1,7 +1,7 @@
 name: "Data Processing Pipeline"
 description: "Extract, transform, and load data with validation and quality checks"
 version: "1.0.0"
-author: "AgentRuntime Team"
+author: "Unagnt Team"
 category: "data-pipeline"
 tags:
   - etl

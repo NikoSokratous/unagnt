@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/agentruntime/agentruntime/internal/store"
-	"github.com/agentruntime/agentruntime/pkg/observe"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
-	"github.com/agentruntime/agentruntime/pkg/tool"
-	"github.com/agentruntime/agentruntime/pkg/tool/builtin"
+	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool/builtin"
 )
 
 // TestEndToEndAgentExecution tests a full agent run

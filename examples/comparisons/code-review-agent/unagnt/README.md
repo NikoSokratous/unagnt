@@ -1,4 +1,4 @@
-# AgentRuntime Implementation
+# Unagnt Implementation
 
 Production-ready code review agent with built-in governance, observability, and cost tracking.
 
@@ -24,22 +24,22 @@ Production-ready code review agent with built-in governance, observability, and 
 
 ```bash
 # Apply policy
-agentctl policy apply policy.yaml
+unagnt policy apply policy.yaml
 
 # Run workflow
-agentctl workflow run code-review.yaml \
+unagnt workflow run code-review.yaml \
   --param pr_url=https://github.com/user/repo/pull/123 \
   --param severity_threshold=medium \
   --param auto_comment=false
 
 # Watch execution in real-time
-agentctl runs watch <run-id>
+unagnt runs watch <run-id>
 
 # View cost breakdown
-agentctl costs --run <run-id>
+unagnt costs --run <run-id>
 
 # Replay for debugging
-agentctl replay <run-id> --mode debug
+unagnt replay <run-id> --mode debug
 ```
 
 ## What You Get Out-of-the-Box
@@ -80,11 +80,11 @@ rules:
 ### Automatic Observability
 ```bash
 # Every execution is traced
-agentctl runs get <run-id>
+unagnt runs get <run-id>
 # Shows: duration, cost, tool calls, state transitions
 
 # Replay any run
-agentctl replay <run-id>
+unagnt replay <run-id>
 # Reproduce exact behavior for debugging
 ```
 
@@ -121,7 +121,7 @@ All steps automatically:
 
 ## Comparison to Manual Implementation
 
-| Feature | AgentRuntime | Manual Code |
+| Feature | Unagnt | Manual Code |
 |---------|-------------|-------------|
 | Workflow definition | 80 lines YAML | 200+ lines code |
 | Policy enforcement | 40 lines YAML | 100+ lines code |
@@ -136,7 +136,7 @@ All steps automatically:
 
 ```bash
 # Deploy to Kubernetes
-helm install code-review-agent agentruntime/agentruntime \
+helm install code-review-agent Unagnt/Unagnt \
   --set workflows.codeReview.enabled=true \
   --set policies.production=true
 

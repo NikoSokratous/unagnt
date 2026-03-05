@@ -1,7 +1,7 @@
 name: "Code Review Workflow"
 description: "Automated code review with multiple agents for comprehensive analysis"
 version: "1.0.0"
-author: "AgentRuntime Team"
+author: "Unagnt Team"
 category: "code-review"
 tags:
   - code-review

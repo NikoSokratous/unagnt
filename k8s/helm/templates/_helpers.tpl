@@ -1,14 +1,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "agentruntime.name" -}}
+{{- define "unagnt.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "agentruntime.fullname" -}}
+{{- define "unagnt.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -24,16 +24,16 @@ Create a default fully qualified app name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "agentruntime.chart" -}}
+{{- define "unagnt.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "agentruntime.labels" -}}
-helm.sh/chart: {{ include "agentruntime.chart" . }}
-{{ include "agentruntime.selectorLabels" . }}
+{{- define "unagnt.labels" -}}
+helm.sh/chart: {{ include "unagnt.chart" . }}
+{{ include "unagnt.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,17 +43,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "agentruntime.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "agentruntime.name" . }}
+{{- define "unagnt.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "unagnt.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "agentruntime.serviceAccountName" -}}
+{{- define "unagnt.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "agentruntime.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "unagnt.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

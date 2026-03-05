@@ -3,7 +3,7 @@ package mcp
 import (
 	"context"
 
-	"github.com/agentruntime/agentruntime/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
 )
 
 // LoadMCPSource connects to an MCP server and registers its tools into the registry.

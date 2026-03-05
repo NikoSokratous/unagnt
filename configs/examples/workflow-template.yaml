@@ -1,7 +1,7 @@
 name: code-review
 description: Multi-step code review workflow
 version: "1.0.0"
-author: agentruntime
+author: Unagnt
 category: code-review
 parameters:
   - name: repo

@@ -1,8 +1,8 @@
-# AgentRuntime User Guide
+# Unagnt User Guide
 
 **Version**: 1.0.0 | **Last Updated**: 2026-02-27
 
-Complete guide for using AgentRuntime to build and run AI agent applications.
+Complete guide for using Unagnt to build and run AI agent applications.
 
 ---
 
@@ -23,7 +23,7 @@ Complete guide for using AgentRuntime to build and run AI agent applications.
 
 ## Introduction
 
-AgentRuntime is a platform for building and running autonomous AI agents with production-grade safety, observability, and scalability.
+Unagnt is a platform for building and running autonomous AI agents with production-grade safety, observability, and scalability.
 
 ### What You Can Build
 
@@ -95,13 +95,13 @@ A **workflow** coordinates multiple agents:
 
 ```bash
 # Basic agent
-agentctl agent create researcher \
+unagnt agent create researcher \
   --goal "Research AI safety papers" \
   --llm gpt-4 \
   --max-steps 10
 
 # With more options
-agentctl agent create analyst \
+unagnt agent create analyst \
   --goal "Analyze sales data and generate report" \
   --llm claude-3-opus \
   --max-steps 20 \
@@ -131,7 +131,7 @@ curl -X POST http://localhost:8080/api/v1/agents \
 package main
 
 import (
-    "github.com/agentruntime/agentruntime/pkg/client"
+    "github.com/Unagnt/Unagnt/pkg/client"
 )
 
 func main() {
@@ -156,9 +156,9 @@ func main() {
 #### Using SDK (Python)
 
 ```python
-from agentruntime import AgentRuntimeClient
+from Unagnt import UnagntClient
 
-client = AgentRuntimeClient(
+client = UnagntClient(
     base_url="http://localhost:8080",
     api_key="your-api-key"
 )
@@ -179,17 +179,17 @@ print(f"Created agent: {agent.id}")
 
 ```bash
 # Start execution
-agentctl agent run researcher
+unagnt agent run researcher
 
 # With custom context
-agentctl agent run researcher \
+unagnt agent run researcher \
   --context "Focus on papers from 2024"
 
 # Watch live
-agentctl runs watch <run-id>
+unagnt runs watch <run-id>
 
 # Get final result
-agentctl runs get <run-id>
+unagnt runs get <run-id>
 ```
 
 ### Autonomy Levels
@@ -206,22 +206,22 @@ agentctl runs get <run-id>
 
 ```bash
 # List all agents
-agentctl agents list
+unagnt agents list
 
 # Get agent details
-agentctl agents get researcher
+unagnt agents get researcher
 
 # Update agent
-agentctl agents update researcher --max-steps 20
+unagnt agents update researcher --max-steps 20
 
 # Delete agent
-agentctl agents delete researcher
+unagnt agents delete researcher
 
 # View agent runs
-agentctl runs list --agent researcher
+unagnt runs list --agent researcher
 
 # Export agent config
-agentctl agents export researcher > researcher.yaml
+unagnt agents export researcher > researcher.yaml
 ```
 
 ---
@@ -254,7 +254,7 @@ steps:
 
 Run it:
 ```bash
-agentctl workflow run research-workflow.yaml \
+unagnt workflow run research-workflow.yaml \
   --param topic="AI safety in robotics"
 ```
 
@@ -355,16 +355,16 @@ steps:
 
 ```bash
 # List available templates
-agentctl workflow templates list
+unagnt workflow templates list
 
 # View template details
-agentctl workflow templates get code-review
+unagnt workflow templates get code-review
 
 # Install template
-agentctl workflow templates install code-review
+unagnt workflow templates install code-review
 
 # Run installed template
-agentctl workflow run code-review \
+unagnt workflow run code-review \
   --param repository_url=https://github.com/user/repo \
   --param branch=main
 ```
@@ -464,30 +464,30 @@ risk_scoring:
 
 ```bash
 # Validate policy syntax
-agentctl policy validate policies/safety-policy.yaml
+unagnt policy validate policies/safety-policy.yaml
 
 # Apply policy
-agentctl policy apply policies/safety-policy.yaml
+unagnt policy apply policies/safety-policy.yaml
 
 # List active policies
-agentctl policy list
+unagnt policy list
 
 # Get policy details
-agentctl policy get safety-policy 1.0.0
+unagnt policy get safety-policy 1.0.0
 
 # Delete policy version
-agentctl policy delete safety-policy 1.0.0
+unagnt policy delete safety-policy 1.0.0
 ```
 
 ### Testing Policies
 
 ```bash
 # Simulate against past run
-agentctl policy simulate enterprise-policy 2.0.0 \
+unagnt policy simulate enterprise-policy 2.0.0 \
   --run-id abc123
 
 # Test with synthetic actions
-agentctl policy test enterprise-policy 2.0.0 \
+unagnt policy test enterprise-policy 2.0.0 \
   --tool http_request \
   --params '{"url": "https://evil.com"}' \
   --expected deny
@@ -497,16 +497,16 @@ agentctl policy test enterprise-policy 2.0.0 \
 
 ```bash
 # Create new version
-agentctl policy apply policies/safety-policy-v2.yaml
+unagnt policy apply policies/safety-policy-v2.yaml
 
 # Compare versions
-agentctl policy diff safety-policy 1.0.0 2.0.0
+unagnt policy diff safety-policy 1.0.0 2.0.0
 
 # Rollback
-agentctl policy activate safety-policy 1.0.0
+unagnt policy activate safety-policy 1.0.0
 
 # View changelog
-agentctl policy changelog safety-policy
+unagnt policy changelog safety-policy
 ```
 
 ---
@@ -563,7 +563,7 @@ tools:
 package main
 
 import (
-    "github.com/agentruntime/agentruntime/pkg/tool"
+    "github.com/Unagnt/Unagnt/pkg/tool"
 )
 
 type MyTool struct{}
@@ -614,17 +614,17 @@ go build -buildmode=plugin -o my_tool.so tools/my_tool.go
 cp my_tool.so /app/plugins/
 
 # Validate
-agentctl tool validate --plugin my_tool.so
+unagnt tool validate --plugin my_tool.so
 
 # Test
-agentctl tool test my_tool --params '{"input": "test"}'
+unagnt tool test my_tool --params '{"input": "test"}'
 ```
 
 ### Scaffolding Tools
 
 ```bash
 # Generate boilerplate
-agentctl scaffold tool \
+unagnt scaffold tool \
   --name weather_lookup \
   --output tools/
 
@@ -636,17 +636,17 @@ agentctl scaffold tool \
 
 ```bash
 # List all tools
-agentctl tools list
+unagnt tools list
 
 # Get tool schema
-agentctl tools schema http_request
+unagnt tools schema http_request
 
 # Test tool
-agentctl tools test calculator \
+unagnt tools test calculator \
   --params '{"expression": "2+2"}'
 
 # Hot-reload (WASM only)
-agentctl tools reload
+unagnt tools reload
 ```
 
 ---
@@ -672,18 +672,18 @@ Long-term storage:
 
 ```bash
 # Store fact
-agentctl memory set --agent researcher \
+unagnt memory set --agent researcher \
   --key "favorite_topic" \
   --value "AI safety"
 
 # Retrieve
-agentctl memory get --agent researcher --key "favorite_topic"
+unagnt memory get --agent researcher --key "favorite_topic"
 
 # List all
-agentctl memory list --agent researcher
+unagnt memory list --agent researcher
 
 # Delete
-agentctl memory delete --agent researcher --key "favorite_topic"
+unagnt memory delete --agent researcher --key "favorite_topic"
 ```
 
 ### Semantic Memory
@@ -692,12 +692,12 @@ Vector-based similarity search:
 
 ```bash
 # Add memory
-agentctl memory add-semantic --agent researcher \
+unagnt memory add-semantic --agent researcher \
   --text "AI safety is crucial for AGI development" \
   --metadata '{"source": "paper", "date": "2024-01-01"}'
 
 # Search
-agentctl memory search --agent researcher \
+unagnt memory search --agent researcher \
   --query "safety in artificial intelligence" \
   --limit 5
 ```
@@ -708,13 +708,13 @@ Immutable audit trail:
 
 ```bash
 # Query events
-agentctl events --agent researcher --run-id abc123
+unagnt events --agent researcher --run-id abc123
 
 # Export for replay
-agentctl events export --run-id abc123 > events.json
+unagnt events export --run-id abc123 > events.json
 
 # Search events
-agentctl events search --tool http_request --since "2024-01-01"
+unagnt events search --tool http_request --since "2024-01-01"
 ```
 
 ---
@@ -797,16 +797,16 @@ Enable full observability:
 Before production:
 ```bash
 # 1. Validate syntax
-agentctl workflow validate workflow.yaml
+unagnt workflow validate workflow.yaml
 
 # 2. Dry run
-agentctl workflow run workflow.yaml --dry-run
+unagnt workflow run workflow.yaml --dry-run
 
 # 3. Test with sample data
-agentctl workflow run workflow.yaml --param test_mode=true
+unagnt workflow run workflow.yaml --param test_mode=true
 
 # 4. Load test
-agentctl workflow load-test workflow.yaml --users 100
+unagnt workflow load-test workflow.yaml --users 100
 ```
 
 ### 5. Version Control
@@ -829,14 +829,14 @@ repo/
 Don't reinvent the wheel:
 ```bash
 # Start from template
-agentctl workflow templates install code-review
+unagnt workflow templates install code-review
 
 # Customize
-agentctl workflow export code-review > my-review.yaml
+unagnt workflow export code-review > my-review.yaml
 # Edit my-review.yaml
 
 # Deploy
-agentctl workflow apply my-review.yaml
+unagnt workflow apply my-review.yaml
 ```
 
 ### 7. Secure Secrets
@@ -890,13 +890,13 @@ steps:
 Debug past runs:
 ```bash
 # Replay exact execution
-agentctl replay <run-id> --mode exact
+unagnt replay <run-id> --mode exact
 
 # Replay with live LLM
-agentctl replay <run-id> --mode live
+unagnt replay <run-id> --mode live
 
 # Debug with breakpoints
-agentctl replay <run-id> --mode debug
+unagnt replay <run-id> --mode debug
 ```
 
 ### Multi-Tenancy
@@ -904,15 +904,15 @@ agentctl replay <run-id> --mode debug
 Isolate by tenant:
 ```bash
 # Create tenant
-agentctl tenants create acme-corp
+unagnt tenants create acme-corp
 
 # Create agent in tenant
-agentctl agent create researcher \
+unagnt agent create researcher \
   --tenant acme-corp \
   --goal "Research competitors"
 
 # Query by tenant
-agentctl runs list --tenant acme-corp
+unagnt runs list --tenant acme-corp
 ```
 
 ### Cost Attribution
@@ -920,15 +920,15 @@ agentctl runs list --tenant acme-corp
 Track spending:
 ```bash
 # View costs
-agentctl costs --by agent
-agentctl costs --by tenant
-agentctl costs --date-range "2024-01-01:2024-01-31"
+unagnt costs --by agent
+unagnt costs --by tenant
+unagnt costs --date-range "2024-01-01:2024-01-31"
 
 # Set budgets
-agentctl budget set --agent researcher --limit 100.00
+unagnt budget set --agent researcher --limit 100.00
 
 # Alerts
-agentctl budget alert --tenant acme-corp \
+unagnt budget alert --tenant acme-corp \
   --threshold 80% \
   --webhook https://alerts.example.com
 ```
@@ -952,7 +952,7 @@ steps:
 Trigger on events:
 ```bash
 # Create webhook
-agentctl webhooks create \
+unagnt webhooks create \
   --name github-pr \
   --agent code-reviewer \
   --secret webhook-secret \
@@ -975,13 +975,13 @@ curl -X POST http://localhost:8080/api/v1/webhooks/github-pr \
 - **API Docs**: [API_REFERENCE.md](API_REFERENCE.md)
 
 ### Community
-- **Discord**: [Join chat](https://discord.gg/agentruntime)
-- **GitHub**: [Issues & discussions](https://github.com/NikoSokratous/agentctl)
-- **Blog**: [blog.agentruntime.io](https://blog.agentruntime.io)
+- **Discord**: [Join chat](https://discord.gg/Unagnt)
+- **GitHub**: [Issues & discussions](https://github.com/NikoSokratous/unagnt)
+- **Blog**: [blog.Unagnt.io](https://blog.Unagnt.io)
 
 ### Support
-- **Email**: [support@agentruntime.io](mailto:support@agentruntime.io)
-- **Commercial**: [contact@agentruntime.io](mailto:contact@agentruntime.io)
+- **Email**: [support@Unagnt.io](mailto:support@Unagnt.io)
+- **Commercial**: [contact@Unagnt.io](mailto:contact@Unagnt.io)
 
 ---
 

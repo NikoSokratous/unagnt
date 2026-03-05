@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/agentruntime/agentruntime/internal/store"
-	"github.com/agentruntime/agentruntime/pkg/orchestrate"
+	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
 )
 
 func TestEndToEndRun(t *testing.T) {

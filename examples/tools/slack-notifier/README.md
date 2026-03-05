@@ -1,6 +1,6 @@
 # Slack Notifier Tool
 
-Send notifications to Slack channels from AgentRuntime workflows.
+Send notifications to Slack channels from Unagnt workflows.
 
 ## Features
 
@@ -14,7 +14,7 @@ Send notifications to Slack channels from AgentRuntime workflows.
 ## Installation
 
 ```bash
-agentctl plugin install slack-notifier
+unagnt plugin install slack-notifier
 ```
 
 ## Configuration

@@ -23,7 +23,7 @@ go run .
 ### Terminal 2: Run agent with approval webhook
 
 ```bash
-agentctl run -c showcase/hitl-demo/agent.yaml -g "Make a POST request to http://localhost:8080/health with body 'test'" --approval-webhook http://localhost:9090/request
+unagnt run -c showcase/hitl-demo/agent.yaml -g "Make a POST request to http://localhost:8080/health with body 'test'" --approval-webhook http://localhost:9090/request
 ```
 
 When the agent tries the POST, it will block. In another terminal:
@@ -40,7 +40,7 @@ The agent will then continue.
 
 ### CLI approval (default)
 
-Without `--approval-webhook`, agentctl uses stdin: you'll be prompted "Approve? [y/N]:" in the same terminal.
+Without `--approval-webhook`, unagnt uses stdin: you'll be prompted "Approve? [y/N]:" in the same terminal.
 
 ## Slack Integration
 

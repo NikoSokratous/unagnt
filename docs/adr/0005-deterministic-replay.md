@@ -72,13 +72,13 @@ We implement **deterministic replay** by recording all non-deterministic inputs:
 
 ```bash
 # Record a run (automatic)
-agentctl run --config agent.yaml --goal "..." --store agent.db
+unagnt run --config agent.yaml --goal "..." --store agent.db
 
 # Replay the run
-agentctl replay --run-id abc123 --store agent.db
+unagnt replay --run-id abc123 --store agent.db
 
 # Compare two runs
-agentctl diff run-1 run-2 --store agent.db
+unagnt diff run-1 run-2 --store agent.db
 ```
 
 ## Security Considerations
@@ -92,7 +92,7 @@ Recordings may contain:
 
 **Mitigation**:
 - Store access control via filesystem permissions
-- GDPR delete: `agentctl memory delete --agent-id X`
+- GDPR delete: `unagnt memory delete --agent-id X`
 - Future: Selective redaction of sensitive fields
 
 ### Tampering

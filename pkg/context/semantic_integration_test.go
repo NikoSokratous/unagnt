@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/agentruntime/agentruntime/pkg/llm/openai"
-	"github.com/agentruntime/agentruntime/pkg/memory"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/llm/openai"
+	"github.com/NikoSokratous/unagnt/pkg/memory"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
 
 func TestSemanticSearchIntegration(t *testing.T) {

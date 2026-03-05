@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/observe"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 	_ "modernc.org/sqlite"
 )
 

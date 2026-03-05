@@ -1,4 +1,4 @@
-module github.com/agentruntime/agentruntime
+module github.com/NikoSokratous/unagnt
 
 go 1.25.0
 

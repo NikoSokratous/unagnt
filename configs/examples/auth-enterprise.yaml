@@ -1,5 +1,5 @@
 # Example Enterprise SSO configuration
-# Use with agentd or API server
+# Use with unagntd or API server
 
 auth:
   enabled: true

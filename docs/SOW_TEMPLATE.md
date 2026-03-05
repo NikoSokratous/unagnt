@@ -1,11 +1,11 @@
-# SOW Template – AgentRuntime
+# SOW Template – Unagnt
 
 **Customer:** [Name]  
 **Term:** [Start] – [End]
 
 ## Objectives
 
-- Deploy AgentRuntime; apply compliance pack (SOC2/HIPAA) as needed
+- Deploy Unagnt; apply compliance pack (SOC2/HIPAA) as needed
 - Configure audit export to SIEM; integrate with IdP if in scope
 - Training and runbook handover as agreed
 
@@ -24,4 +24,4 @@
 
 ## Acceptance
 
-Sign-off by Customer and AgentRuntime. Commercial terms per order form; support tier per SUPPORT.md.
+Sign-off by Customer and Unagnt. Commercial terms per order form; support tier per SUPPORT.md.

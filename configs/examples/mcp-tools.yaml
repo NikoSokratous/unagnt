@@ -1,4 +1,4 @@
-# Example: MCP tool sources for AgentRuntime
+# Example: MCP tool sources for Unagnt
 # Add mcp_sources to your agent config to use MCP tools
 
 mcp_sources:

@@ -3,7 +3,7 @@ package observe
 import (
 	"encoding/json"
 
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
 
 // Tracer records tool calls and reasoning for traces.

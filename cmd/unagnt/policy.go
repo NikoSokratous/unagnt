@@ -13,7 +13,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
 )

@@ -2,7 +2,7 @@
 
 **Status**: Accepted  
 **Date**: 2026-02-26  
-**Decision Makers**: AgentRuntime Core Team
+**Decision Makers**: Unagnt Core Team
 
 ## Context
 

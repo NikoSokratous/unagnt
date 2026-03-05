@@ -28,4 +28,4 @@ cp target/wasm32-wasi/release/example_wasm_tool.wasm example.wasm
 echo "✓ WASM plugin built successfully: example.wasm"
 echo ""
 echo "Test with:"
-echo "  agentctl plugin scan --dirs ."
+echo "  unagnt plugin scan --dirs ."

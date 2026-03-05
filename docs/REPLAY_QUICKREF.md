@@ -34,22 +34,22 @@ snapshot, _ := recorder.StopRecording("completed")
 
 ```bash
 # List snapshots
-agentctl replay list
-agentctl replay list --run run-123
+unagnt replay list
+unagnt replay list --run run-123
 
 # Replay
-agentctl replay run snap-123 --mode exact
-agentctl replay run snap-123 --mode live
-agentctl replay run snap-123 --start 5 --stop 10
+unagnt replay run snap-123 --mode exact
+unagnt replay run snap-123 --mode live
+unagnt replay run snap-123 --start 5 --stop 10
 
 # Debug with breakpoints
-agentctl replay debug snap-123
+unagnt replay debug snap-123
 
 # Validate
-agentctl replay validate snap-123
+unagnt replay validate snap-123
 
 # Compare
-agentctl replay diff snap-old snap-new
+unagnt replay diff snap-old snap-new
 ```
 
 ## Replay Options
@@ -67,32 +67,32 @@ agentctl replay diff snap-old snap-new
 ### Regression Test
 ```bash
 # 1. Record baseline
-agentctl run my-agent --goal "task" --record
+unagnt run my-agent --goal "task" --record
 
 # 2. Make code changes
 # ...
 
 # 3. Test for regressions
-agentctl replay run snap-baseline --mode live
+unagnt replay run snap-baseline --mode live
 ```
 
 ### Debug Failed Run
 ```bash
 # 1. Find failed run
-agentctl logs list --state failed
+unagnt logs list --state failed
 
 # 2. Get snapshot
-agentctl replay list --run run-failed-xyz
+unagnt replay list --run run-failed-xyz
 
 # 3. Debug
-agentctl replay debug snap-failed
+unagnt replay debug snap-failed
 ```
 
 ### Performance Comparison
 ```bash
-agentctl replay run snap-old --mode exact
-agentctl run my-agent --goal "same task" --record
-agentctl replay diff snap-old snap-new
+unagnt replay run snap-old --mode exact
+unagnt run my-agent --goal "same task" --record
+unagnt replay diff snap-old snap-new
 ```
 
 ## Data Structures

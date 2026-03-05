@@ -1,14 +1,14 @@
-# AgentRuntime v1.0 - Release Notes
+# Unagnt v1.0 - Release Notes
 
 **Release Date**: February 26, 2026  
 **Status**: Production Ready  
-**GitHub**: https://github.com/NikoSokratous/agentctl
+**GitHub**: https://github.com/NikoSokratous/unagnt
 
 ---
 
 ## 🎉 What's New in v1.0
 
-AgentRuntime v1.0 is a major release that transforms the platform from a foundational agent framework into a comprehensive, production-grade orchestration system with enterprise features.
+Unagnt v1.0 is a major release that transforms the platform from a foundational agent framework into a comprehensive, production-grade orchestration system with enterprise features.
 
 ---
 
@@ -61,7 +61,7 @@ Ground agents in your knowledge base and memory with semantic search and embeddi
 - **Embeddings**: OpenAI text-embedding-3-small or local sentence-transformers (all-MiniLM-L6-v2)
 - **Semantic Memory**: Similar past interactions retrieved by meaning, not keywords
 - **Local Storage**: SQLite for persistent key-value memory; in-memory vector store for development
-- **CLI**: `agentctl context ingest`, `agentctl context knowledge list`, `agentctl context search`
+- **CLI**: `unagnt context ingest`, `unagnt context knowledge list`, `unagnt context search`
 
 See [examples/knowledge-base/](examples/knowledge-base/) and [docs/EMBEDDINGS.md](docs/EMBEDDINGS.md).
 
@@ -187,14 +187,14 @@ See [examples/knowledge-base/](examples/knowledge-base/) and [docs/EMBEDDINGS.md
 - **5 Built-in Providers**: Policy, workflow state, semantic memory, tool outputs, knowledge
 - **Token Budgeting**: Per-section limits and smart truncation
 - **Parallel Fetching**: Configurable concurrency for faster assembly
-- **CLI Commands**: `agentctl context inspect`, `agentctl context explain`, `agentctl context validate`
+- **CLI Commands**: `unagnt context inspect`, `unagnt context explain`, `unagnt context validate`
 - **Observability**: Metrics, tracing, and structured logs
 
 #### RAG & Knowledge Base
 - **Document Ingestion**: Ingest markdown and text from directories
 - **Chunking**: Configurable chunk size (default 500 tokens) and overlap (default 50)
 - **Semantic Retrieval**: Embed query, search vector store, inject top-K chunks into context
-- **CLI**: `agentctl context ingest ./docs`, `agentctl context knowledge list`, `agentctl context search "query"`
+- **CLI**: `unagnt context ingest ./docs`, `unagnt context knowledge list`, `unagnt context search "query"`
 - **Example**: [examples/knowledge-base/](examples/knowledge-base/) - support agent with RAG
 
 #### Embeddings
@@ -310,8 +310,8 @@ context_assembly:
         top_k: 3
 ```
 ```bash
-agentctl context ingest ./docs
-agentctl run --agent agent.yaml --goal "Help me with deployment"
+unagnt context ingest ./docs
+unagnt run --agent agent.yaml --goal "Help me with deployment"
 ```
 
 ---
@@ -344,15 +344,15 @@ agentctl run --agent agent.yaml --goal "Help me with deployment"
 ### Quick Start
 ```bash
 # Clone repository
-git clone https://github.com/NikoSokratous/agentctl.git
-cd agentruntime
+git clone https://github.com/NikoSokratous/unagnt.git
+cd Unagnt
 
 # Install dependencies
 go mod download
 cd web && npm install
 
 # Run migrations
-agentctl migrate
+unagnt migrate
 
 # Start services
 docker-compose up -d
@@ -367,8 +367,8 @@ open http://localhost:3000
 kubectl apply -f k8s/crds/
 
 # Install with Helm
-helm install agentruntime ./k8s/helm \
-  --namespace agentruntime \
+helm install Unagnt ./k8s/helm \
+  --namespace Unagnt \
   --create-namespace
 ```
 
@@ -380,23 +380,23 @@ helm install agentruntime ./k8s/helm \
 
 1. **Backup your database**
    ```bash
-   pg_dump agentruntime > backup.sql
+   pg_dump Unagnt > backup.sql
    ```
 
 2. **Run migrations**
    ```bash
-   agentctl migrate --to 013
+   unagnt migrate --to 013
    ```
 
 3. **Update configuration**
    ```bash
    # Update Helm values
-   helm upgrade agentruntime ./k8s/helm -f values.yaml
+   helm upgrade Unagnt ./k8s/helm -f values.yaml
    ```
 
 4. **Verify**
    ```bash
-   agentctl version
+   unagnt version
    kubectl get agents
    ```
 
@@ -472,16 +472,16 @@ Special thanks to:
 
 ## 📞 Support
 
-- **Documentation**: https://docs.agentruntime.io
-- **GitHub Issues**: https://github.com/NikoSokratous/agentctl/issues
-- **Discord**: https://discord.gg/agentruntime
-- **Email**: support@agentruntime.io
+- **Documentation**: https://docs.Unagnt.io
+- **GitHub Issues**: https://github.com/NikoSokratous/unagnt/issues
+- **Discord**: https://discord.gg/Unagnt
+- **Email**: support@Unagnt.io
 
 ---
 
 ## 🎉 Thank You!
 
-Thank you for using AgentRuntime! We're excited to see what you build with v1.0.
+Thank you for using Unagnt! We're excited to see what you build with v1.0.
 
 ---
 

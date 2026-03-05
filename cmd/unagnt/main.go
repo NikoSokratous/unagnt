@@ -9,7 +9,7 @@ import (
 
 func main() {
 	root := &cobra.Command{
-		Use:   "agentctl",
+		Use:   "unagnt",
 		Short: "CLI for the Agent Runtime",
 	}
 

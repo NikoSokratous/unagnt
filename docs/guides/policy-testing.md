@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AgentRuntime policy testing framework allows you to write automated tests for your policies using YAML test files. This ensures policies behave as expected before deployment.
+The Unagnt policy testing framework allows you to write automated tests for your policies using YAML test files. This ensures policies behave as expected before deployment.
 
 ## Test File Format
 
@@ -177,7 +177,7 @@ tests:
 
 ```bash
 # Run tests from file
-$ agentctl policy test security-policy --file tests.yaml
+$ unagnt policy test security-policy --file tests.yaml
 
 # Output:
 security-policy-tests
@@ -357,13 +357,13 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         
-      - name: Build agentctl
-        run: go build -o agentctl ./cmd/agentctl
+      - name: Build unagnt
+        run: go build -o unagnt ./cmd/unagnt
         
       - name: Test policies
         run: |
-          ./agentctl policy test security-policy --file tests/security_policy_test.yaml
-          ./agentctl policy test data-access --file tests/data_access_test.yaml
+          ./unagnt policy test security-policy --file tests/security_policy_test.yaml
+          ./unagnt policy test data-access --file tests/data_access_test.yaml
 ```
 
 ### Pre-commit Hook
@@ -375,7 +375,7 @@ jobs:
 echo "Running policy tests..."
 
 for test_file in tests/*_test.yaml; do
-    if ! agentctl policy test $(basename $test_file _test.yaml) --file $test_file; then
+    if ! unagnt policy test $(basename $test_file _test.yaml) --file $test_file; then
         echo "Policy tests failed!"
         exit 1
     fi
@@ -390,10 +390,10 @@ Test policy changes don't break existing behavior:
 
 ```bash
 # Before changing policy
-$ agentctl policy test security-policy --file tests.yaml > results-before.txt
+$ unagnt policy test security-policy --file tests.yaml > results-before.txt
 
 # After changing policy
-$ agentctl policy test security-policy --file tests.yaml > results-after.txt
+$ unagnt policy test security-policy --file tests.yaml > results-after.txt
 
 # Compare
 $ diff results-before.txt results-after.txt
@@ -454,12 +454,12 @@ tests:
 
 1. Check policy version:
 ```bash
-$ agentctl policy versions security-policy
+$ unagnt policy versions security-policy
 ```
 
 2. Verify policy content:
 ```bash
-$ agentctl policy get security-policy 1.0.0
+$ unagnt policy get security-policy 1.0.0
 ```
 
 3. Run in verbose mode (future feature)

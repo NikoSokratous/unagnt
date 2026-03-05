@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/agentruntime/agentruntime/pkg/llm/openai"
-	"github.com/agentruntime/agentruntime/pkg/memory"
+	"github.com/NikoSokratous/unagnt/pkg/llm/openai"
+	"github.com/NikoSokratous/unagnt/pkg/memory"
 )
 
 func TestKnowledgeStoreIngest(t *testing.T) {

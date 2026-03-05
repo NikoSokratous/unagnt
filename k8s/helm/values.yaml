@@ -1,18 +1,18 @@
-# Default values for agentruntime
+# Default values for Unagnt
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 # Global settings
 global:
   environment: production
-  domain: agentruntime.example.com
+  domain: Unagnt.example.com
 
 # Replication settings
 replicaCount: 3
 
 # Image settings
 image:
-  repository: agentruntime/agentruntime
+  repository: Unagnt/Unagnt
   pullPolicy: IfNotPresent
   tag: "1.0.0"
 
@@ -61,14 +61,14 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
   hosts:
-    - host: api.agentruntime.example.com
+    - host: api.Unagnt.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: agentruntime-tls
+    - secretName: Unagnt-tls
       hosts:
-        - api.agentruntime.example.com
+        - api.Unagnt.example.com
 
 # Resource limits
 resources:
@@ -123,7 +123,7 @@ affinity:
               - key: app.kubernetes.io/name
                 operator: In
                 values:
-                  - agentruntime
+                  - Unagnt
           topologyKey: kubernetes.io/hostname
 
 # Environment-specific configurations
@@ -139,9 +139,9 @@ env:
 postgresql:
   enabled: true
   auth:
-    username: agentruntime
+    username: Unagnt
     password: changeme
-    database: agentruntime
+    database: Unagnt
   primary:
     persistence:
       enabled: true
@@ -177,7 +177,7 @@ operator:
   enabled: true
   replicaCount: 1
   image:
-    repository: agentruntime/operator
+    repository: Unagnt/operator
     tag: "1.0.0"
   resources:
     limits:
@@ -192,7 +192,7 @@ web:
   enabled: true
   replicaCount: 2
   image:
-    repository: agentruntime/web
+    repository: Unagnt/web
     tag: "1.0.0"
   service:
     type: ClusterIP
@@ -200,14 +200,14 @@ web:
   ingress:
     enabled: true
     hosts:
-      - host: app.agentruntime.example.com
+      - host: app.Unagnt.example.com
         paths:
           - path: /
             pathType: Prefix
     tls:
-      - secretName: agentruntime-web-tls
+      - secretName: Unagnt-web-tls
         hosts:
-          - app.agentruntime.example.com
+          - app.Unagnt.example.com
   resources:
     limits:
       cpu: 500m
@@ -259,7 +259,7 @@ backup:
   retention: 7  # days
   storage:
     type: s3
-    bucket: agentruntime-backups
+    bucket: Unagnt-backups
     region: us-east-1
 
 # Security

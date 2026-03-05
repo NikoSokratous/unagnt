@@ -1,7 +1,7 @@
 name: "Customer Support Automation"
 description: "Intelligent customer support ticket routing, analysis, and response"
 version: "1.0.0"
-author: "AgentRuntime Team"
+author: "Unagnt Team"
 category: "customer-support"
 tags:
   - support

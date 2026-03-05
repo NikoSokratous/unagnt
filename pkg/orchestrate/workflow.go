@@ -9,7 +9,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/workflow"
+	"github.com/NikoSokratous/unagnt/pkg/workflow"
 	"gopkg.in/yaml.v3"
 )
 

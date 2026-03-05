@@ -3,14 +3,14 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentruntime"
+name = "unagnt"
 version = "0.2.0"
-description = "Python SDK for Agent Runtime API"
+description = "Python SDK for Unagnt API"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Agent Runtime Team"}
+    {name = "Unagnt Team"}
 ]
 keywords = ["ai", "agents", "runtime", "llm"]
 classifiers = [
@@ -38,6 +38,6 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/NikoSokratous/agentctl"
-Documentation = "https://github.com/NikoSokratous/agentctl"
-Repository = "https://github.com/NikoSokratous/agentctl"
+Homepage = "https://github.com/NikoSokratous/unagnt"
+Documentation = "https://github.com/NikoSokratous/unagnt"
+Repository = "https://github.com/NikoSokratous/unagnt"

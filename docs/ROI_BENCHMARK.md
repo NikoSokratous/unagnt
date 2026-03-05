@@ -1,6 +1,6 @@
 # ROI Benchmark: Governance Reduces Cost
 
-This document provides a methodology and benchmark scenario demonstrating how policy governance in AgentRuntime reduces operational cost.
+This document provides a methodology and benchmark scenario demonstrating how policy governance in Unagnt reduces operational cost.
 
 ## Executive Summary
 
@@ -84,8 +84,8 @@ savings = (cost_no_governance - cost_with_governance) / cost_no_governance
 
 ## How to Run a Benchmark
 
-1. Deploy AgentRuntime with cost tracking and policy enforcement.
-2. Use a workload generator (or `agentctl run` in a loop) to trigger 1,000 tool calls.
+1. Deploy Unagnt with cost tracking and policy enforcement.
+2. Use a workload generator (or `unagnt run` in a loop) to trigger 1,000 tool calls.
 3. Ensure a mix of safe and risky actions (e.g., `http_request` to internal vs external URLs).
 4. Query analytics: `GET /v1/analytics/costs`, `GET /v1/analytics/denials/stats`.
 5. Compare runs with policy enabled vs disabled.

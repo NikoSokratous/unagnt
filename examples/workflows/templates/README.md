@@ -1,6 +1,6 @@
 # Workflow Templates
 
-This directory contains example workflow templates for the AgentRuntime marketplace. These templates demonstrate various use cases and best practices for multi-agent workflows.
+This directory contains example workflow templates for the Unagnt marketplace. These templates demonstrate various use cases and best practices for multi-agent workflows.
 
 ## Available Templates
 
@@ -136,7 +136,7 @@ if err := registry.LoadEmbeddedTemplates(); err != nil {
 
 4. **Test locally**:
    ```bash
-   agentctl workflow run my-custom-workflow.yaml --param key=value
+   unagnt workflow run my-custom-workflow.yaml --param key=value
    ```
 
 ### Parameter Types
@@ -255,7 +255,7 @@ To share your template with the community:
 2. **Document well**: Add clear descriptions and examples
 3. **Publish to marketplace**:
    ```bash
-   agentctl workflow publish my-template.yaml \
+   unagnt workflow publish my-template.yaml \
      --category category-name \
      --tags tag1,tag2,tag3
    ```
@@ -327,7 +327,7 @@ To contribute new templates:
 For questions or issues with templates:
 - Open an issue on GitHub
 - Join the community Discord
-- Check the documentation at docs.agentruntime.io
+- Check the documentation at docs.Unagnt.io
 
 ---
 

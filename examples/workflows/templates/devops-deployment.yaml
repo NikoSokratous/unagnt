@@ -1,7 +1,7 @@
 name: "DevOps Deployment Pipeline"
 description: "Automated deployment with testing, security scanning, and rollback capabilities"
 version: "1.0.0"
-author: "AgentRuntime Team"
+author: "Unagnt Team"
 category: "devops"
 tags:
   - deployment

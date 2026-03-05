@@ -20,4 +20,4 @@ go build -buildmode=plugin -o example_plugin.so example_tool.go
 echo "✓ Plugin built successfully: example_plugin.so"
 echo ""
 echo "Test with:"
-echo "  agentctl plugin scan --dirs ."
+echo "  unagnt plugin scan --dirs ."

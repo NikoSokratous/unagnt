@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/observe"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
 
 // Store is the interface for persistent storage of runs and events.

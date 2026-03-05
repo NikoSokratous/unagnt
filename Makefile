@@ -1,21 +1,21 @@
-.PHONY: build test clean run-agentctl run-agentd generate-operator
+.PHONY: build test clean run-unagnt run-unagntd generate-operator
 
-BINARY_AGENTCTL := bin/agentctl
-BINARY_AGENTD := bin/agentd
+BINARY_UNAGNT := bin/unagnt
+BINARY_UNAGNTD := bin/unagntd
 GO := go
 GOFLAGS := -v
 
 all: build
 
-build: build-agentctl build-agentd
+build: build-unagnt build-unagntd
 
-build-agentctl:
+build-unagnt:
 	@mkdir -p bin
-	$(GO) build $(GOFLAGS) -o $(BINARY_AGENTCTL) ./cmd/agentctl
+	$(GO) build $(GOFLAGS) -o $(BINARY_UNAGNT) ./cmd/unagnt
 
-build-agentd:
+build-unagntd:
 	@mkdir -p bin
-	$(GO) build $(GOFLAGS) -o $(BINARY_AGENTD) ./cmd/agentd
+	$(GO) build $(GOFLAGS) -o $(BINARY_UNAGNTD) ./cmd/unagntd
 
 test:
 	$(GO) test ./... -race -coverprofile=coverage.out
@@ -30,11 +30,11 @@ clean:
 	rm -rf bin/
 	rm -f coverage.out coverage.html
 
-run-agentctl: build-agentctl
-	./$(BINARY_AGENTCTL) $(ARGS)
+run-unagnt: build-unagnt
+	./$(BINARY_UNAGNT) $(ARGS)
 
-run-agentd: build-agentd
-	./$(BINARY_AGENTD) $(ARGS)
+run-unagntd: build-unagntd
+	./$(BINARY_UNAGNTD) $(ARGS)
 
 fmt:
 	$(GO) fmt ./...
@@ -47,12 +47,12 @@ lint: fmt vet
 generate-operator:
 	cd k8s/operator && controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./api/v1/..."
 
-showcase-deploy: build-agentctl
+showcase-deploy: build-unagnt
 	@echo "Deploying showcase enterprise-compliance-bot..."
 	@if command -v helm >/dev/null 2>&1 && command -v kubectl >/dev/null 2>&1; then \
-		helm upgrade --install agentruntime ./k8s/helm -f ./k8s/helm/values.yaml 2>/dev/null || true; \
+		helm upgrade --install unagnt ./k8s/helm -f ./k8s/helm/values.yaml 2>/dev/null || true; \
 		kubectl apply -f ./showcase/enterprise-compliance-bot/k8s/; \
-		echo "Showcase deployed. Run: agentctl run --config showcase/enterprise-compliance-bot/agent.yaml --goal '...'"; \
+		echo "Showcase deployed. Run: unagnt run --config showcase/enterprise-compliance-bot/agent.yaml --goal '...'"; \
 	else \
-		echo "Helm/kubectl not found. Use: agentctl run --config showcase/enterprise-compliance-bot/agent.yaml"; \
+		echo "Helm/kubectl not found. Use: unagnt run --config showcase/enterprise-compliance-bot/agent.yaml"; \
 	fi

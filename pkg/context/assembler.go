@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
 )
 
 // DefaultAssembler implements ContextAssembler with token budgeting.

@@ -1,8 +1,8 @@
 """Tests for Agent Runtime Python SDK"""
 
 import pytest
-from agentruntime import AgentRuntime, AsyncAgentRuntime
-from agentruntime.errors import APIError
+from unagnt import AgentRuntime, AsyncAgentRuntime
+from unagnt.errors import APIError
 
 
 def test_client_creation():

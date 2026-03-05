@@ -1,6 +1,6 @@
 # GitHub Integration Tool
 
-A shareable tool for GitHub API operations in AgentRuntime.
+A shareable tool for GitHub API operations in Unagnt.
 
 ## Features
 
@@ -14,7 +14,7 @@ A shareable tool for GitHub API operations in AgentRuntime.
 ## Installation
 
 ```bash
-agentctl plugin install github-integration
+unagnt plugin install github-integration
 ```
 
 ## Configuration

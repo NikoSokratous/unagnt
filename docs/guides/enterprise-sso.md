@@ -1,6 +1,6 @@
 # Enterprise SSO (SAML / OIDC)
 
-AgentRuntime supports enterprise identity federation for the Web UI and API via OAuth2, OpenID Connect (OIDC), and SAML 2.0.
+Unagnt supports enterprise identity federation for the Web UI and API via OAuth2, OpenID Connect (OIDC), and SAML 2.0.
 
 ## Overview
 

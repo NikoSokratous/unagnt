@@ -373,7 +373,7 @@ func ingestKnowledge(directory, source string) error {
 	fmt.Println("  Embedding model: text-embedding-3-small")
 	fmt.Println()
 
-	fmt.Printf("%s Note: Use 'agentctl context search' to test retrieval\n", yellow("ℹ"))
+	fmt.Printf("%s Note: Use 'unagnt context search' to test retrieval\n", yellow("ℹ"))
 
 	return nil
 }

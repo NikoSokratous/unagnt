@@ -6,8 +6,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/agentruntime/agentruntime/pkg/tool"
-	"github.com/agentruntime/agentruntime/pkg/tool/builtin"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool/builtin"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

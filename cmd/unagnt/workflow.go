@@ -10,8 +10,8 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/registry"
-	"github.com/agentruntime/agentruntime/pkg/workflow"
+	"github.com/NikoSokratous/unagnt/pkg/registry"
+	"github.com/NikoSokratous/unagnt/pkg/workflow"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	_ "modernc.org/sqlite"

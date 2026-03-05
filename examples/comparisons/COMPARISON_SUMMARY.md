@@ -5,7 +5,7 @@
 ## What Was Created
 
 A comprehensive comparison showing **the same complex code review agent** built with:
-1. **AgentRuntime** (declarative, production-ready)
+1. **Unagnt** (declarative, production-ready)
 2. **LangGraph** (imperative, requires manual implementation)
 
 ## Structure
@@ -15,8 +15,8 @@ examples/comparisons/
 ├── README.md                           # Overview and comparison table
 └── code-review-agent/
     ├── README.md                       # Detailed comparison
-    ├── agentruntime/
-    │   ├── README.md                   # AgentRuntime implementation guide
+    ├── Unagnt/
+    │   ├── README.md                   # Unagnt implementation guide
     │   ├── code-review.yaml            # 80 lines - complete workflow
     │   └── policy.yaml                 # 40 lines - governance
     └── langgraph/
@@ -39,7 +39,7 @@ A sophisticated **code review agent** that:
 
 ## Key Comparisons
 
-| Feature | AgentRuntime | LangGraph |
+| Feature | Unagnt | LangGraph |
 |---------|-------------|-----------|
 | **Total Lines** | 150 (YAML+config) | 650+ (Python) |
 | **Dev Time** | 2-3 hours | 2-3 days |
@@ -65,7 +65,7 @@ A sophisticated **code review agent** that:
 - Development time estimates
 - Maintenance considerations
 
-### 3. AgentRuntime Implementation
+### 3. Unagnt Implementation
 - **`code-review.yaml`** (80 lines)
   - Complete workflow definition
   - Retry configuration
@@ -95,7 +95,7 @@ A sophisticated **code review agent** that:
 
 ## What It Demonstrates
 
-### AgentRuntime Advantages
+### Unagnt Advantages
 1. **Declarative Configuration** - YAML over code
 2. **Built-in Production Features** - No DIY required
 3. **Governance from Day 1** - Policies, budgets, approvals
@@ -111,11 +111,11 @@ A sophisticated **code review agent** that:
 
 ## Usage Examples
 
-### Run AgentRuntime Version
+### Run Unagnt Version
 ```bash
-cd examples/comparisons/code-review-agent/agentruntime
-agentctl policy apply policy.yaml
-agentctl workflow run code-review.yaml \
+cd examples/comparisons/code-review-agent/Unagnt
+unagnt policy apply policy.yaml
+unagnt workflow run code-review.yaml \
   --param pr_url=https://github.com/user/repo/pull/123
 ```
 
@@ -131,19 +131,19 @@ python code_review_agent.py --pr-url https://github.com/user/repo/pull/123
 ## Key Messages
 
 1. **Same Functionality, Different Approach**
-   - AgentRuntime: Configuration (150 lines)
+   - Unagnt: Configuration (150 lines)
    - LangGraph: Code (650+ lines)
 
 2. **Time to Production**
-   - AgentRuntime: Same day (all features built-in)
+   - Unagnt: Same day (all features built-in)
    - LangGraph: 3-5 days (must implement infrastructure)
 
 3. **Maintenance**
-   - AgentRuntime: Edit YAML
+   - Unagnt: Edit YAML
    - LangGraph: Modify code, test, deploy
 
 4. **Production Features**
-   - AgentRuntime: Policies, cost tracking, replay, multi-tenancy, K8s
+   - Unagnt: Policies, cost tracking, replay, multi-tenancy, K8s
    - LangGraph: Must implement everything yourself
 
 ## Documentation Quality
@@ -163,7 +163,7 @@ This comparison will:
 2. **Demonstrate advantages** - Clear feature comparison
 3. **Be immediately useful** - People can run both
 4. **Build credibility** - Honest, objective comparison
-5. **Help decision-making** - When to use AgentRuntime vs alternatives
+5. **Help decision-making** - When to use Unagnt vs alternatives
 
 ## Next Steps for Users
 
@@ -178,4 +178,4 @@ After exploring this comparison, users can:
 
 **Status**: ✅ Complete and ready for GitHub release!
 
-This comparison provides concrete evidence of AgentRuntime's value proposition through a real-world, production-grade example.
+This comparison provides concrete evidence of Unagnt's value proposition through a real-world, production-grade example.

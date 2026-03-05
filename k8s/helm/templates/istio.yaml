@@ -2,24 +2,24 @@
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
-  name: {{ include "agentruntime.fullname" . }}
+  name: {{ include "unagnt.fullname" . }}
   labels:
-    {{- include "agentruntime.labels" . | nindent 4 }}
+    {{- include "unagnt.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "agentruntime.selectorLabels" . | nindent 6 }}
+      {{- include "unagnt.selectorLabels" . | nindent 6 }}
   mtls:
     mode: {{ .Values.serviceMesh.mtls.mode }}
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: {{ include "agentruntime.fullname" . }}
+  name: {{ include "unagnt.fullname" . }}
   labels:
-    {{- include "agentruntime.labels" . | nindent 4 }}
+    {{- include "unagnt.labels" . | nindent 4 }}
 spec:
-  host: {{ include "agentruntime.fullname" . }}
+  host: {{ include "unagnt.fullname" . }}
   trafficPolicy:
     {{- with .Values.serviceMesh.trafficPolicy }}
     {{- toYaml . | nindent 4 }}
@@ -32,12 +32,12 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: {{ include "agentruntime.fullname" . }}
+  name: {{ include "unagnt.fullname" . }}
   labels:
-    {{- include "agentruntime.labels" . | nindent 4 }}
+    {{- include "unagnt.labels" . | nindent 4 }}
 spec:
   hosts:
-  - {{ include "agentruntime.fullname" . }}
+  - {{ include "unagnt.fullname" . }}
   {{- if .Values.ingress.enabled }}
   {{- range .Values.ingress.hosts }}
   - {{ .host }}
@@ -49,7 +49,7 @@ spec:
         prefix: /api
     route:
     - destination:
-        host: {{ include "agentruntime.fullname" . }}
+        host: {{ include "unagnt.fullname" . }}
         port:
           number: {{ .Values.service.port }}
       weight: 100

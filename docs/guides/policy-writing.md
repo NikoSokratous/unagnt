@@ -175,7 +175,7 @@ Note: Time-based requires extended CEL functions (future enhancement).
 ### 1. Validate Syntax
 
 ```bash
-agentctl policy validate --policy policy.yaml
+unagnt policy validate --policy policy.yaml
 ```
 
 ### 2. Test with Scenarios
@@ -217,13 +217,13 @@ Create `test-scenarios.json`:
 Run tests:
 
 ```bash
-agentctl policy validate --policy policy.yaml --test test-scenarios.json
+unagnt policy validate --policy policy.yaml --test test-scenarios.json
 ```
 
 ### 3. Dry-Run with Agent
 
 ```bash
-agentctl agent test --config agent.yaml
+unagnt agent test --config agent.yaml
 ```
 
 This shows which rules would trigger for your agent config.
@@ -366,13 +366,13 @@ Note: Dynamic approvers require runtime string interpolation (future feature).
 ### 1. Check Rule Matches
 
 ```bash
-agentctl policy validate --policy policy.yaml --verbose
+unagnt policy validate --policy policy.yaml --verbose
 ```
 
 ### 2. Inspect Logs
 
 ```bash
-agentctl logs --log-file agent.log --filter "policy_check"
+unagnt logs --log-file agent.log --filter "policy_check"
 ```
 
 ### 3. Add Test Rules
@@ -403,7 +403,7 @@ Temporarily add a catch-all rule to see what's not matching:
 - Check rule order (first match wins)
 - Validate CEL syntax
 - Print `input` to see actual values
-- Use `agentctl policy validate --test`
+- Use `unagnt policy validate --test`
 
 ### Performance Issues
 

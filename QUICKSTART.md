@@ -1,6 +1,6 @@
-# AgentRuntime - Quick Start Guide
+# Unagnt - Quick Start Guide
 
-Get AgentRuntime up and running in under 5 minutes!
+Get Unagnt up and running in under 5 minutes!
 
 ## Prerequisites
 
@@ -8,13 +8,24 @@ Get AgentRuntime up and running in under 5 minutes!
 - **Node.js 18+** - [Install Node](https://nodejs.org/) (for Web UI)
 - **Git** - [Install Git](https://git-scm.com/)
 
-## Installation
+## Zero-Deps Quick Start
+
+```bash
+# Install and run (no Postgres, Redis, or Qdrant needed)
+go install github.com/NikoSokratous/unagnt/cmd/unagnt@latest
+export OPENAI_API_KEY=sk-...
+unagnt run --config examples/cli-assistant/agent.yaml --goal "List all files in current directory"
+```
+
+See [docs/E2E_EXAMPLE.md](docs/E2E_EXAMPLE.md) for the full walkthrough.
+
+## Installation (Build from Source)
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/NikoSokratous/agentctl.git
-cd agentruntime
+git clone https://github.com/NikoSokratous/unagnt.git
+cd unagnt
 ```
 
 ### 2. Build the Project
@@ -24,45 +35,52 @@ cd agentruntime
 make build
 
 # Or build individually
-go build -o bin/agentctl ./cmd/agentctl
-go build -o bin/server ./pkg/orchestrate/cmd/server
+go build -o bin/unagnt ./cmd/unagnt
+go build -o bin/unagntd ./cmd/unagntd
 ```
 
 ### 3. Initialize Database
 
 ```bash
 # Run migrations
-./bin/agentctl init
+./bin/unagnt init
 
 # Or manually with sqlite3
-cat migrations/*.sql | sqlite3 agentruntime.db
+cat migrations/*.sql | sqlite3 unagnt.db
 ```
 
-## Running AgentRuntime
+## Running Unagnt
 
-### Option 1: Local Development (Recommended for testing)
+### Option 1: Local Development (SQLite + in-memory)
 
 ```bash
 # Start the server
-./bin/server
+./bin/unagntd
 
 # In another terminal, use the CLI
-./bin/agentctl --help
+./bin/unagnt --help
 ```
 
-### Option 2: Docker
+### Option 2: Docker (default: SQLite only)
 
 ```bash
-# Build and run with Docker
-docker build -t agentruntime .
-docker run -p 8080:8080 -p 3000:3000 agentruntime
+cd deploy
+docker-compose up
 ```
 
-### Option 3: Kubernetes
+### Option 3: Production Deployment
+
+For full stack (PostgreSQL, Redis, Qdrant, Prometheus, Jaeger):
 
 ```bash
-# Deploy with Helm
-helm install agentruntime ./k8s/helm \
+cd deploy
+docker-compose -f docker-compose.yml -f docker-compose.production.yml --profile production up
+```
+
+### Option 4: Kubernetes
+
+```bash
+helm install unagnt ./k8s/helm \
   --set postgresql.enabled=true \
   --set redis.enabled=true
 ```
@@ -82,7 +100,7 @@ export LLM_PROVIDER="ollama"
 ### 2. Create an Agent
 
 ```bash
-./bin/agentctl agent create my-first-agent \
+./bin/unagnt agent create my-first-agent \
   --goal "Analyze the latest AI research papers" \
   --llm gpt-4 \
   --max-steps 10 \
@@ -93,13 +111,13 @@ export LLM_PROVIDER="ollama"
 
 ```bash
 # Start execution
-./bin/agentctl agent run my-first-agent
+./bin/unagnt agent run my-first-agent
 
 # Watch live
-./bin/agentctl runs watch <run-id>
+./bin/unagnt runs watch <run-id>
 
 # Get results
-./bin/agentctl runs get <run-id>
+./bin/unagnt runs get <run-id>
 ```
 
 ## Using the Web UI
@@ -153,7 +171,7 @@ steps:
 
 ```bash
 # Run the workflow
-./bin/agentctl workflow run workflow.yaml \
+./bin/unagnt workflow run workflow.yaml \
   --param topic="AI safety"
 ```
 
@@ -182,16 +200,16 @@ From the project root:
 
 ```bash
 # Ingest markdown and text files from the knowledge-base example
-./bin/agentctl context ingest examples/knowledge-base/docs --source "documentation"
+./bin/unagnt context ingest examples/knowledge-base/docs --source "documentation"
 
 # Verify
-./bin/agentctl context knowledge list
+./bin/unagnt context knowledge list
 ```
 
 ### 3. Run the Agent
 
 ```bash
-./bin/agentctl run --agent examples/knowledge-base/agent.yaml --goal "How do I deploy an agent?"
+./bin/unagnt run --agent examples/knowledge-base/agent.yaml --goal "How do I deploy an agent?"
 ```
 
 The agent retrieves relevant chunks from your docs and grounds its response in them.
@@ -199,7 +217,7 @@ The agent retrieves relevant chunks from your docs and grounds its response in t
 ### 4. Test Search
 
 ```bash
-./bin/agentctl context search "how do I configure policies?" --top-k 5
+./bin/unagnt context search "how do I configure policies?" --top-k 5
 ```
 
 See [examples/knowledge-base/README.md](examples/knowledge-base/README.md) and [docs/EMBEDDINGS.md](docs/EMBEDDINGS.md) for details.
@@ -229,13 +247,13 @@ rules:
 ### Apply Policy
 
 ```bash
-./bin/agentctl policy apply policies/safety.yaml
+./bin/unagnt policy apply policies/safety.yaml
 ```
 
 ### Test Policy
 
 ```bash
-./bin/agentctl policy simulate security-policy 1.0.0 \
+./bin/unagnt policy simulate security-policy 1.0.0 \
   --run-id <past-run-id>
 ```
 
@@ -244,17 +262,17 @@ rules:
 ### List Available Templates
 
 ```bash
-./bin/agentctl workflow templates list
+./bin/unagnt workflow templates list
 ```
 
 ### Install a Template
 
 ```bash
 # Install from marketplace
-./bin/agentctl workflow templates install code-review
+./bin/unagnt workflow templates install code-review
 
 # Customize and run
-./bin/agentctl workflow run code-review \
+./bin/unagnt workflow run code-review \
   --param repository_url=https://github.com/user/repo \
   --param branch=main
 ```
@@ -275,21 +293,21 @@ rules:
 
 ```bash
 # Validate a tool definition
-./bin/agentctl tool validate tools/my-tool.yaml
+./bin/unagnt tool validate tools/my-tool.yaml
 ```
 
 ### Scaffold New Tool
 
 ```bash
 # Generate tool boilerplate
-./bin/agentctl scaffold tool --name my_tool --output tools/
+./bin/unagnt scaffold tool --name my_tool --output tools/
 ```
 
 ### Debug Workflows
 
 ```bash
 # Start debug session
-./bin/agentctl workflow debug <workflow-id>
+./bin/unagnt workflow debug <workflow-id>
 
 # Set breakpoint
 > break step-name
@@ -319,7 +337,7 @@ curl http://localhost:8080/health
 # Start Jaeger
 docker run -d -p 16686:16686 -p 4317:4317 jaegertracing/all-in-one
 
-# Configure AgentRuntime
+# Configure Unagnt
 export OTLP_ENDPOINT="localhost:4317"
 export TRACING_ENABLED="true"
 
@@ -331,9 +349,9 @@ open http://localhost:16686
 
 ```bash
 # View costs
-./bin/agentctl costs --by agent
-./bin/agentctl costs --by tenant
-./bin/agentctl costs --date-range "2024-01-01:2024-01-31"
+./bin/unagnt costs --by agent
+./bin/unagnt costs --by tenant
+./bin/unagnt costs --date-range "2024-01-01:2024-01-31"
 ```
 
 ## Next Steps
@@ -350,16 +368,16 @@ open http://localhost:16686
 - Browse [Workflow Templates](examples/workflows/templates/README.md)
 
 ### Community
-- 💬 Join [Discord](https://discord.gg/agentruntime)
-- 🐛 Report issues on [GitHub](https://github.com/NikoSokratous/agentctl/issues)
-- ⭐ Star the [repository](https://github.com/NikoSokratous/agentctl)
+- 💬 Join [Discord](https://discord.gg/Unagnt)
+- 🐛 Report issues on [GitHub](https://github.com/NikoSokratous/unagnt/issues)
+- ⭐ Star the [repository](https://github.com/NikoSokratous/unagnt)
 
 ## Common Issues
 
 ### Database Not Found
 ```bash
 # Initialize database
-./bin/agentctl init
+./bin/unagnt init
 ```
 
 ### Permission Denied

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Policies in AgentRuntime define constraints and rules that agents must follow during execution. They provide safety, compliance, and governance controls.
+Policies in Unagnt define constraints and rules that agents must follow during execution. They provide safety, compliance, and governance controls.
 
 ## Policy Types
 
@@ -97,7 +97,7 @@ rules:
 Apply the policy:
 
 ```bash
-agentctl policy create policy.yaml
+unagnt policy create policy.yaml
 ```
 
 ### Using CLI
@@ -105,13 +105,13 @@ agentctl policy create policy.yaml
 Create policy interactively:
 
 ```bash
-agentctl policy create --name my_policy --interactive
+unagnt policy create --name my_policy --interactive
 ```
 
 ### Programmatically
 
 ```go
-import "github.com/agentruntime/agentruntime/pkg/policy"
+import "github.com/Unagnt/Unagnt/pkg/policy"
 
 engine := policy.NewEngine()
 
@@ -284,7 +284,7 @@ policy:
 Test policy without executing:
 
 ```bash
-agentctl policy test policy.yaml --scenario scenario.yaml
+unagnt policy test policy.yaml --scenario scenario.yaml
 ```
 
 ### Validation
@@ -292,7 +292,7 @@ agentctl policy test policy.yaml --scenario scenario.yaml
 Validate policy syntax:
 
 ```bash
-agentctl policy validate policy.yaml
+unagnt policy validate policy.yaml
 ```
 
 ### Simulation
@@ -300,7 +300,7 @@ agentctl policy validate policy.yaml
 Simulate agent behavior with policy:
 
 ```bash
-agentctl simulate --agent agent.yaml --policy policy.yaml
+unagnt simulate --agent agent.yaml --policy policy.yaml
 ```
 
 ## Policy Inheritance
@@ -344,7 +344,7 @@ policy:
 All violations are logged:
 
 ```bash
-agentctl policy violations --agent my-agent
+unagnt policy violations --agent my-agent
 ```
 
 ### Metrics
@@ -352,7 +352,7 @@ agentctl policy violations --agent my-agent
 Track violation metrics:
 
 ```bash
-agentctl metrics --type policy_violations
+unagnt metrics --type policy_violations
 ```
 
 ### Alerts
@@ -454,14 +454,14 @@ rules:
 
 Check policy is attached:
 ```bash
-agentctl agent describe my-agent --show-policy
+unagnt agent describe my-agent --show-policy
 ```
 
 ### Unexpected denials
 
 Explain policy evaluation:
 ```bash
-agentctl policy explain --agent my-agent --action delete_file
+unagnt policy explain --agent my-agent --action delete_file
 ```
 
 ### Approval not working

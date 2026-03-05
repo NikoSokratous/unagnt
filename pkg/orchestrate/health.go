@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/agentruntime/agentruntime/internal/logging"
+	"github.com/NikoSokratous/unagnt/internal/logging"
 )
 
 // HealthHandler handles /health endpoint

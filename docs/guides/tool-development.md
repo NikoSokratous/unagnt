@@ -50,7 +50,7 @@ type Tool interface {
 ### Step 1: Scaffold
 
 ```bash
-agentctl scaffold tool --name github_api --output tools/
+unagnt scaffold tool --name github_api --output tools/
 ```
 
 This creates:
@@ -67,7 +67,7 @@ import (
     "encoding/json"
     "fmt"
     
-    "github.com/agentruntime/agentruntime/pkg/tool"
+    "github.com/Unagnt/Unagnt/pkg/tool"
 )
 
 type GitHubAPI struct{}
@@ -272,7 +272,7 @@ func TestGitHubAPI(t *testing.T) {
 ### Validation with CLI
 
 ```bash
-agentctl tool validate --tool github_api
+unagnt tool validate --tool github_api
 ```
 
 ## Advanced Patterns
@@ -420,7 +420,7 @@ Future: Central tool registry for discovery and sharing.
 
 - Read [Policy Writing Guide](policy-writing.md) to control tool usage
 - See [examples/](../../examples/) for real-world tools
-- Validate your tool: `agentctl tool validate --tool <name>`
+- Validate your tool: `unagnt tool validate --tool <name>`
 
 ## Questions?
 

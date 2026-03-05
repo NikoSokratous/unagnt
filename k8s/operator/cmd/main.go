@@ -12,8 +12,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	agentruntimev1 "github.com/agentruntime/agentruntime/k8s/operator/api/v1"
-	"github.com/agentruntime/agentruntime/k8s/operator"
+	agentruntimev1 "github.com/NikoSokratous/unagnt/k8s/operator/api/v1"
+	"github.com/NikoSokratous/unagnt/k8s/operator"
 )
 
 var (

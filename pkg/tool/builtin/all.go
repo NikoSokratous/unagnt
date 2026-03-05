@@ -1,7 +1,7 @@
 package builtin
 
 import (
-	"github.com/agentruntime/agentruntime/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
 )
 
 // All returns all built-in tools.

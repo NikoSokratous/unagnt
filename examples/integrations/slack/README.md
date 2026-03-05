@@ -19,7 +19,7 @@ integrations:
 ## Approval Request Example
 
 ```go
-import "github.com/agentruntime/agentruntime/pkg/integrations"
+import "github.com/Unagnt/Unagnt/pkg/integrations"
 
 conn, _ := integrations.NewConnector(&integrations.Config{
     Type:       "slack",

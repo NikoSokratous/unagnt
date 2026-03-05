@@ -1,6 +1,6 @@
 # MCP (Model Context Protocol) Support
 
-AgentRuntime can act as an **MCP client**, connecting to MCP-compliant servers and exposing their tools to agents.
+Unagnt can act as an **MCP client**, connecting to MCP-compliant servers and exposing their tools to agents.
 
 ## Configuration
 
@@ -46,7 +46,7 @@ npx -y @modelcontextprotocol/server-filesystem /tmp
 Add to agent config and run:
 
 ```bash
-agentctl run -c agent.yaml -g "List files in /tmp"
+unagnt run -c agent.yaml -g "List files in /tmp"
 ```
 
 ## References

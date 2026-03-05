@@ -13,20 +13,20 @@ Complete guide to integrating with the Agent Runtime REST API.
 
 ## Getting Started
 
-The Agent Runtime API (`agentd`) provides HTTP endpoints for managing agent runs.
+The Agent Runtime API (`unagntd`) provides HTTP endpoints for managing agent runs.
 
 ### Starting the Server
 
 ```bash
 # Basic
-agentd --addr :8080
+unagntd --addr :8080
 
 # With authentication
 export AGENT_RUNTIME_API_KEYS="key1,key2"
-agentd --addr :8080 --store agent.db
+unagntd --addr :8080 --store agent.db
 
 # With custom logging
-agentd --addr :8080 --log-level debug
+unagntd --addr :8080 --log-level debug
 ```
 
 ### Base URL
@@ -203,9 +203,9 @@ Prometheus metrics (no auth required).
 **Response:** Prometheus text format
 
 ```
-# HELP agentruntime_runs_created_total Total number of runs created
-# TYPE agentruntime_runs_created_total counter
-agentruntime_runs_created_total 42
+# HELP Unagnt_runs_created_total Total number of runs created
+# TYPE Unagnt_runs_created_total counter
+Unagnt_runs_created_total 42
 ```
 
 ## Error Handling
@@ -266,7 +266,7 @@ async function createRunWithRetry(agentName, goal, maxRetries = 3) {
 ### Go
 
 ```go
-import "github.com/agentruntime/agentruntime/sdk/go/client"
+import "github.com/Unagnt/Unagnt/sdk/go/client"
 
 c := client.New("http://localhost:8080", "your-api-key")
 resp, err := c.CreateRun(ctx, "demo-agent", "test goal")
@@ -277,9 +277,9 @@ See: [sdk/go/README.md](../../sdk/go/README.md)
 ### Python
 
 ```python
-from agentruntime import AgentRuntime
+from Unagnt import Unagnt
 
-client = AgentRuntime(base_url="http://localhost:8080", api_key="key")
+client = Unagnt(base_url="http://localhost:8080", api_key="key")
 run_id = client.create_run("demo-agent", "test goal")
 ```
 
@@ -335,10 +335,10 @@ runAgent('demo-agent', 'Calculate 15 + 27')
 ### Python with Error Handling
 
 ```python
-from agentruntime import AgentRuntime
-from agentruntime.errors import APIError, TimeoutError
+from Unagnt import Unagnt
+from Unagnt.errors import APIError, TimeoutError
 
-client = AgentRuntime(
+client = Unagnt(
     base_url="http://localhost:8080",
     api_key="your-key"
 )
@@ -398,7 +398,7 @@ Scrape `/metrics` for observability:
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: 'agentruntime'
+  - job_name: 'Unagnt'
     static_configs:
       - targets: ['localhost:8080']
 ```
@@ -437,7 +437,7 @@ readinessProbe:
 # Generate new keys
 export NEW_KEYS="$(openssl rand -hex 32),$(openssl rand -hex 32)"
 
-# Update agentd
+# Update unagntd
 export AGENT_RUNTIME_API_KEYS="$OLD_KEYS,$NEW_KEYS"
 
 # Graceful migration period
@@ -452,5 +452,5 @@ export AGENT_RUNTIME_API_KEYS="$OLD_KEYS,$NEW_KEYS"
 
 ## Support
 
-- GitHub Issues: https://github.com/NikoSokratous/agentctl/issues
+- GitHub Issues: https://github.com/NikoSokratous/unagnt/issues
 - Discord: (coming soon)

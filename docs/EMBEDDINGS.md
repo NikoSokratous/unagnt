@@ -1,6 +1,6 @@
 # Embeddings and Semantic Search
 
-This guide covers how to use embeddings for semantic search and RAG (Retrieval Augmented Generation) in AgentRuntime.
+This guide covers how to use embeddings for semantic search and RAG (Retrieval Augmented Generation) in Unagnt.
 
 ## Table of Contents
 
@@ -16,14 +16,14 @@ This guide covers how to use embeddings for semantic search and RAG (Retrieval A
 
 ## Overview
 
-Embeddings are vector representations of text that capture semantic meaning. AgentRuntime uses embeddings for:
+Embeddings are vector representations of text that capture semantic meaning. Unagnt uses embeddings for:
 
 1. **Semantic Memory Search**: Find similar past interactions based on meaning, not just keywords
 2. **RAG (Retrieval Augmented Generation)**: Retrieve relevant knowledge from documents to ground agent responses
 
 ## Embedding Providers
 
-AgentRuntime supports multiple embedding providers:
+Unagnt supports multiple embedding providers:
 
 ### OpenAI (Recommended for Production)
 
@@ -152,7 +152,7 @@ fragment, err := memProvider.Fetch(ctx, input)
 
 ```bash
 # Search for similar past interactions
-agentctl context search "how do I deploy an agent?" --top-k 5
+unagnt context search "how do I deploy an agent?" --top-k 5
 ```
 
 ## RAG with Knowledge Base
@@ -169,13 +169,13 @@ agentctl context search "how do I deploy an agent?" --top-k 5
 
 ```bash
 # Ingest documents from a directory
-agentctl context ingest ./docs --source "documentation"
+unagnt context ingest ./docs --source "documentation"
 
 # List ingested documents
-agentctl context knowledge list
+unagnt context knowledge list
 
 # Clear knowledge base
-agentctl context knowledge clear --yes
+unagnt context knowledge clear --yes
 ```
 
 ### Programmatic Usage
@@ -214,36 +214,36 @@ chunks, err := knowledgeStore.Search(ctx, "how do I configure policies?", 3)
 
 ```bash
 # Inspect assembled context
-agentctl context inspect <run-id>
+unagnt context inspect <run-id>
 
 # Explain why each piece was included
-agentctl context explain <run-id>
+unagnt context explain <run-id>
 
 # Show assembly statistics
-agentctl context stats <run-id>
+unagnt context stats <run-id>
 ```
 
 ### Knowledge Management
 
 ```bash
 # Ingest documents
-agentctl context ingest ./docs --source "docs"
+unagnt context ingest ./docs --source "docs"
 
 # List documents
-agentctl context knowledge list
+unagnt context knowledge list
 
 # Search knowledge base
-agentctl context search "query" --top-k 5
+unagnt context search "query" --top-k 5
 
 # Clear knowledge base
-agentctl context knowledge clear --yes
+unagnt context knowledge clear --yes
 ```
 
 ### Validation
 
 ```bash
 # Validate configuration
-agentctl context validate agent.yaml
+unagnt context validate agent.yaml
 ```
 
 ## Performance
@@ -327,7 +327,7 @@ pip install sentence-transformers
 **Debug:**
 
 ```bash
-agentctl context explain <run-id>
+unagnt context explain <run-id>
 ```
 
 ### Issue: "Knowledge provider returns no results"
@@ -341,10 +341,10 @@ agentctl context explain <run-id>
 
 ```bash
 # Check if documents are ingested
-agentctl context knowledge list
+unagnt context knowledge list
 
 # Test search directly
-agentctl context search "your query" --top-k 10
+unagnt context search "your query" --top-k 10
 ```
 
 ### Issue: "Context assembly is slow"
@@ -373,7 +373,7 @@ agentctl context search "your query" --top-k 10
 3. **Keep chunks focused**: 500 tokens is a good default
 4. **Use descriptive sources**: Name sources clearly for citation
 5. **Monitor costs**: Track API usage if using OpenAI
-6. **Test retrieval quality**: Use `agentctl context search` to validate
+6. **Test retrieval quality**: Use `unagnt context search` to validate
 7. **Update knowledge regularly**: Re-ingest when documents change
 
 ## Example Configuration

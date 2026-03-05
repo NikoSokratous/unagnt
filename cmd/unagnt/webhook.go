@@ -7,7 +7,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/agentruntime/agentruntime/internal/config"
+	"github.com/NikoSokratous/unagnt/internal/config"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

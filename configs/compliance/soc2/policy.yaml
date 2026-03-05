@@ -1,4 +1,4 @@
-# SOC2-oriented policy bundle for AgentRuntime
+# SOC2-oriented policy bundle for Unagnt
 # Covers: access control (CC6.1), audit logging (CC7.2), change management
 version: "1"
 rules:

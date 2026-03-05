@@ -1,13 +1,13 @@
-# AgentRuntime
+# Unagnt
 
 <div align="center">
 
 **Production-grade runtime for autonomous AI agents**
 
-[![CI](https://github.com/NikoSokratous/agentctl/actions/workflows/ci.yml/badge.svg)](https://github.com/NikoSokratous/agentctl/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/NikoSokratous/agentctl)](https://goreportcard.com/report/github.com/NikoSokratous/agentctl)
+[![CI](https://github.com/NikoSokratous/unagnt/actions/workflows/ci.yml/badge.svg)](https://github.com/NikoSokratous/unagnt/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/NikoSokratous/unagnt)](https://goreportcard.com/report/github.com/NikoSokratous/unagnt)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Release](https://img.shields.io/github/v/release/NikoSokratous/agentctl)](https://github.com/NikoSokratous/agentctl/releases)
+[![Release](https://img.shields.io/github/v/release/NikoSokratous/unagnt)](https://github.com/NikoSokratous/unagnt/releases)
 
 [Features](#-features) •
 [Quick Start](#-quick-start) •
@@ -20,11 +20,27 @@
 
 ---
 
-## What is AgentRuntime?
+## What is Unagnt?
 
-AgentRuntime is an **enterprise-grade orchestration platform** for autonomous AI agents. Unlike chatbots or LLM wrappers, AgentRuntime provides the **infrastructure** needed to run AI agents safely and reliably in production.
+Unagnt is an **enterprise-grade orchestration platform** for autonomous AI agents. Unlike chatbots or LLM wrappers, Unagnt provides the **infrastructure** needed to run AI agents safely and reliably in production.
 
-### Why AgentRuntime?
+### Why Unagnt? (vs LangGraph, Temporal, CrewAI)
+
+Unagnt is Go-native, ships as a single binary, and runs with zero external infrastructure by default (SQLite + in-memory). You own your stack: no SaaS lock-in, air-gapped support, and policy enforcement built-in. LangGraph and CrewAI are Python-centric; Temporal is a general workflow engine. Unagnt focuses on AI agents with policy, audit, and cost controls out of the box.
+
+### Feature Status
+
+| Feature | Status |
+|---------|--------|
+| Single-agent run (unagnt run) | Working |
+| Policy engine | Working |
+| DAG workflow (simulated) | Working |
+| Cost tracking | Partial |
+| Real workflow execution | Planned |
+| Visual designer | UI exists |
+| Kubernetes operator | Requires make generate |
+
+### Highlights
 
 ✅ **Production-Ready**: Policy enforcement, audit logs, and security by default  
 ✅ **Observable**: Full tracing, metrics, and replay capabilities  
@@ -77,34 +93,35 @@ AgentRuntime is an **enterprise-grade orchestration platform** for autonomous AI
 
 ## 🚀 Quick Start
 
-### Installation
+### Installation (Zero Dependencies)
 
 ```bash
-# Clone the repository
-git clone https://github.com/NikoSokratous/agentctl.git
-cd agentruntime
-
-# Build
-make build
-
-# Run the server
-./bin/server
+# One-liner: install and run
+go install github.com/NikoSokratous/unagnt/cmd/unagnt@latest
+unagnt run --config examples/cli-assistant/agent.yaml --goal "List files"
 ```
+
+Zero dependencies: SQLite + in-memory by default. No Postgres, Redis, or Qdrant required.
 
 ### Your First Agent
 
 ```bash
-# Create an agent
-agentctl agent create researcher \
-  --goal "Research AI safety papers" \
-  --llm gpt-4 \
-  --max-steps 10
+# Set your API key
+export OPENAI_API_KEY=sk-...
 
-# Run the agent
-agentctl agent run researcher
+# Run the CLI assistant example
+unagnt run --config examples/cli-assistant/agent.yaml --goal "List all files in current directory"
+```
 
-# Watch live execution
-agentctl runs watch <run-id>
+👉 **Try the full walkthrough in 2 minutes**: [docs/E2E_EXAMPLE.md](docs/E2E_EXAMPLE.md)
+
+### Build from Source
+
+```bash
+git clone https://github.com/NikoSokratous/unagnt.git
+cd unagnt
+make build
+./bin/unagntd   # Start the server
 ```
 
 ### Visual Workflow Designer
@@ -128,7 +145,7 @@ cd web && npm install && npm run dev
 - **[User Guide](docs/USER_GUIDE.md)** - Complete feature walkthrough
 - **[Embeddings & RAG](docs/EMBEDDINGS.md)** - Semantic search and knowledge-base setup
 - **[Context Assembly](docs/CONTEXT_ASSEMBLY.md)** - How context is built for each LLM call
-- **[CLI Reference](docs/CLI_REFERENCE.md)** - All agentctl commands
+- **[CLI Reference](docs/CLI_REFERENCE.md)** - All unagnt commands
 - **[API Reference](docs/API_REFERENCE.md)** - REST and GraphQL APIs
 - **[Workflow Guide](examples/workflows/templates/README.md)** - Building workflows
 
@@ -203,7 +220,7 @@ context_assembly:
         sources: ["./docs"]
         top_k: 3
 ```
-Ingest docs, then run: `agentctl context ingest ./docs`
+Ingest docs, then run: `unagnt context ingest ./docs`
 
 👉 **See [examples/](examples/) for 20+ ready-to-use examples**
 
@@ -213,11 +230,11 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      AgentRuntime Platform                   │
+│                      Unagnt Platform                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ Web UI       │  │ CLI (agentctl)│  │ REST/GraphQL │      │
+│  │ Web UI       │  │ CLI (unagnt)│  │ REST/GraphQL │      │
 │  │ React + Flow │  │ Go            │  │ API          │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
 │         │                  │                  │              │
@@ -243,10 +260,8 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 │         │  - LLM Integration                  │              │
 │         └──────────────────┬──────────────────┘              │
 │                            │                                 │
-│  ┌──────────┬──────────┬──┴────┬──────────┬──────────┐     │
-│  │ PostgreSQL│  Redis  │ Qdrant│ Prometheus│ Jaeger  │     │
-│  └──────────┴──────────┴───────┴──────────┴──────────┘     │
-│                                                               │
+│  Default: SQLite + in-memory (zero external deps)            │
+│  Production (opt-in): PostgreSQL, Redis, Qdrant, Prometheus, Jaeger  │
 │  Vault / Secrets • Air-Gapped • Compliance Pack              │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -330,7 +345,7 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 - [x] MCP (Model Context Protocol) Support
 - [x] HITL Demo Flow
 - [x] Budget Caps and Alerts (pkg/cost/budget.go)
-- [x] GitOps for Policies (agentctl policy apply)
+- [x] GitOps for Policies (unagnt policy apply)
 - [x] Workflow Versioning
 
 ### ✅ v1.3: Enterprise Foundations (Complete)
@@ -354,7 +369,7 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 - **Deliverable:** `pkg/license/` feature gating (OSS core vs enterprise features); packaging for enterprise binary.
 
 #### 4. Hosted Tier (Optional)
-- **What:** Managed AgentRuntime for teams that prefer not to self-host.
+- **What:** Managed Unagnt for teams that prefer not to self-host.
 - **Deliverable:** Hosted offering; separate pricing/sales motion.
 
 #### 5. Agent Marketplace
@@ -370,7 +385,7 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 
 **Goal:** Enable real production workloads and differentiate with intelligent orchestration. Addresses the primary barrier to first users: simulated execution.
 
-**Rationale:** Without real workflow execution, users cannot run production agents. Agentic orchestration (multi-model routing, dynamic tool selection) differentiates AgentRuntime from generic workflow engines.
+**Rationale:** Without real workflow execution, users cannot run production agents. Agentic orchestration (multi-model routing, dynamic tool selection) differentiates Unagnt from generic workflow engines.
 
 #### 1. Full Runtime Integration
 - **Problem:** Webhook-triggered and scheduled runs complete without real execution; `StepExecutor` default is simulated.
@@ -420,7 +435,7 @@ Ingest docs, then run: `agentctl context ingest ./docs`
 - “Explain this workflow” in plain language
 
 ### 📋 v8.0+: Hosted & Marketplace (Backlog)
-- **Hosted Tier:** Managed AgentRuntime; multi-tenant SaaS; usage-based pricing.
+- **Hosted Tier:** Managed Unagnt; multi-tenant SaaS; usage-based pricing.
 - **Agent Marketplace:** Private/public marketplace; paid listings; discovery and curation.
 
 ---
@@ -437,7 +452,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#known-limitations--implementatio
 
 ## 📄 License
 
-AgentRuntime is open source software licensed under the [MIT License](LICENSE).
+Unagnt is open source software licensed under the [MIT License](LICENSE).
 
 ---
 
@@ -454,25 +469,25 @@ Built with:
 
 ## 💬 Community
 
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/NikoSokratous/agentctl/discussions)
-- **Discord**: [Join our community](https://discord.gg/agentruntime)
-- **Twitter**: [@agentruntime](https://twitter.com/agentruntime)
-- **Blog**: [blog.agentruntime.io](https://blog.agentruntime.io)
+- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/NikoSokratous/unagnt/discussions)
+- **Discord**: [Join our community](https://discord.gg/Unagnt)
+- **Twitter**: [@Unagnt](https://twitter.com/Unagnt)
+- **Blog**: [blog.Unagnt.io](https://blog.Unagnt.io)
 
 ---
 
 ## 📞 Support
 
-- **Documentation**: [docs.agentruntime.io](https://docs.agentruntime.io)
-- **Issues**: [GitHub Issues](https://github.com/NikoSokratous/agentctl/issues)
-- **Commercial Support**: [contact@agentruntime.io](mailto:contact@agentruntime.io)
+- **Documentation**: [docs.Unagnt.io](https://docs.Unagnt.io)
+- **Issues**: [GitHub Issues](https://github.com/NikoSokratous/unagnt/issues)
+- **Commercial Support**: [contact@Unagnt.io](mailto:contact@Unagnt.io)
 
 ---
 
 <div align="center">
 
-**⭐ If you find AgentRuntime useful, please star the repo! ⭐**
+**⭐ If you find Unagnt useful, please star the repo! ⭐**
 
-Made with ❤️ by the AgentRuntime community
+Made with ❤️ by the Unagnt community
 
 </div>

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/agentruntime/agentruntime/pkg/llm"
-	"github.com/agentruntime/agentruntime/pkg/memory"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/memory"
 )
 
 // KnowledgeStore manages a document corpus for RAG.

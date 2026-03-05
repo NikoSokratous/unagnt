@@ -19,7 +19,7 @@ cd examples/research-assistant
 export OPENAI_API_KEY=sk-...
 
 # Run research task
-../../bin/agentctl run \
+../../bin/unagnt run \
   --config agent.yaml \
   --goal "Research the latest developments in quantum computing" \
   --store research.db
@@ -103,10 +103,10 @@ Research results are stored in:
 
 ```bash
 # View logs
-agentctl logs --log-file agent.log --run-id <run-id>
+unagnt logs --log-file agent.log --run-id <run-id>
 
 # Query semantic memory
-agentctl memory query --agent-id research-assistant --query "quantum computing"
+unagnt memory query --agent-id research-assistant --query "quantum computing"
 ```
 
 ## Advanced Usage
@@ -117,10 +117,10 @@ Run multiple sessions, semantic memory accumulates:
 
 ```bash
 # Day 1
-agentctl run --config agent.yaml --goal "Research AI safety" --store research.db
+unagnt run --config agent.yaml --goal "Research AI safety" --store research.db
 
 # Day 2 - builds on previous research
-agentctl run --config agent.yaml --goal "Find counter-arguments to AI safety concerns" --store research.db
+unagnt run --config agent.yaml --goal "Find counter-arguments to AI safety concerns" --store research.db
 ```
 
 ### Custom Sources

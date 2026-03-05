@@ -13,7 +13,7 @@ bundle() {
   cd "$REPO_ROOT"
   make build 2>/dev/null || true
   if [[ ! -f "$REPO_ROOT/bin/agentd" ]]; then
-    echo "Run 'make build' first to produce bin/agentd and bin/agentctl"
+    echo "Run 'make build' first to produce bin/unagntd and bin/unagnt"
     exit 1
   fi
 
@@ -21,7 +21,7 @@ bundle() {
   rm -rf "$STAGING"
   mkdir -p "$STAGING"/{bin,config,configs/compliance}
 
-  cp "$REPO_ROOT/bin/agentd" "$REPO_ROOT/bin/agentctl" "$STAGING/bin/" 2>/dev/null || true
+  cp "$REPO_ROOT/bin/unagntd" "$REPO_ROOT/bin/unagnt" "$STAGING/bin/" 2>/dev/null || true
   cp -r "$REPO_ROOT/configs/compliance/"* "$STAGING/configs/compliance/" 2>/dev/null || true
   [[ -d "$REPO_ROOT/configs/examples" ]] && cp -r "$REPO_ROOT/configs/examples" "$STAGING/configs/" || true
 
@@ -31,9 +31,9 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "$DIR/config"
 echo "Installing AgentRuntime into $DIR"
-echo "Binaries: $DIR/bin/agentd, $DIR/bin/agentctl"
+echo "Binaries: $DIR/bin/unagntd, $DIR/bin/unagnt"
 echo "Configs:  $DIR/configs/ and $DIR/config/"
-echo "Run: $DIR/bin/agentd or add $DIR/bin to PATH and run agentctl"
+echo "Run: $DIR/bin/unagntd or add $DIR/bin to PATH and run unagnt"
 INSTALL
   chmod +x "$STAGING/install.sh"
 

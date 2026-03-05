@@ -23,7 +23,7 @@ export OPENAI_API_KEY=sk-...
 export AGENT_ENVIRONMENT=development  # or production
 
 # Run pipeline
-../../bin/agentctl run \
+../../bin/unagnt run \
   --config agent.yaml \
   --goal "Extract user signups from last 24h, check for anomalies" \
   --store pipeline.db
@@ -34,21 +34,21 @@ export AGENT_ENVIRONMENT=development  # or production
 ### Daily Metrics
 
 ```bash
-agentctl run --config agent.yaml \
+unagnt run --config agent.yaml \
   --goal "Calculate daily active users, compare to last week, alert if drop > 10%"
 ```
 
 ### Data Quality Check
 
 ```bash
-agentctl run --config agent.yaml \
+unagnt run --config agent.yaml \
   --goal "Check users table for null emails, duplicate accounts, invalid dates"
 ```
 
 ### ETL Job
 
 ```bash
-agentctl run --config agent.yaml \
+unagnt run --config agent.yaml \
   --goal "Extract orders from API, transform to analytics format, load to warehouse"
 ```
 
@@ -102,9 +102,9 @@ curl http://localhost:8080/metrics | grep pipeline
 ```
 
 Key metrics:
-- `agentruntime_tool_executions_total{tool="db_read"}`
-- `agentruntime_policy_denials_total{rule="prod-db-write-approval"}`
-- `agentruntime_run_duration_seconds`
+- `Unagnt_tool_executions_total{tool="db_read"}`
+- `Unagnt_policy_denials_total{rule="prod-db-write-approval"}`
+- `Unagnt_run_duration_seconds`
 
 ### Alerts
 
@@ -119,7 +119,7 @@ Configure alerts for:
 ### Cron-Based Execution
 
 ```yaml
-# Schedule in agentd (future feature)
+# Schedule in unagntd (future feature)
 schedule:
   - cron: "0 */6 * * *"  # Every 6 hours
     agent: data-pipeline
@@ -159,10 +159,10 @@ Example transformations the agent can perform:
 
 ```bash
 # Replay to debug
-agentctl replay --run-id <failed-run-id> --store pipeline.db
+unagnt replay --run-id <failed-run-id> --store pipeline.db
 
 # Compare successful vs failed
-agentctl diff <success-run> <failed-run> --store pipeline.db
+unagnt diff <success-run> <failed-run> --store pipeline.db
 ```
 
 ### Audit Trail
@@ -170,7 +170,7 @@ agentctl diff <success-run> <failed-run> --store pipeline.db
 All queries logged for compliance:
 
 ```bash
-agentctl logs --log-file agent.log --filter "tool=db_write"
+unagnt logs --log-file agent.log --filter "tool=db_write"
 ```
 
 ## Security

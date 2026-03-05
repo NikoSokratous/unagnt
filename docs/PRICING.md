@@ -1,6 +1,6 @@
 # Pricing (Commercial Tiers)
 
-AgentRuntime core is **open source (MIT)**. Commercial tiers add support, SLAs, and optional hosted/enterprise features.
+Unagnt core is **open source (MIT)**. Commercial tiers add support, SLAs, and optional hosted/enterprise features.
 
 ## Tiers (Overview)
 
@@ -18,4 +18,4 @@ AgentRuntime core is **open source (MIT)**. Commercial tiers add support, SLAs, 
 
 ## Contact
 
-For pricing and SOW templates: [contact@agentruntime.io](mailto:contact@agentruntime.io).
+For pricing and SOW templates: [contact@Unagnt.io](mailto:contact@Unagnt.io).

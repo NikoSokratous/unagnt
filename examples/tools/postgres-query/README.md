@@ -1,6 +1,6 @@
 # PostgreSQL Query Tool
 
-Execute SQL queries and manage PostgreSQL databases from AgentRuntime.
+Execute SQL queries and manage PostgreSQL databases from Unagnt.
 
 ## Features
 
@@ -14,7 +14,7 @@ Execute SQL queries and manage PostgreSQL databases from AgentRuntime.
 ## Installation
 
 ```bash
-agentctl plugin install postgres-query
+unagnt plugin install postgres-query
 ```
 
 ## Configuration

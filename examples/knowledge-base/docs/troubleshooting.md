@@ -29,7 +29,7 @@
 
 3. Check logs:
    ```bash
-   agentctl logs --agent my-agent
+   unagnt logs --agent my-agent
    ```
 
 4. Increase timeout:
@@ -48,7 +48,7 @@
 
 1. Check token usage:
    ```bash
-   agentctl context inspect <run-id>
+   unagnt context inspect <run-id>
    ```
 
 2. Reduce token budgets:
@@ -81,7 +81,7 @@
 
 1. Clear semantic memory:
    ```bash
-   agentctl memory clear --semantic
+   unagnt memory clear --semantic
    ```
 
 2. Reduce working memory size:
@@ -107,7 +107,7 @@
 
 1. List available tools:
    ```bash
-   agentctl tools list
+   unagnt tools list
    ```
 
 2. Verify tool configuration:
@@ -119,12 +119,12 @@
 
 3. Check tool permissions:
    ```bash
-   agentctl tools check search_docs
+   unagnt tools check search_docs
    ```
 
 4. Test tool directly:
    ```bash
-   agentctl tools exec search_docs --input '{"query": "test"}'
+   unagnt tools exec search_docs --input '{"query": "test"}'
    ```
 
 ### Embedding Issues
@@ -143,7 +143,7 @@
 
 2. Test embeddings directly:
    ```bash
-   agentctl context search "test query" --top-k 1
+   unagnt context search "test query" --top-k 1
    ```
 
 3. Switch to local embeddings:
@@ -169,12 +169,12 @@
 
 1. List ingested documents:
    ```bash
-   agentctl context knowledge list
+   unagnt context knowledge list
    ```
 
 2. Re-ingest documents:
    ```bash
-   agentctl context ingest ./docs --source "docs"
+   unagnt context ingest ./docs --source "docs"
    ```
 
 3. Enable knowledge provider:
@@ -216,7 +216,7 @@
 
 3. Profile assembly:
    ```bash
-   agentctl context stats <run-id>
+   unagnt context stats <run-id>
    ```
 
 4. Reduce provider count:
@@ -251,7 +251,7 @@
 
 4. Monitor token usage:
    ```bash
-   agentctl stats --tokens
+   unagnt stats --tokens
    ```
 
 ## Debugging Techniques
@@ -266,7 +266,7 @@ logging:
 Or via CLI:
 
 ```bash
-agentctl run --agent agent.yaml --log-level debug
+unagnt run --agent agent.yaml --log-level debug
 ```
 
 ### Inspect Context
@@ -274,7 +274,7 @@ agentctl run --agent agent.yaml --log-level debug
 See what context was assembled:
 
 ```bash
-agentctl context inspect <run-id> --format json
+unagnt context inspect <run-id> --format json
 ```
 
 ### Explain Decisions
@@ -282,7 +282,7 @@ agentctl context inspect <run-id> --format json
 Understand why context was included/excluded:
 
 ```bash
-agentctl context explain <run-id>
+unagnt context explain <run-id>
 ```
 
 ### Interactive Debugging
@@ -290,7 +290,7 @@ agentctl context explain <run-id>
 Use the debug REPL:
 
 ```bash
-agentctl debug --agent agent.yaml
+unagnt debug --agent agent.yaml
 ```
 
 Commands:
@@ -349,39 +349,39 @@ View traces in Jaeger or similar tool.
 
 ### Documentation
 
-- Main docs: https://docs.agentruntime.io
-- API reference: https://api.agentruntime.io/docs
-- Examples: https://github.com/NikoSokratous/agentctl
+- Main docs: https://docs.Unagnt.io
+- API reference: https://api.Unagnt.io/docs
+- Examples: https://github.com/NikoSokratous/unagnt
 
 ### Community
 
-- Discord: https://discord.gg/agentruntime
-- GitHub Discussions: https://github.com/NikoSokratous/agentctlagentruntime/discussions
-- Stack Overflow: Tag `agentruntime`
+- Discord: https://discord.gg/Unagnt
+- GitHub Discussions: https://github.com/NikoSokratous/unagntUnagnt/discussions
+- Stack Overflow: Tag `Unagnt`
 
 ### Support
 
-- Email: support@agentruntime.io
-- Enterprise support: enterprise@agentruntime.io
-- Bug reports: https://github.com/NikoSokratous/agentctl/issues
+- Email: support@Unagnt.io
+- Enterprise support: enterprise@Unagnt.io
+- Bug reports: https://github.com/NikoSokratous/unagnt/issues
 
 ## Diagnostic Commands
 
 ```bash
 # Check system health
-agentctl health
+unagnt health
 
 # Verify configuration
-agentctl context validate agent.yaml
+unagnt context validate agent.yaml
 
 # Test connectivity
-agentctl test --provider openai
+unagnt test --provider openai
 
 # Export logs
-agentctl logs export --output logs.json
+unagnt logs export --output logs.json
 
 # Generate diagnostic report
-agentctl diagnose --output report.txt
+unagnt diagnose --output report.txt
 ```
 
 ## Best Practices for Troubleshooting

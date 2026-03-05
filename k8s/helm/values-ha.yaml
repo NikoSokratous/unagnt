@@ -1,15 +1,15 @@
-# High Availability values for AgentRuntime
-# Use: helm install agentruntime ./k8s/helm -f k8s/helm/values-ha.yaml
+# High Availability values for Unagnt
+# Use: helm install Unagnt ./k8s/helm -f k8s/helm/values-ha.yaml
 
 global:
   environment: production
-  domain: agentruntime.example.com
+  domain: Unagnt.example.com
 
 # Higher replica count for HA
 replicaCount: 5
 
 image:
-  repository: agentruntime/agentruntime
+  repository: Unagnt/Unagnt
   pullPolicy: IfNotPresent
   tag: "1.0.0"
 
@@ -39,7 +39,7 @@ affinity:
             - key: app.kubernetes.io/name
               operator: In
               values:
-                - agentruntime
+                - Unagnt
         topologyKey: kubernetes.io/hostname
     preferredDuringSchedulingIgnoredDuringExecution:
       - weight: 100
@@ -49,16 +49,16 @@ affinity:
               - key: app.kubernetes.io/name
                 operator: In
                 values:
-                  - agentruntime
+                  - Unagnt
           topologyKey: topology.kubernetes.io/zone
 
 # PostgreSQL with read replicas for HA
 postgresql:
   enabled: true
   auth:
-    username: agentruntime
+    username: Unagnt
     password: changeme  # Use external secrets
-    database: agentruntime
+    database: Unagnt
   primary:
     persistence:
       enabled: true
@@ -98,7 +98,7 @@ backup:
   retention: 14
   storage:
     type: s3
-    bucket: agentruntime-backups-ha
+    bucket: Unagnt-backups-ha
     region: us-east-1
 
 # Service mesh for mTLS and traffic management

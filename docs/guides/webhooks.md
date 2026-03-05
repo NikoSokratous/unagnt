@@ -85,7 +85,7 @@ goal_template: |
 ### Add Webhook
 
 ```bash
-agentctl webhook add \
+unagnt webhook add \
   --path /webhook/ci \
   --agent ci-agent \
   --goal "Run tests for {{.commit}}" \
@@ -97,7 +97,7 @@ agentctl webhook add \
 ### List Webhooks
 
 ```bash
-agentctl webhook list --file webhooks.yaml
+unagnt webhook list --file webhooks.yaml
 ```
 
 ### Test Template
@@ -109,7 +109,7 @@ Test goal rendering with a sample payload:
 echo '{"commit":"abc123","branch":"main"}' > payload.json
 
 # Test rendering
-agentctl webhook test \
+unagnt webhook test \
   --path /webhook/ci \
   --payload payload.json \
   --file webhooks.yaml
@@ -201,8 +201,8 @@ Configure in GitHub:
 ### Local Testing
 
 ```bash
-# Start agentd with webhooks
-agentd --webhooks webhooks.yaml
+# Start unagntd with webhooks
+unagntd --webhooks webhooks.yaml
 
 # Send test webhook
 curl -X POST http://localhost:8080/webhook/test \
@@ -236,7 +236,7 @@ Monitor webhook activity:
 
 ```bash
 # View webhook runs
-agentctl logs --source webhook
+unagnt logs --source webhook
 
 # Check webhook metrics
 curl http://localhost:8080/metrics | grep webhook
@@ -263,14 +263,14 @@ curl http://localhost:8080/metrics | grep webhook
 
 ```bash
 # Test template locally
-agentctl webhook test --path /webhook/test --payload test.json
+unagnt webhook test --path /webhook/test --payload test.json
 ```
 
 ### Agent Not Executing
 
 - Check agent config path is correct
 - Verify agent has required permissions
-- Review logs: `agentctl logs --run-id <id>`
+- Review logs: `unagnt logs --run-id <id>`
 
 ## Advanced Usage
 

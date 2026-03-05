@@ -2,7 +2,7 @@
 
 **Status**: Accepted  
 **Date**: 2026-02-26  
-**Decision Makers**: AgentRuntime Core Team
+**Decision Makers**: Unagnt Core Team
 
 ## Context
 
@@ -124,7 +124,7 @@ default: // Drop event if buffer full
 ### Scaling Considerations
 
 For distributed deployments:
-- Use Redis Pub/Sub to share events across `agentd` instances
+- Use Redis Pub/Sub to share events across `unagntd` instances
 - Implement sticky sessions for load balancer
 - Consider message queue for event persistence
 

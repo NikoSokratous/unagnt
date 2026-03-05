@@ -25,7 +25,7 @@ For automatic PR reviews:
 
 ```bash
 # Add webhook to GitHub repo
-# URL: https://your-agentd.com/webhooks/code-review
+# URL: https://your-unagntd.com/webhooks/code-review
 # Events: Pull requests
 ```
 
@@ -34,7 +34,7 @@ For automatic PR reviews:
 ```bash
 cd examples/code-review-bot
 
-../../bin/agentctl run \
+../../bin/unagnt run \
   --config agent.yaml \
   --goal "Review PR #123 in owner/repo"
 ```
@@ -85,7 +85,7 @@ The bot checks for:
 ```
 GitHub Webhook
     ↓
-agentd receives event
+unagntd receives event
     ↓
 Agent fetches PR diff (http_request tool)
     ↓
@@ -144,7 +144,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          agentctl run \
+          unagnt run \
             --config examples/code-review-bot/agent.yaml \
             --goal "Review PR #${{ github.event.pull_request.number }}"
 ```
@@ -155,10 +155,10 @@ View review history:
 
 ```bash
 # List past reviews
-agentctl logs --log-file agent.log
+unagnt logs --log-file agent.log
 
 # Compare reviews across different model versions
-agentctl diff <run-id-1> <run-id-2>
+unagnt diff <run-id-1> <run-id-2>
 ```
 
 ## Cost Estimation

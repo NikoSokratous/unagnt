@@ -2,12 +2,12 @@ metadata:
   id: slack-notifier
   name: slack-notifier
   version: 1.0.0
-  author: AgentRuntime Team
+  author: Unagnt Team
   description: Send notifications and messages to Slack channels
   type: tool
   runtime: go
   license: MIT
-  repository: https://github.com/NikoSokratous/agentctl
+  repository: https://github.com/NikoSokratous/unagnt
   permissions:
     - network
     - api

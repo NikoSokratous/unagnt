@@ -1,5 +1,5 @@
-module github.com/agentruntime/agentruntime/sdk/go
+module github.com/NikoSokratous/unagnt/sdk/go
 
 go 1.22
 
-replace github.com/agentruntime/agentruntime => ../../
+replace github.com/NikoSokratous/unagnt => ../../

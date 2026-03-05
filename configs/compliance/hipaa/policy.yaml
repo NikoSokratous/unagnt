@@ -1,4 +1,4 @@
-# HIPAA-oriented policy bundle for AgentRuntime
+# HIPAA-oriented policy bundle for Unagnt
 # Covers: access control (164.312(a)), audit controls (164.312(b)), integrity (164.312(c))
 version: "1"
 rules:

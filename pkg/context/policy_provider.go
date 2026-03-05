@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/llm"
-	"github.com/agentruntime/agentruntime/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 )
 
 // PolicyProvider injects active policies as system context.

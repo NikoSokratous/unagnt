@@ -4,18 +4,18 @@ End-to-end demo deployable via one command. Demonstrates policy governance (bloc
 
 ## Quick Start
 
-### Option 1: agentctl (no K8s)
+### Option 1: unagnt (no K8s)
 
 ```bash
 cd showcase/enterprise-compliance-bot
-agentctl run --config agent.yaml --goal "Calculate 15% of 240 and echo the result"
+unagnt run --config agent.yaml --goal "Calculate 15% of 240 and echo the result"
 ```
 
 ### Option 2: Kubernetes
 
 ```bash
-# Deploy AgentRuntime (see project root)
-helm install agentruntime ./k8s/helm -f k8s/helm/values.yaml
+# Deploy Unagnt (see project root)
+helm install Unagnt ./k8s/helm -f k8s/helm/values.yaml
 
 # Apply showcase resources
 kubectl apply -f k8s/agent.yaml
@@ -26,7 +26,7 @@ kubectl apply -f k8s/policy.yaml
 
 ```bash
 make showcase-deploy
-# Or: helm install agentruntime ./k8s/helm && kubectl apply -f showcase/enterprise-compliance-bot/k8s/
+# Or: helm install Unagnt ./k8s/helm && kubectl apply -f showcase/enterprise-compliance-bot/k8s/
 ```
 
 ## Policy
@@ -41,7 +41,7 @@ Start the web UI and navigate to **Analytics**:
 
 ```bash
 # From project root
-make run   # or: go run ./cmd/agentctl web
+make run   # or: go run ./cmd/unagnt web
 # Open http://localhost:8080, go to /analytics
 ```
 

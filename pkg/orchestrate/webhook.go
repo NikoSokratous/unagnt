@@ -13,8 +13,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/agentruntime/agentruntime/internal/config"
-	"github.com/agentruntime/agentruntime/internal/store"
+	"github.com/NikoSokratous/unagnt/internal/config"
+	"github.com/NikoSokratous/unagnt/internal/store"
 	"github.com/google/uuid"
 )
 

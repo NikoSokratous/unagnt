@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  agentd:
+  unagntd:
     build: ..
     ports:
       - "8080:8080"
@@ -9,4 +9,4 @@ services:
       - AGENTD_STORE=agent.db
     volumes:
       - ./data:/data
-    command: ["agentd", "--addr", ":8080", "--store", "/data/agent.db"]
+    command: ["unagntd", "--addr", ":8080", "--store", "/data/agent.db"]

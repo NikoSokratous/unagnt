@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/agentruntime/agentruntime/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
 )
 
 // ExampleTool is a sample Go plugin tool.

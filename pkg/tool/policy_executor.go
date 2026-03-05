@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/agentruntime/agentruntime/pkg/policy"
-	"github.com/agentruntime/agentruntime/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
 
 // PolicyExecutor wraps an executor with policy checks and approval gates.

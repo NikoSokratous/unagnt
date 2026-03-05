@@ -170,7 +170,7 @@ risk:
 ### Assess Action Risk
 
 ```bash
-agentctl risk assess \
+unagnt risk assess \
   --tool delete_file \
   --env production \
   --permission fs:delete
@@ -212,7 +212,7 @@ reliability     [██████░░░░░░░░░░░░░░] 0
 ### View Statistics
 
 ```bash
-agentctl risk stats --days 7
+unagnt risk stats --days 7
 ```
 
 Output:
@@ -250,7 +250,7 @@ Deny              18
 ### Top Risky Actions
 
 ```bash
-agentctl risk top --limit 5 --min-score 0.7
+unagnt risk top --limit 5 --min-score 0.7
 ```
 
 Output:
@@ -267,7 +267,7 @@ RANK  TOOL              SCORE  LEVEL     DECISION         TIMESTAMP
 ### Risk Trends
 
 ```bash
-agentctl risk trend --days 7 --interval day
+unagnt risk trend --days 7 --interval day
 ```
 
 Output:
@@ -285,7 +285,7 @@ PERIOD       AVG SCORE  COUNT  TREND
 ### Generate Compliance Report
 
 ```bash
-agentctl risk report generate --type daily --date 2026-02-26
+unagnt risk report generate --type daily --date 2026-02-26
 ```
 
 Output:
@@ -303,7 +303,7 @@ Report generated: report-1709049600
 ### List Reports
 
 ```bash
-agentctl risk report list --type daily --limit 10
+unagnt risk report list --type daily --limit 10
 ```
 
 Output:
@@ -317,7 +317,7 @@ report-003   weekly  2026-W08    3241     187        56      93.5%
 ### View Report
 
 ```bash
-agentctl risk report view report-001
+unagnt risk report view report-001
 ```
 
 Output:
@@ -354,8 +354,8 @@ Average Risk Score: 0.38 (low-medium)
 ### Export Report
 
 ```bash
-agentctl risk report export report-001 --format json --output report.json
-agentctl risk report export report-001 --format csv --output report.csv
+unagnt risk report export report-001 --format json --output report.json
+unagnt risk report export report-001 --format csv --output report.csv
 ```
 
 ## Configuration
@@ -389,7 +389,7 @@ risk_scoring:
 ### Programmatic Usage
 
 ```go
-import "github.com/agentruntime/agentruntime/pkg/risk"
+import "github.com/Unagnt/Unagnt/pkg/risk"
 
 // Create engine
 config := risk.DefaultRiskConfig()
@@ -595,7 +595,7 @@ dev:
 
 ```bash
 # Weekly check
-agentctl risk trend --days 7 --interval day
+unagnt risk trend --days 7 --interval day
 
 # Watch for:
 # - Increasing average scores
@@ -607,17 +607,17 @@ agentctl risk trend --days 7 --interval day
 
 ```bash
 # Automate daily reports
-0 0 * * * agentctl risk report generate --type daily
+0 0 * * * unagnt risk report generate --type daily
 
 # Weekly review
-0 0 * * 0 agentctl risk report generate --type weekly
+0 0 * * 0 unagnt risk report generate --type weekly
 ```
 
 ### 5. Tune Based on Analytics
 
 ```bash
 # Get stats
-agentctl risk stats --days 30
+unagnt risk stats --days 30
 
 # If denial rate > 10%:
 # - Policies too strict
@@ -666,33 +666,33 @@ auditLogger.Log(AuditLog{
 
 ```bash
 # Generate monthly report
-agentctl risk report generate --type monthly
+unagnt risk report generate --type monthly
 
 # Check compliance rate
-agentctl risk stats --days 30
+unagnt risk stats --days 30
 
 # Export for auditors
-agentctl risk report export report-feb --format pdf
+unagnt risk report export report-feb --format pdf
 ```
 
 ### 4. Incident Investigation
 
 ```bash
 # Find high-risk actions
-agentctl risk top --min-score 0.8
+unagnt risk top --min-score 0.8
 
 # Review decisions
-agentctl policy audit query --decision deny --days 7
+unagnt policy audit query --decision deny --days 7
 
 # Check trends around incident
-agentctl risk trend --days 7 --interval hour
+unagnt risk trend --days 7 --interval hour
 ```
 
 ### 5. Policy Tuning
 
 ```bash
 # Assess current policy effectiveness
-agentctl risk stats
+unagnt risk stats
 
 # If too many denials:
 # - Lower auto_deny threshold
@@ -749,7 +749,7 @@ rbac:
 
 ```bash
 # Check denial reasons
-agentctl policy audit query --decision deny --days 7
+unagnt policy audit query --decision deny --days 7
 
 # Review thresholds
 # If too many denials, increase auto_deny threshold
@@ -759,7 +759,7 @@ agentctl policy audit query --decision deny --days 7
 
 ```bash
 # Check category weights
-agentctl risk assess --tool <tool> --env production
+unagnt risk assess --tool <tool> --env production
 
 # Adjust weights in config if needed
 ```
@@ -920,26 +920,26 @@ if assessment.RiskScore.Score >= 0.8 {
 
 ```bash
 # Morning routine
-agentctl risk stats --days 1
-agentctl risk top --limit 10
+unagnt risk stats --days 1
+unagnt risk top --limit 10
 
 # Weekly review
-agentctl risk report generate --type weekly
-agentctl risk trend --days 30
+unagnt risk report generate --type weekly
+unagnt risk trend --days 30
 ```
 
 ### Example 3: Compliance Audit
 
 ```bash
 # Generate quarterly report
-agentctl risk report generate --type custom \
+unagnt risk report generate --type custom \
   --start 2026-01-01 --end 2026-03-31
 
 # Export for auditors
-agentctl risk report export report-q1 --format pdf
+unagnt risk report export report-q1 --format pdf
 
 # Review findings
-agentctl risk report view report-q1
+unagnt risk report view report-q1
 ```
 
 ## Next Steps

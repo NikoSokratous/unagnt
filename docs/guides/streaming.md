@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AgentRuntime provides real-time streaming of agent execution events using Server-Sent Events (SSE). This allows clients to monitor agent runs as they happen, enabling live dashboards and interactive debugging tools.
+The Unagnt provides real-time streaming of agent execution events using Server-Sent Events (SSE). This allows clients to monitor agent runs as they happen, enabling live dashboards and interactive debugging tools.
 
 ## Architecture
 
@@ -56,7 +56,7 @@ Heartbeats are sent every 30 seconds to keep the connection alive.
 ### Go SDK
 
 ```go
-import "github.com/agentruntime/agentruntime/sdk/go/client"
+import "github.com/Unagnt/Unagnt/sdk/go/client"
 
 client := client.New("http://localhost:8080", "your-api-key")
 
@@ -86,9 +86,9 @@ for {
 ### Python SDK
 
 ```python
-from agentruntime import AgentRuntimeClient, stream_events
+from Unagnt import UnagntClient, stream_events
 
-client = AgentRuntimeClient(
+client = UnagntClient(
     base_url="http://localhost:8080",
     api_key="your-api-key"
 )
@@ -137,7 +137,7 @@ eventSource.onerror = (error) => {
 
 For high-scale deployments:
 
-1. **Use Redis Pub/Sub**: Distribute events across multiple `agentd` instances
+1. **Use Redis Pub/Sub**: Distribute events across multiple `unagntd` instances
 2. **Load Balancing**: Use sticky sessions to route clients to the same backend
 3. **Event Replay**: Store events in a time-series database for late joiners
 
@@ -221,7 +221,7 @@ Enable verbose logging to see event flow:
 
 ```bash
 export LOG_LEVEL=debug
-agentd --log-level=debug
+unagntd --log-level=debug
 ```
 
 Monitor active connections:

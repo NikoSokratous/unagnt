@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	agentruntimev1 "github.com/agentruntime/agentruntime/k8s/operator/api/v1"
+	agentruntimev1 "github.com/NikoSokratous/unagnt/k8s/operator/api/v1"
 )
 
 // WorkflowReconciler reconciles a Workflow object
@@ -23,9 +23,9 @@ type WorkflowReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=agentruntime.io,resources=workflows,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=agentruntime.io,resources=workflows/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=agentruntime.io,resources=workflows/finalizers,verbs=update
+// +kubebuilder:rbac:groups=unagnt.io,resources=workflows,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=unagnt.io,resources=workflows/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=unagnt.io,resources=workflows/finalizers,verbs=update
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 
@@ -253,7 +253,7 @@ steps:
 			Namespace: workflow.Namespace,
 			Labels: map[string]string{
 				"app":                       "agentruntime",
-				"agentruntime.io/workflow":  workflow.Name,
+				"unagnt.io/workflow":  workflow.Name,
 			},
 		},
 		Data: map[string]string{
@@ -268,8 +268,8 @@ steps:
 // jobForWorkflow creates a Job to execute the workflow
 func (r *WorkflowReconciler) jobForWorkflow(workflow *agentruntimev1.Workflow) *batchv1.Job {
 	labels := map[string]string{
-		"app":                      "agentruntime",
-		"agentruntime.io/workflow": workflow.Name,
+		"app":                      "unagnt",
+		"unagnt.io/workflow": workflow.Name,
 	}
 
 	job := &batchv1.Job{
@@ -288,7 +288,7 @@ func (r *WorkflowReconciler) jobForWorkflow(workflow *agentruntimev1.Workflow) *
 					Containers: []corev1.Container{
 						{
 							Name:  "workflow-executor",
-							Image: "agentruntime/executor:latest",
+							Image: "unagnt/executor:latest",
 							Args: []string{
 								"workflow",
 								"run",

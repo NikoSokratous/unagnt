@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "agentruntime.fullname" . }}
+  name: {{ include "unagnt.fullname" . }}
   labels:
-    {{- include "agentruntime.labels" . | nindent 4 }}
+    {{- include "unagnt.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "agentruntime.selectorLabels" . | nindent 6 }}
+      {{- include "unagnt.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -19,7 +19,7 @@ spec:
         {{- end }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
-        {{- include "agentruntime.selectorLabels" . | nindent 8 }}
+        {{- include "unagnt.selectorLabels" . | nindent 8 }}
         {{- if .Values.serviceMesh.enabled }}
         sidecar.istio.io/inject: "true"
         {{- end }}
@@ -28,7 +28,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "agentruntime.serviceAccountName" . }}
+      serviceAccountName: {{ include "unagnt.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -51,12 +51,12 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: {{ include "agentruntime.fullname" . }}-db
+              name: {{ include "unagnt.fullname" . }}-db
               key: url
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
-              name: {{ include "agentruntime.fullname" . }}-redis
+              name: {{ include "unagnt.fullname" . }}-redis
               key: url
         livenessProbe:
           {{- toYaml .Values.livenessProbe | nindent 10 }}
@@ -66,14 +66,14 @@ spec:
           {{- toYaml .Values.resources | nindent 10 }}
         volumeMounts:
         - name: config
-          mountPath: /etc/agentruntime
+          mountPath: /etc/unagnt
           readOnly: true
         - name: tmp
           mountPath: /tmp
       volumes:
       - name: config
         configMap:
-          name: {{ include "agentruntime.fullname" . }}
+          name: {{ include "unagnt.fullname" . }}
       - name: tmp
         emptyDir: {}
       {{- with .Values.nodeSelector }}

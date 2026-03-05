@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/agentruntime/agentruntime/pkg/registry"
+	"github.com/NikoSokratous/unagnt/pkg/registry"
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 	_ "modernc.org/sqlite"

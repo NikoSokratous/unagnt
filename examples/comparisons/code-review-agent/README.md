@@ -16,7 +16,7 @@ A production-grade automated code review agent that:
 
 ## Implementations
 
-### 1. AgentRuntime (`./agentruntime/`)
+### 1. Unagnt (`./unagnt/`)
 **Lines of Code**: ~150 (YAML + minimal glue)  
 **Features**: All capabilities built-in
 
@@ -26,7 +26,7 @@ A production-grade automated code review agent that:
 
 ## Key Differences
 
-| Feature | AgentRuntime | LangGraph |
+| Feature | Unagnt | LangGraph |
 |---------|-------------|-----------|
 | **Policy Enforcement** | ✅ Built-in YAML policies | ❌ Must implement manually |
 | **Cost Tracking** | ✅ Automatic per-agent/tenant | ❌ Must implement manually |
@@ -40,10 +40,10 @@ A production-grade automated code review agent that:
 
 ## Running the Examples
 
-### AgentRuntime
+### Unagnt
 ```bash
-cd agentruntime
-agentctl workflow run code-review.yaml \
+cd unagnt
+unagnt workflow run code-review.yaml \
   --param pr_url=https://github.com/user/repo/pull/123 \
   --param severity_threshold=medium
 ```
@@ -59,7 +59,7 @@ python code_review_agent.py --pr-url https://github.com/user/repo/pull/123
 
 ### Configuration vs Code
 
-**AgentRuntime**: Declarative YAML configuration
+**Unagnt**: Declarative YAML configuration
 - Workflow: 80 lines of YAML
 - Policy: 40 lines of YAML
 - Glue code: 30 lines of Go (custom tools if needed)
@@ -75,7 +75,7 @@ python code_review_agent.py --pr-url https://github.com/user/repo/pull/123
 
 ### What You Get Out-of-the-Box
 
-#### AgentRuntime
+#### Unagnt
 ```yaml
 # Just describe what you want
 name: "code-review-agent"
@@ -103,7 +103,7 @@ class CodeReviewAgent:
 
 ## Production Considerations
 
-### AgentRuntime Advantages
+### Unagnt Advantages
 1. **Policy Enforcement**: YAML-based governance from day 1
 2. **Observability**: Built-in tracing, metrics, replay
 3. **Security**: Permission system prevents dangerous operations
@@ -120,7 +120,7 @@ class CodeReviewAgent:
 
 ## When to Use What?
 
-### Choose AgentRuntime if:
+### Choose Unagnt if:
 - ✅ You need production-grade features immediately
 - ✅ You want declarative, maintainable workflows
 - ✅ Governance and compliance are important
@@ -137,28 +137,28 @@ class CodeReviewAgent:
 ## Real-World Impact
 
 ### Development Time
-- **AgentRuntime**: 2-3 hours to production-ready workflow
+- **Unagnt**: 2-3 hours to production-ready workflow
 - **LangGraph**: 2-3 days to add production features
 
 ### Maintenance
-- **AgentRuntime**: Update YAML config, policies versioned
+- **Unagnt**: Update YAML config, policies versioned
 - **LangGraph**: Code changes, testing, deployment
 
 ### Debugging
-- **AgentRuntime**: Replay any execution deterministically
+- **Unagnt**: Replay any execution deterministically
 - **LangGraph**: Add logging, hope you captured enough
 
 ### Scaling
-- **AgentRuntime**: `kubectl scale` or HPA
+- **Unagnt**: `kubectl scale` or HPA
 - **LangGraph**: Custom infrastructure, load balancing, etc.
 
 ## Conclusion
 
 Both frameworks have their place:
 - **LangGraph**: Great for prototyping and custom research
-- **AgentRuntime**: Built for production from day one
+- **Unagnt**: Built for production from day one
 
-If you're building a proof-of-concept, either works. If you're building production AI systems, AgentRuntime gives you the infrastructure you need without writing it yourself.
+If you're building a proof-of-concept, either works. If you're building production AI systems, Unagnt gives you the infrastructure you need without writing it yourself.
 
 ## Try It Yourself
 

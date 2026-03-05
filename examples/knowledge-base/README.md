@@ -1,6 +1,6 @@
 # Knowledge Base Example
 
-This example demonstrates how to use AgentRuntime's RAG (Retrieval Augmented Generation) capabilities with a knowledge base.
+This example demonstrates how to use Unagnt's RAG (Retrieval Augmented Generation) capabilities with a knowledge base.
 
 ## Overview
 
@@ -36,7 +36,7 @@ embeddings:
 The `docs/` directory contains sample documentation. Ingest it:
 
 ```bash
-agentctl context ingest ./docs --source "documentation"
+unagnt context ingest ./docs --source "documentation"
 ```
 
 This will:
@@ -48,19 +48,19 @@ This will:
 ### 3. Verify Ingestion
 
 ```bash
-agentctl context knowledge list
+unagnt context knowledge list
 ```
 
 ### 4. Test Search
 
 ```bash
-agentctl context search "how do I configure policies?" --top-k 5
+unagnt context search "how do I configure policies?" --top-k 5
 ```
 
 ## Running the Agent
 
 ```bash
-agentctl run --agent agent.yaml --goal "Help me understand how to deploy an agent"
+unagnt run --agent agent.yaml --goal "Help me understand how to deploy an agent"
 ```
 
 The agent will:
@@ -132,13 +132,13 @@ Try these queries to see RAG in action:
 
 ```bash
 # Should retrieve from api-guide.md
-agentctl run --agent agent.yaml --goal "How do I authenticate with the API?"
+unagnt run --agent agent.yaml --goal "How do I authenticate with the API?"
 
 # Should retrieve from deployment.md
-agentctl run --agent agent.yaml --goal "What are the deployment best practices?"
+unagnt run --agent agent.yaml --goal "What are the deployment best practices?"
 
 # Should retrieve from troubleshooting.md
-agentctl run --agent agent.yaml --goal "My agent is failing, how do I debug?"
+unagnt run --agent agent.yaml --goal "My agent is failing, how do I debug?"
 ```
 
 ## Inspecting Context
@@ -146,7 +146,7 @@ agentctl run --agent agent.yaml --goal "My agent is failing, how do I debug?"
 See what was retrieved:
 
 ```bash
-agentctl context inspect <run-id>
+unagnt context inspect <run-id>
 ```
 
 Look for the "knowledge" fragment to see which chunks were included.
@@ -156,11 +156,11 @@ Look for the "knowledge" fragment to see which chunks were included.
 1. Add `.md` or `.txt` files to `docs/`
 2. Re-ingest:
    ```bash
-   agentctl context ingest ./docs --source "documentation"
+   unagnt context ingest ./docs --source "documentation"
    ```
 3. Test retrieval:
    ```bash
-   agentctl context search "your query"
+   unagnt context search "your query"
    ```
 
 ## Cost Considerations
@@ -186,7 +186,7 @@ With local embeddings:
 
 ### "No results found"
 
-- Check documents were ingested: `agentctl context knowledge list`
+- Check documents were ingested: `unagnt context knowledge list`
 - Lower similarity threshold in config
 - Increase `top_k`
 - Try different query phrasing

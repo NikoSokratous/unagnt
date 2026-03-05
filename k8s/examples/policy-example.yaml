@@ -1,4 +1,4 @@
-apiVersion: agentruntime.io/v1
+apiVersion: unagnt.io/v1
 kind: Policy
 metadata:
   name: production-safety-policy

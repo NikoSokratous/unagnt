@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/llm"
-	"github.com/agentruntime/agentruntime/pkg/memory"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/memory"
 )
 
 // MemoryProvider retrieves context from memory systems.

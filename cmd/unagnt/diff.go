@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/agentruntime/agentruntime/internal/store"
-	"github.com/agentruntime/agentruntime/pkg/observe"
+	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
 	"github.com/spf13/cobra"
 )
 

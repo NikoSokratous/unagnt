@@ -1,6 +1,6 @@
 # Example Go Plugin
 
-This is a complete working example of a Go plugin for AgentRuntime.
+This is a complete working example of a Go plugin for Unagnt.
 
 ## Building
 
@@ -16,10 +16,10 @@ go build -buildmode=plugin -o example_plugin.so example_tool.go
 
 ```bash
 # Scan for the plugin
-agentctl plugin scan --dirs ./examples/plugins
+unagnt plugin scan --dirs ./examples/plugins
 
 # List loaded plugins
-agentctl plugin list --dirs ./examples/plugins
+unagnt plugin list --dirs ./examples/plugins
 ```
 
 ## Plugin Structure

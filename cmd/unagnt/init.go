@@ -143,7 +143,7 @@ func runInit(outputDir string) error {
 
 	fmt.Printf("\n%s Next steps:\n", yellow("→"))
 	fmt.Printf("  1. Set your API key: export %s_API_KEY=...\n", strings.ToUpper(provider))
-	fmt.Printf("  2. Run your agent: agentctl run --config %s --goal \"<your goal>\"\n", agentPath)
+	fmt.Printf("  2. Run your agent: unagnt run --config %s --goal \"<your goal>\"\n", agentPath)
 
 	return nil
 }

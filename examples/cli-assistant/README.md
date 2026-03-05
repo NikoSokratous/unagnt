@@ -18,23 +18,23 @@ cd examples/cli-assistant
 export OPENAI_API_KEY=sk-...
 
 # Run the assistant
-../../bin/agentctl run --config agent.yaml --goal "List all files in current directory"
+../../bin/unagnt run --config agent.yaml --goal "List all files in current directory"
 ```
 
 ## Example Goals
 
 ```bash
 # File operations
-agentctl run --config agent.yaml --goal "Find all .go files modified in the last week"
+unagnt run --config agent.yaml --goal "Find all .go files modified in the last week"
 
 # System info
-agentctl run --config agent.yaml --goal "Show disk usage for /home"
+unagnt run --config agent.yaml --goal "Show disk usage for /home"
 
 # Network
-agentctl run --config agent.yaml --goal "Check if port 8080 is open"
+unagnt run --config agent.yaml --goal "Check if port 8080 is open"
 
 # Git operations
-agentctl run --config agent.yaml --goal "Show git commits from last 24 hours"
+unagnt run --config agent.yaml --goal "Show git commits from last 24 hours"
 ```
 
 ## Safety Features

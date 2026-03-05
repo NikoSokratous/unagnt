@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AgentRuntime supports two types of plugins:
+The Unagnt supports two types of plugins:
 
 1. **Go Plugins**: Native Go `.so` files for maximum performance
 2. **WASM Plugins**: WebAssembly modules for secure sandboxing
@@ -29,7 +29,7 @@ import (
     "context"
     "encoding/json"
     
-    "github.com/agentruntime/agentruntime/pkg/tool"
+    "github.com/Unagnt/Unagnt/pkg/tool"
 )
 
 type MyTool struct{}
@@ -112,7 +112,7 @@ go build -buildmode=plugin -o my_custom_tool.so tool.go
 ### Loading Go Plugins
 
 ```go
-import "github.com/agentruntime/agentruntime/pkg/tool"
+import "github.com/Unagnt/Unagnt/pkg/tool"
 
 loader := tool.NewPluginLoader()
 err := loader.LoadPlugin("./plugins/my_custom_tool.so")
@@ -214,7 +214,7 @@ The runtime can automatically discover plugins in configured directories:
 ```go
 discovery := tool.NewPluginDiscovery([]string{
     "./plugins",
-    "/usr/local/share/agentruntime/plugins",
+    "/usr/local/share/Unagnt/plugins",
 })
 
 manifests, err := discovery.ScanPlugins()
@@ -237,13 +237,13 @@ err := discovery.WatchForChanges("./plugins", 5*time.Second)
 ### Scan for Plugins
 
 ```bash
-agentctl plugin scan --dirs ./plugins --verbose
+unagnt plugin scan --dirs ./plugins --verbose
 ```
 
 ### List Loaded Plugins
 
 ```bash
-agentctl plugin list
+unagnt plugin list
 ```
 
 ## Manifest Format
@@ -329,7 +329,7 @@ func TestMyTool(t *testing.T) {
 go build -buildmode=plugin -o test.so
 
 # Test loading
-agentctl plugin scan --dirs .
+unagnt plugin scan --dirs .
 ```
 
 ## Distribution
@@ -340,10 +340,10 @@ Future versions will support a plugin registry:
 
 ```bash
 # Publish plugin
-agentctl plugin publish ./my-tool --registry https://plugins.agentruntime.dev
+unagnt plugin publish ./my-tool --registry https://plugins.Unagnt.dev
 
 # Install plugin
-agentctl plugin install my-tool@1.0.0
+unagnt plugin install my-tool@1.0.0
 ```
 
 ### Versioning

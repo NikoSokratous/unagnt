@@ -1,11 +1,11 @@
-# Agent Runtime Python SDK
+# Unagnt Python SDK
 
-Python client library for the Agent Runtime API.
+Python client library for the Unagnt API.
 
 ## Installation
 
 ```bash
-pip install agentruntime
+pip install unagnt
 ```
 
 Or install from source:
@@ -20,10 +20,10 @@ pip install -e .
 ### Synchronous Client
 
 ```python
-from agentruntime import AgentRuntime
+from unagnt import Unagnt
 
 # Create client
-client = AgentRuntime(
+client = Unagnt(
     base_url="http://localhost:8080",
     api_key="your-api-key"
 )
@@ -47,10 +47,10 @@ print(f"Steps: {run.step_count}")
 
 ```python
 import asyncio
-from agentruntime import AsyncAgentRuntime
+from unagnt import AsyncUnagnt
 
 async def main():
-    async with AsyncAgentRuntime(
+    async with AsyncUnagnt(
         base_url="http://localhost:8080",
         api_key="your-api-key"
     ) as client:
@@ -66,7 +66,7 @@ asyncio.run(main())
 
 ## API Reference
 
-### AgentRuntime
+### Unagnt
 
 Synchronous client for the API.
 
@@ -78,7 +78,7 @@ Synchronous client for the API.
 - `wait_for_run(run_id, poll_interval=2.0, timeout=None)` - Wait for completion
 - `health_check()` - Check service health
 
-### AsyncAgentRuntime
+### AsyncUnagnt
 
 Asynchronous client (all methods are async/await).
 
@@ -90,7 +90,7 @@ Asynchronous client (all methods are async/await).
 
 ### Errors
 
-- `AgentRuntimeError` - Base exception
+- `UnagntError` - Base exception
 - `APIError` - API request failed
 - `NotFoundError` - Resource not found (404)
 - `UnauthorizedError` - Auth failed (401)
@@ -113,7 +113,7 @@ pytest
 ### Type Checking
 
 ```bash
-mypy agentruntime/
+mypy unagnt/
 ```
 
 ## License

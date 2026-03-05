@@ -1,6 +1,6 @@
 # Integration Tests
 
-This directory contains end-to-end integration tests for the AgentRuntime.
+This directory contains end-to-end integration tests for the Unagnt.
 
 ## Running Tests
 
@@ -57,7 +57,7 @@ services:
     image: qdrant/qdrant
   redis:
     image: redis:alpine
-  agentd:
+  unagntd:
     build: .
     depends_on:
       - qdrant

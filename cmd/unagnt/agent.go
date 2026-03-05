@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/agentruntime/agentruntime/internal/config"
-	"github.com/agentruntime/agentruntime/pkg/policy"
-	"github.com/agentruntime/agentruntime/pkg/tool"
-	"github.com/agentruntime/agentruntime/pkg/tool/builtin"
+	"github.com/NikoSokratous/unagnt/internal/config"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool/builtin"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -163,7 +163,7 @@ func runAgentTest(configFile string, verbose bool) error {
 	}
 
 	fmt.Printf("\n%s Agent config is ready to use\n", green("✓"))
-	fmt.Printf("\nTo run: agentctl run --config %s --goal \"<your goal>\"\n", configFile)
+	fmt.Printf("\nTo run: unagnt run --config %s --goal \"<your goal>\"\n", configFile)
 
 	return nil
 }

@@ -1,6 +1,6 @@
 # Example WASM Plugin
 
-This demonstrates a WebAssembly-based plugin for AgentRuntime with sandboxed execution.
+This demonstrates a WebAssembly-based plugin for Unagnt with sandboxed execution.
 
 ## Building
 
@@ -30,7 +30,7 @@ WASM plugins must export an `execute` function that:
 
 ```bash
 # Scan for WASM plugins
-agentctl plugin scan --dirs ./examples/plugins --verbose
+unagnt plugin scan --dirs ./examples/plugins --verbose
 
 # The runtime will load and execute via Wazero
 ```

@@ -4,7 +4,7 @@ This directory demonstrates the **same code review agent** implemented in two di
 
 ## 📊 Side-by-Side Comparison
 
-| Aspect | AgentRuntime | LangGraph |
+| Aspect | Unagnt | LangGraph |
 |--------|-------------|-----------|
 | **Lines of Code** | ~150 (YAML + config) | ~450+ (Python) |
 | **Dev Time** | 2-3 hours | 2-3 days |
@@ -20,7 +20,7 @@ This directory demonstrates the **same code review agent** implemented in two di
 
 ## 🎯 What This Shows
 
-### AgentRuntime Strengths
+### Unagnt Strengths
 1. **Declarative configuration** - YAML over code
 2. **Built-in production features** - No DIY infrastructure
 3. **Governance from day 1** - Policies, budgets, approval gates
@@ -37,24 +37,24 @@ This directory demonstrates the **same code review agent** implemented in two di
 ## 🔍 Key Insights
 
 ### Complexity
-- **AgentRuntime**: 80 lines YAML + 40 lines policy + 30 lines custom tools = **150 lines**
+- **Unagnt**: 80 lines YAML + 40 lines policy + 30 lines custom tools = **150 lines**
 - **LangGraph**: 450 lines core + 200 lines production features = **650+ lines**
 
 ### Time to Production
-- **AgentRuntime**: **Same day** - all features built-in
+- **Unagnt**: **Same day** - all features built-in
 - **LangGraph**: **3-5 days** - must implement production features
 
 ### Maintenance
-- **AgentRuntime**: Update YAML config
+- **Unagnt**: Update YAML config
 - **LangGraph**: Modify code, test, redeploy
 
 ### Debugging
-- **AgentRuntime**: `agentctl replay <run-id>` - deterministic
+- **Unagnt**: `unagnt replay <run-id>` - deterministic
 - **LangGraph**: Add more logging, hope you captured enough
 
 ## 📁 Files Overview
 
-### AgentRuntime (`./agentruntime/`)
+### Unagnt (`./Unagnt/`)
 ```
 code-review.yaml    # 80 lines - complete workflow
 policy.yaml         # 40 lines - security + cost policies
@@ -70,11 +70,11 @@ README.md              # Documentation + what's missing
 
 ## 🚀 Try It Yourself
 
-### Run AgentRuntime Version
+### Run Unagnt Version
 ```bash
-cd agentruntime
-agentctl policy apply policy.yaml
-agentctl workflow run code-review.yaml \
+cd Unagnt
+unagnt policy apply policy.yaml
+unagnt workflow run code-review.yaml \
   --param pr_url=https://github.com/user/repo/pull/123
 ```
 
@@ -90,7 +90,7 @@ python code_review_agent.py \
 
 ## 💡 When to Use What?
 
-### Use AgentRuntime if you:
+### Use Unagnt if you:
 - ✅ Need production features immediately
 - ✅ Want declarative, version-controlled workflows
 - ✅ Need governance, cost control, compliance
@@ -116,19 +116,19 @@ This comparison teaches:
 
 ## 📚 Further Reading
 
-- [AgentRuntime Architecture](../../docs/ARCHITECTURE.md)
-- [AgentRuntime User Guide](../../docs/USER_GUIDE.md)
-- [AgentRuntime Deployment](../../docs/DEPLOYMENT.md)
+- [Unagnt Architecture](../../docs/ARCHITECTURE.md)
+- [Unagnt User Guide](../../docs/USER_GUIDE.md)
+- [Unagnt Deployment](../../docs/DEPLOYMENT.md)
 - [LangGraph Documentation](https://python.langchain.com/docs/langgraph)
 
 ## ⚖️ The Bottom Line
 
 Both tools have their place:
 - **LangGraph**: Great for learning and prototypes
-- **AgentRuntime**: Built for production from day one
+- **Unagnt**: Built for production from day one
 
 Choose based on your needs:
 - Building a POC? Either works.
-- Building production AI? AgentRuntime saves weeks.
+- Building production AI? Unagnt saves weeks.
 
 The code doesn't lie - run both and compare! 🎯

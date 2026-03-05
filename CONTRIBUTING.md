@@ -31,8 +31,8 @@ This project adheres to a Code of Conduct that all contributors are expected to 
 
 ```bash
 # Clone repository
-git clone https://github.com/NikoSokratous/agentctl.git
-cd agentruntime
+git clone https://github.com/NikoSokratous/unagnt.git
+cd Unagnt
 
 # Install dependencies
 go mod download
@@ -69,12 +69,12 @@ Recommended: VS Code or GoLand
 ### Running Locally
 
 ```bash
-# Terminal 1: Start agentd
-make run-agentd
+# Terminal 1: Start unagntd
+make run-unagntd
 
-# Terminal 2: Test with agentctl
+# Terminal 2: Test with unagnt
 export OPENAI_API_KEY=sk-...
-make run-agentctl
+make run-unagnt
 ```
 
 ## Making Changes
@@ -284,7 +284,7 @@ We follow [Semantic Versioning](https://semver.org/):
 ## Project Structure
 
 ```
-agentruntime/
+Unagnt/
 ├── cmd/           # CLI and daemon entrypoints
 ├── pkg/           # Public APIs
 ├── internal/      # Private implementation
@@ -321,7 +321,7 @@ Look for `good-first-issue` label on GitHub.
 - **GitHub Issues**: Bug reports, feature requests
 - **GitHub Discussions**: Questions, ideas
 - **Discord**: Real-time chat (coming soon)
-- **Email**: security@agentruntime.dev (security issues only)
+- **Email**: security@Unagnt.dev (security issues only)
 
 ## Recognition
 
@@ -332,7 +332,7 @@ Contributors are recognized in:
 
 ## Questions?
 
-- Check [existing issues](https://github.com/NikoSokratous/agentctl/issues)
+- Check [existing issues](https://github.com/NikoSokratous/unagnt/issues)
 - Read the [documentation](../guides/)
 - Ask in GitHub Discussions
 

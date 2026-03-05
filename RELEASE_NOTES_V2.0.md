@@ -1,8 +1,8 @@
-# AgentRuntime v2.0 - Release Notes
+# Unagnt v2.0 - Release Notes
 
 **Release Date**: March 2026  
 **Status**: Production Ready  
-**GitHub**: https://github.com/NikoSokratous/agentctl
+**GitHub**: https://github.com/NikoSokratous/unagnt
 
 ---
 
@@ -68,7 +68,7 @@ Expanded ecosystem integration, cost controls, and policy-as-code workflows.
 - Alerts when costs approach or exceed thresholds
 
 ### GitOps for Policies
-- `agentctl policy apply` for declarative policy deployment
+- `unagnt policy apply` for declarative policy deployment
 - Policy-as-code workflows with version control
 
 ### Workflow Versioning
@@ -177,26 +177,26 @@ Compliance packaging, air-gapped deployment, open-core licensing, and commercial
 
 1. **Backup**
    ```bash
-   pg_dump agentruntime > backup.sql
+   pg_dump Unagnt > backup.sql
    ```
 
 2. **Pull and migrate**
    ```bash
    git pull
-   agentctl migrate
+   unagnt migrate
    ```
 
 3. **Air-gapped (optional)**
    ```bash
    ./scripts/offline-install.sh bundle
    # Transfer tarball, then:
-   tar -xzf agentruntime-air-gapped-*.tar.gz
-   cd agentruntime-air-gapped && ./install.sh
+   tar -xzf Unagnt-air-gapped-*.tar.gz
+   cd Unagnt-air-gapped && ./install.sh
    ```
 
 4. **Kubernetes**
    ```bash
-   helm upgrade agentruntime ./k8s/helm -f values.yaml
+   helm upgrade Unagnt ./k8s/helm -f values.yaml
    ```
 
 ---

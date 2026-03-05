@@ -42,7 +42,7 @@ recording:
 ### Programmatic Recording
 
 ```go
-import "github.com/agentruntime/agentruntime/pkg/replay"
+import "github.com/Unagnt/Unagnt/pkg/replay"
 
 config := replay.RecordingConfig{
     Enabled:            true,
@@ -74,7 +74,7 @@ snapshot, err := recorder.StopRecording("completed")
 Uses recorded responses for deterministic replay.
 
 ```bash
-agentctl replay run snap-123 --mode exact
+unagnt replay run snap-123 --mode exact
 ```
 
 **Use for:**
@@ -92,7 +92,7 @@ agentctl replay run snap-123 --mode exact
 Re-executes with live APIs.
 
 ```bash
-agentctl replay run snap-123 --mode live
+unagnt replay run snap-123 --mode live
 ```
 
 **Use for:**
@@ -110,7 +110,7 @@ agentctl replay run snap-123 --mode live
 Recorded models, live tools.
 
 ```bash
-agentctl replay run snap-123 --mode mixed
+unagnt replay run snap-123 --mode mixed
 ```
 
 **Use for:**
@@ -123,7 +123,7 @@ agentctl replay run snap-123 --mode mixed
 Step-through debugging with breakpoints.
 
 ```bash
-agentctl replay run snap-123 --mode debug --breakpoint 5 --breakpoint 10
+unagnt replay run snap-123 --mode debug --breakpoint 5 --breakpoint 10
 ```
 
 **Use for:**
@@ -136,7 +136,7 @@ agentctl replay run snap-123 --mode debug --breakpoint 5 --breakpoint 10
 Verifies snapshot integrity without execution.
 
 ```bash
-agentctl replay validate snap-123
+unagnt replay validate snap-123
 ```
 
 **Use for:**
@@ -150,13 +150,13 @@ agentctl replay validate snap-123
 
 ```bash
 # List all snapshots
-agentctl replay list
+unagnt replay list
 
 # List snapshots for a specific run
-agentctl replay list --run run-123
+unagnt replay list --run run-123
 
 # Limit results
-agentctl replay list --limit 10
+unagnt replay list --limit 10
 ```
 
 Output:
@@ -170,16 +170,16 @@ snap-002     run-124   agent-2    8            15          completed  250KB
 
 ```bash
 # Exact replay
-agentctl replay run snap-123 --mode exact
+unagnt replay run snap-123 --mode exact
 
 # Partial replay (sequences 5-10)
-agentctl replay run snap-123 --mode exact --start 5 --stop 10
+unagnt replay run snap-123 --mode exact --start 5 --stop 10
 
 # With breakpoints
-agentctl replay run snap-123 --mode debug --breakpoint 5 --breakpoint 10
+unagnt replay run snap-123 --mode debug --breakpoint 5 --breakpoint 10
 
 # Execute side effects
-agentctl replay run snap-123 --mode exact --verify-side-effects
+unagnt replay run snap-123 --mode exact --verify-side-effects
 ```
 
 Output:
@@ -207,7 +207,7 @@ Speedup Factor: 42.28x
 ### Debug Replay
 
 ```bash
-agentctl replay debug snap-123
+unagnt replay debug snap-123
 ```
 
 Interactive commands:
@@ -219,7 +219,7 @@ Interactive commands:
 ### Validate Snapshot
 
 ```bash
-agentctl replay validate snap-123
+unagnt replay validate snap-123
 ```
 
 Output:
@@ -237,7 +237,7 @@ Snapshot is valid!
 ### Compare Snapshots
 
 ```bash
-agentctl replay diff snap-123 snap-124
+unagnt replay diff snap-123 snap-124
 ```
 
 Output:
@@ -349,10 +349,10 @@ Ensure agent behavior remains consistent across code changes:
 
 ```bash
 # Record baseline execution
-agentctl run my-agent --goal "process data" --record
+unagnt run my-agent --goal "process data" --record
 
 # After code changes, replay
-agentctl replay run snap-baseline --mode live --verify-outputs
+unagnt replay run snap-baseline --mode live --verify-outputs
 
 # Check for divergences
 ```
@@ -363,13 +363,13 @@ Investigate failed runs by replaying with breakpoints:
 
 ```bash
 # List recent runs
-agentctl logs list --state failed
+unagnt logs list --state failed
 
 # Get snapshot for failed run
-agentctl replay list --run run-failed-123
+unagnt replay list --run run-failed-123
 
 # Debug replay with breakpoints
-agentctl replay debug snap-xyz --breakpoint 5 --breakpoint 12
+unagnt replay debug snap-xyz --breakpoint 5 --breakpoint 12
 ```
 
 ### 3. Performance Testing
@@ -378,7 +378,7 @@ Compare execution times across versions:
 
 ```bash
 # Replay with exact mode (fast)
-agentctl replay run snap-123 --mode exact
+unagnt replay run snap-123 --mode exact
 
 # Check speedup factor in metrics
 ```
@@ -389,10 +389,10 @@ Validate historical executions:
 
 ```bash
 # Validate snapshot integrity
-agentctl replay validate snap-audit-2026-02
+unagnt replay validate snap-audit-2026-02
 
 # Replay with verification
-agentctl replay run snap-audit-2026-02 --mode validation
+unagnt replay run snap-audit-2026-02 --mode validation
 ```
 
 ### 5. Training & Documentation
@@ -401,7 +401,7 @@ Replay successful runs for training:
 
 ```bash
 # Debug mode for step-by-step walkthrough
-agentctl replay debug snap-success-example
+unagnt replay debug snap-success-example
 ```
 
 ## Best Practices
@@ -432,27 +432,27 @@ agentctl replay debug snap-success-example
 
 1. **Start with Validation**: Always validate before replaying
    ```bash
-   agentctl replay validate snap-123
-   agentctl replay run snap-123
+   unagnt replay validate snap-123
+   unagnt replay run snap-123
    ```
 
 2. **Use Exact Mode for Speed**: For quick checks
    ```bash
-   agentctl replay run snap-123 --mode exact
+   unagnt replay run snap-123 --mode exact
    ```
 
 3. **Use Live Mode for Testing**: To catch API changes
    ```bash
-   agentctl replay run snap-123 --mode live
+   unagnt replay run snap-123 --mode live
    ```
 
 4. **Don't Execute Side Effects in Production**: Unless explicitly intended
    ```bash
    # Safe - no side effects
-   agentctl replay run snap-123 --mode exact
+   unagnt replay run snap-123 --mode exact
    
    # Dangerous - executes writes, API calls, etc.
-   agentctl replay run snap-123 --verify-side-effects
+   unagnt replay run snap-123 --verify-side-effects
    ```
 
 ### Storage
@@ -460,7 +460,7 @@ agentctl replay debug snap-success-example
 1. **Regular Cleanup**: Archive old snapshots
    ```bash
    # Archive snapshots older than 30 days
-   agentctl replay list --older-than 30d | xargs agentctl replay archive
+   unagnt replay list --older-than 30d | xargs unagnt replay archive
    ```
 
 2. **Retention Policy**: Set automatic cleanup rules
@@ -475,17 +475,17 @@ agentctl replay debug snap-success-example
 
 1. **Use Breakpoints**: Target specific sequences
    ```bash
-   agentctl replay debug snap-123 --breakpoint 10 --breakpoint 15
+   unagnt replay debug snap-123 --breakpoint 10 --breakpoint 15
    ```
 
 2. **Partial Replay**: Test specific sections
    ```bash
-   agentctl replay run snap-123 --start 5 --stop 10
+   unagnt replay run snap-123 --start 5 --stop 10
    ```
 
 3. **Compare Snapshots**: Find differences
    ```bash
-   agentctl replay diff snap-before snap-after
+   unagnt replay diff snap-before snap-after
    ```
 
 ## Divergence Analysis
@@ -548,37 +548,37 @@ Snapshots are stored as JSON with the following structure:
 
 ```bash
 # List available snapshots
-agentctl replay list
+unagnt replay list
 
 # Check run ID mapping
-agentctl logs list | grep run-123
+unagnt logs list | grep run-123
 ```
 
 ### Replay Divergence
 
 ```bash
 # Validate snapshot first
-agentctl replay validate snap-123
+unagnt replay validate snap-123
 
 # Compare with live execution
-agentctl replay run snap-123 --mode live
+unagnt replay run snap-123 --mode live
 ```
 
 ### Checksum Mismatch
 
 ```bash
 # Re-validate
-agentctl replay validate snap-123
+unagnt replay validate snap-123
 
 # If corrupted, re-record
-agentctl run my-agent --record
+unagnt run my-agent --record
 ```
 
 ### Large Snapshots
 
 ```bash
 # Check size
-agentctl replay list
+unagnt replay list
 
 # Enable compression for future runs
 # Add to agent config:
@@ -635,7 +635,7 @@ Replay integrates with the policy engine for compliance:
 
 ```bash
 # Replay with policy validation
-agentctl replay run snap-123 --mode validation --check-policy
+unagnt replay run snap-123 --mode validation --check-policy
 ```
 
 Policy decisions are recorded in each tool execution:
@@ -697,40 +697,40 @@ See `migrations/006_deterministic_replay.sql` for full schema.
 
 ```bash
 # Run agent with recording
-agentctl run my-agent --goal "analyze logs" --record
+unagnt run my-agent --goal "analyze logs" --record
 
 # List snapshots
-agentctl replay list
+unagnt replay list
 
 # Replay exactly
-agentctl replay run snap-abc123 --mode exact
+unagnt replay run snap-abc123 --mode exact
 ```
 
 ### Example 2: Debug Failed Run
 
 ```bash
 # Find failed run
-agentctl logs list --state failed
+unagnt logs list --state failed
 
 # Get snapshot
-agentctl replay list --run run-failed-xyz
+unagnt replay list --run run-failed-xyz
 
 # Debug with breakpoints
-agentctl replay debug snap-failed --breakpoint 8
+unagnt replay debug snap-failed --breakpoint 8
 ```
 
 ### Example 3: Regression Testing
 
 ```bash
 # Record baseline
-agentctl run my-agent --goal "process data" --record
+unagnt run my-agent --goal "process data" --record
 # Output: Snapshot saved as snap-baseline
 
 # Make code changes
 # ...
 
 # Test for regressions
-agentctl replay run snap-baseline --mode live
+unagnt replay run snap-baseline --mode live
 
 # Check divergences
 # If divergences found, investigate
@@ -740,13 +740,13 @@ agentctl replay run snap-baseline --mode live
 
 ```bash
 # Replay old snapshot
-agentctl replay run snap-old --mode exact
+unagnt replay run snap-old --mode exact
 
 # Record new run
-agentctl run my-agent --goal "same task" --record
+unagnt run my-agent --goal "same task" --record
 
 # Compare
-agentctl replay diff snap-old snap-new
+unagnt replay diff snap-old snap-new
 ```
 
 ## Security Considerations
@@ -764,7 +764,7 @@ agentctl replay diff snap-old snap-new
 3. **Side Effects**: Never execute in production
    ```bash
    # Don't do this in production!
-   agentctl replay run snap-123 --verify-side-effects
+   unagnt replay run snap-123 --verify-side-effects
    ```
 
 4. **Secrets**: Snapshots may contain API keys

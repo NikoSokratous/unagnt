@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/agentruntime/agentruntime/internal/config"
-	"github.com/agentruntime/agentruntime/pkg/llm"
-	"github.com/agentruntime/agentruntime/pkg/llm/local"
-	"github.com/agentruntime/agentruntime/pkg/llm/openai"
-	"github.com/agentruntime/agentruntime/pkg/memory"
-	"github.com/agentruntime/agentruntime/pkg/policy"
+	"github.com/NikoSokratous/unagnt/internal/config"
+	"github.com/NikoSokratous/unagnt/pkg/llm"
+	"github.com/NikoSokratous/unagnt/pkg/llm/local"
+	"github.com/NikoSokratous/unagnt/pkg/llm/openai"
+	"github.com/NikoSokratous/unagnt/pkg/memory"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 )
 
 // NewContextEngineFromConfig creates a fully configured context engine.

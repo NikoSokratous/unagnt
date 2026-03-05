@@ -1,6 +1,6 @@
 # Compliance Packs (v2.0)
 
-Pre-built policy bundles and audit export for common compliance frameworks. Use with AgentRuntime's policy engine and audit log export API.
+Pre-built policy bundles and audit export for common compliance frameworks. Use with Unagnt's policy engine and audit log export API.
 
 ## Packs
 
@@ -26,7 +26,7 @@ Requires the server to be started with audit logging enabled (policy audit DB).
 
 ## Quick Start
 
-1. Apply a bundle: `agentctl policy apply configs/compliance/soc2/policy.yaml --activate`
+1. Apply a bundle: `unagnt policy apply configs/compliance/soc2/policy.yaml --activate`
 2. Run agents; policy decisions are logged.
 3. Export for SIEM: `curl "http://localhost:8080/v1/compliance/audit/export?format=cef&range=7d" -o audit.cef`
 

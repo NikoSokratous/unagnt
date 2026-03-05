@@ -2,11 +2,11 @@
 
 ## Authentication
 
-To use the AgentRuntime API, you need to authenticate with an API key.
+To use the Unagnt API, you need to authenticate with an API key.
 
 ### Getting an API Key
 
-1. Sign up for an account at https://agentruntime.io
+1. Sign up for an account at https://Unagnt.io
 2. Navigate to Settings > API Keys
 3. Click "Generate New API Key"
 4. Copy the key and store it securely
@@ -16,13 +16,13 @@ To use the AgentRuntime API, you need to authenticate with an API key.
 Set the API key as an environment variable:
 
 ```bash
-export AGENTRUNTIME_API_KEY="ar_..."
+export Unagnt_API_KEY="ar_..."
 ```
 
 Or pass it directly in your code:
 
 ```go
-client := agentruntime.NewClient(agentruntime.Config{
+client := Unagnt.NewClient(Unagnt.Config{
     APIKey: "ar_...",
 })
 ```
@@ -32,8 +32,8 @@ client := agentruntime.NewClient(agentruntime.Config{
 ### Create an Agent
 
 ```bash
-curl -X POST https://api.agentruntime.io/v1/agents \
-  -H "Authorization: Bearer $AGENTRUNTIME_API_KEY" \
+curl -X POST https://api.Unagnt.io/v1/agents \
+  -H "Authorization: Bearer $Unagnt_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "my_agent",
@@ -45,8 +45,8 @@ curl -X POST https://api.agentruntime.io/v1/agents \
 ### Run an Agent
 
 ```bash
-curl -X POST https://api.agentruntime.io/v1/agents/my_agent/run \
-  -H "Authorization: Bearer $AGENTRUNTIME_API_KEY" \
+curl -X POST https://api.Unagnt.io/v1/agents/my_agent/run \
+  -H "Authorization: Bearer $Unagnt_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "goal": "Calculate the sum of 42 and 17"
@@ -56,8 +56,8 @@ curl -X POST https://api.agentruntime.io/v1/agents/my_agent/run \
 ### Check Run Status
 
 ```bash
-curl https://api.agentruntime.io/v1/runs/run_123 \
-  -H "Authorization: Bearer $AGENTRUNTIME_API_KEY"
+curl https://api.Unagnt.io/v1/runs/run_123 \
+  -H "Authorization: Bearer $Unagnt_API_KEY"
 ```
 
 ## Rate Limits
@@ -89,20 +89,20 @@ The API uses standard HTTP status codes:
 
 We provide official SDKs for:
 
-- Go: `go get github.com/agentruntime/agentruntime-go`
-- Python: `pip install agentruntime`
-- JavaScript: `npm install @agentruntime/client`
+- Go: `go get github.com/Unagnt/Unagnt-go`
+- Python: `pip install Unagnt`
+- JavaScript: `npm install @Unagnt/client`
 
 Example in Go:
 
 ```go
-import "github.com/agentruntime/agentruntime-go"
+import "github.com/Unagnt/Unagnt-go"
 
-client := agentruntime.NewClient(agentruntime.Config{
-    APIKey: os.Getenv("AGENTRUNTIME_API_KEY"),
+client := Unagnt.NewClient(Unagnt.Config{
+    APIKey: os.Getenv("Unagnt_API_KEY"),
 })
 
-agent, err := client.CreateAgent(ctx, &agentruntime.AgentConfig{
+agent, err := client.CreateAgent(ctx, &Unagnt.AgentConfig{
     Name: "support_agent",
     Model: "gpt-4",
 })
@@ -111,6 +111,6 @@ agent, err := client.CreateAgent(ctx, &agentruntime.AgentConfig{
 ## Support
 
 For API questions:
-- Email: api-support@agentruntime.io
-- Discord: https://discord.gg/agentruntime
-- Documentation: https://docs.agentruntime.io
+- Email: api-support@Unagnt.io
+- Discord: https://discord.gg/Unagnt
+- Documentation: https://docs.Unagnt.io

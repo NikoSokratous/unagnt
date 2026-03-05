@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/agentruntime/agentruntime/pkg/observe"
+	"github.com/NikoSokratous/unagnt/pkg/observe"
 )
 
 // handleStream streams events for a run using Server-Sent Events (SSE).

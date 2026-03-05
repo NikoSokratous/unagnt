@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	agentruntimev1 "github.com/agentruntime/agentruntime/k8s/operator/api/v1"
+	agentruntimev1 "github.com/NikoSokratous/unagnt/k8s/operator/api/v1"
 )
 
 // PolicyReconciler reconciles a Policy object

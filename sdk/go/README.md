@@ -5,7 +5,7 @@ Go client library for the Agent Runtime API.
 ## Installation
 
 ```bash
-go get github.com/agentruntime/agentruntime/sdk/go
+go get github.com/NikoSokratous/unagnt/sdk/go
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ import (
     "log"
     "time"
 
-    "github.com/agentruntime/agentruntime/sdk/go/client"
+    "github.com/NikoSokratous/unagnt/sdk/go/client"
 )
 
 func main() {
