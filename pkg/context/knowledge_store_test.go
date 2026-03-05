@@ -80,9 +80,10 @@ func TestKnowledgeStoreChunking(t *testing.T) {
 	}
 
 	// Test large document (should be multiple chunks)
+	// Use \n\n so chunkDocument splits at paragraph boundaries (ChunkSize=500 tokens ≈ 2000 chars)
 	largeContent := ""
-	for i := 0; i < 1000; i++ {
-		largeContent += "This is a paragraph with some content. "
+	for i := 0; i < 100; i++ {
+		largeContent += "This is a paragraph with some content.\n\n"
 	}
 
 	largeDoc := &Document{
