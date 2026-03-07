@@ -6,9 +6,9 @@ The Kubernetes operator code is present and uses generated DeepCopy and CRD mani
 
 ## Required Steps
 
-1. **Install controller-gen** (use v0.14.0 for deterministic output):
+1. **Install controller-gen** (use v0.20.0 for Go 1.25 compatibility):
    ```bash
-   go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
+   go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.20.0
    ```
 
 2. **Generate DeepCopy methods**:

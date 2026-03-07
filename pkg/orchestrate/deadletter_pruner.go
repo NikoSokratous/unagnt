@@ -14,10 +14,10 @@ import (
 
 // DeadLetterRetentionConfig configures retention, pruning, and optional archival.
 type DeadLetterRetentionConfig struct {
-	RetentionHours    int    // hours to keep before prune (default 168 = 7 days)
-	ArchiveBeforePrune bool  // if true, archive to dir before prune
-	ArchiveDir        string // directory for archival (required if ArchiveBeforePrune)
-	PruneInterval     time.Duration // how often to run prune (default 1h)
+	RetentionHours     int           // hours to keep before prune (default 168 = 7 days)
+	ArchiveBeforePrune bool          // if true, archive to dir before prune
+	ArchiveDir         string        // directory for archival (required if ArchiveBeforePrune)
+	PruneInterval      time.Duration // how often to run prune (default 1h)
 }
 
 // DeadLetterPruner runs background pruning (and optional archival) of dead letters.

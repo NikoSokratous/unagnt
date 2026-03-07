@@ -206,7 +206,7 @@ jobs:
         go-version: '1.25'
 
     - name: Install controller-gen
-      run: go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
+      run: go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.20.0
 
     - name: Generate operator code
       run: make generate-operator
