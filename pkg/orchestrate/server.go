@@ -60,11 +60,11 @@ func NewServer(addr string, st *store.SQLite, apiKeys []string) *Server {
 // NewServerWithConfig creates an API server with full configuration.
 func NewServerWithConfig(config ServerConfig) *Server {
 	s := &Server{
-		addr:     config.Addr,
-		store:    config.Store,
-		runs:     make(map[string]context.CancelFunc),
-		apiKeys:  config.APIKeys,
-		eventHub: observe.NewEventHub(100),
+		addr:       config.Addr,
+		store:      config.Store,
+		runs:       make(map[string]context.CancelFunc),
+		apiKeys:    config.APIKeys,
+		eventHub:   observe.NewEventHub(100),
 		triggerBus: NewEventTriggerBus(256),
 	}
 
@@ -213,13 +213,13 @@ func (s *Server) handleCreateRun(w http.ResponseWriter, r *http.Request) {
 
 	if s.runner != nil {
 		if err := s.runner.Submit(RunRequest{
-			RunID:     runID,
-			AgentName: req.AgentName,
-			Goal:      req.Goal,
-			Source:    "api",
-			MaxRetries: req.MaxRetries,
+			RunID:        runID,
+			AgentName:    req.AgentName,
+			Goal:         req.Goal,
+			Source:       "api",
+			MaxRetries:   req.MaxRetries,
 			RetryBackoff: time.Duration(req.RetryBackoffMs) * time.Millisecond,
-			Timeout: time.Duration(req.TimeoutMs) * time.Millisecond,
+			Timeout:      time.Duration(req.TimeoutMs) * time.Millisecond,
 		}); err != nil {
 			run.State = "failed"
 			run.UpdatedAt = time.Now()
