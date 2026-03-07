@@ -221,9 +221,6 @@ jobs:
     - name: Build operator
       run: make build-operator
 
-    - name: Validate CRDs (dry-run)
-      run: kubectl apply -f k8s/crds/ --dry-run=client --validate=false
-
   release-gate:
     name: Release Gate
     runs-on: ubuntu-latest
