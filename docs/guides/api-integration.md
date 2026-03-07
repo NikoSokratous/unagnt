@@ -389,7 +389,21 @@ run_id = client.create_run("demo-agent", "test goal")
 
 See: [sdk/python/README.md](../../sdk/python/README.md)
 
-### JavaScript/TypeScript (Coming Soon)
+### TypeScript/Node
+
+```typescript
+import { AgentRuntime } from '@unagnt/client';
+
+const client = new AgentRuntime({
+  baseUrl: 'http://localhost:8080',
+  apiKey: 'your-api-key',
+});
+
+const runId = await client.createRun('demo-agent', 'test goal');
+const run = await client.waitForRun(runId);
+```
+
+See: [sdk/typescript/README.md](../../sdk/typescript/README.md)
 
 ## Examples
 

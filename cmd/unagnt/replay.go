@@ -5,9 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/NikoSokratous/unagnt/pkg/replay"
+	"github.com/chzyer/readline"
 	"github.com/spf13/cobra"
 )
 
@@ -161,22 +165,116 @@ func newReplayListCmd() *cobra.Command {
 }
 
 func newReplayDebugCmd() *cobra.Command {
-	return &cobra.Command{
+	var snapshotFile string
+
+	cmd := &cobra.Command{
 		Use:   "debug <snapshot-id>",
-		Short: "Debug replay with step-through",
-		Args:  cobra.ExactArgs(1),
+		Short: "Debug replay with step-through and time-travel",
+		Long: `Interactive time-travel debugging. Load a snapshot and step forward/back.
+Commands: (s)tep forward, (b)ack, (g)oto <seq>, (p)rint state, (q)uit.
+Use --file to load snapshot from JSON file instead of ID.`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			snapshotID := args[0]
+			snapshot, err := loadSnapshotForDebug(snapshotID, snapshotFile)
+			if err != nil {
+				return err
+			}
 
-			fmt.Printf("Starting debug replay for %s...\n", snapshotID)
-			fmt.Println("Commands: (c)ontinue, (s)tep, (i)nspect, (q)uit")
+			cursor := replay.NewReplayCursor(snapshot)
+			fmt.Printf("Time-travel debug: %s (%d actions)\n", snapshotID, len(snapshot.ToolCalls))
+			fmt.Println("Commands: (s)tep forward, (b)ack, (g)oto <seq>, (p)rint, (q)uit")
 
-			// In production, this would start an interactive debugger
-			fmt.Println("Debug mode not fully implemented in this demo")
+			rl, err := readline.New("debug> ")
+			if err != nil {
+				return err
+			}
+			defer rl.Close()
 
+			for {
+				line, err := rl.Readline()
+				if err != nil {
+					break
+				}
+				line = strings.TrimSpace(line)
+				parts := strings.Fields(line)
+				if len(parts) == 0 {
+					continue
+				}
+				switch parts[0] {
+				case "s", "step":
+					if cursor.StepForward() {
+						st := cursor.GetStateAt(cursor.Position())
+						if st.CurrentAction != nil {
+							fmt.Printf("  [%d] %s\n", st.Position, st.CurrentAction.ToolName)
+						}
+					} else {
+						fmt.Println("  (at end)")
+					}
+				case "b", "back":
+					if cursor.StepBack() {
+						fmt.Printf("  position %d\n", cursor.Position())
+					} else {
+						fmt.Println("  (at start)")
+					}
+				case "g", "goto":
+					if len(parts) < 2 {
+						fmt.Println("  usage: goto <seq>")
+						continue
+					}
+					seq, _ := strconv.Atoi(parts[1])
+					cursor.SeekToSequence(seq)
+					fmt.Printf("  seeked to %d\n", cursor.Position())
+				case "p", "print":
+					st := cursor.GetStateAt(cursor.Position())
+					fmt.Printf("  position=%d can_forward=%v can_back=%v\n",
+						st.Position, st.CanStepForward, st.CanStepBack)
+					if st.CurrentAction != nil {
+						fmt.Printf("  current: %s in=%s out=%s\n",
+							st.CurrentAction.ToolName,
+							string(st.CurrentAction.Input),
+							string(st.CurrentAction.Output))
+					}
+				case "q", "quit", "exit":
+					return nil
+				default:
+					fmt.Println("  unknown: use s, b, g, p, q")
+				}
+			}
 			return nil
 		},
 	}
+
+	cmd.Flags().StringVar(&snapshotFile, "file", "", "Load snapshot from JSON file")
+	return cmd
+}
+
+func loadSnapshotForDebug(snapshotID, filePath string) (*replay.RunSnapshot, error) {
+	if filePath != "" {
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			return nil, fmt.Errorf("read snapshot file: %w", err)
+		}
+		var snap replay.RunSnapshot
+		if err := json.Unmarshal(data, &snap); err != nil {
+			return nil, fmt.Errorf("parse snapshot: %w", err)
+		}
+		return &snap, nil
+	}
+	// Fallback: create minimal demo snapshot
+	return &replay.RunSnapshot{
+		ID:        snapshotID,
+		RunID:     "run-" + snapshotID,
+		AgentName: "demo",
+		Goal:      "demo goal",
+		ToolCalls: []replay.ToolExecution{
+			{Sequence: 1, ToolName: "echo", Input: json.RawMessage(`{"msg":"a"}`), Output: json.RawMessage(`{"echoed":"a"}`)},
+			{Sequence: 2, ToolName: "calc", Input: json.RawMessage(`{"op":"add","a":1,"b":2}`), Output: json.RawMessage(`{"result":3}`)},
+		},
+		StartTime: time.Now().Add(-time.Minute),
+		EndTime:   time.Now(),
+		FinalState: "completed",
+	}, nil
 }
 
 func newReplayValidateCmd() *cobra.Command {

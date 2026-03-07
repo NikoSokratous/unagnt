@@ -1,0 +1,13 @@
+{
+  "Workflow YAML": {
+    "prefix": "unagnt-workflow",
+    "body": [
+      "name: ${1:My Workflow}",
+      "agents:",
+      "  - ${2:agent-name}: ${3:description}",
+      "workflow:",
+      "  - ${4:step1} → ${5:step2}"
+    ],
+    "description": "Unagnt workflow YAML"
+  }
+}

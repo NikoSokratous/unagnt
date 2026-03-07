@@ -1,0 +1,98 @@
+{
+  "name": "unagnt",
+  "displayName": "Unagnt",
+  "description": "Unagnt Agent Runtime - workflow authoring, local run, and time-travel debugging",
+  "version": "0.1.0",
+  "publisher": "unagnt",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:unagntExplorer",
+    "onCommand:unagnt.validateWorkflow",
+    "onCommand:unagnt.runAgent"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Unagnt",
+      "properties": {
+        "unagnt.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "Agent Runtime server URL"
+        },
+        "unagnt.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for authenticated requests"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "unagnt",
+          "title": "Unagnt",
+          "icon": "$(play)"
+        }
+      ]
+    },
+    "views": {
+      "unagnt": [
+        {
+          "id": "unagntExplorer",
+          "name": "Runs & Snapshots"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "unagnt.validateWorkflow",
+        "title": "Unagnt: Validate Workflow"
+      },
+      {
+        "command": "unagnt.runAgent",
+        "title": "Unagnt: Run Agent"
+      },
+      {
+        "command": "unagnt.refresh",
+        "title": "Unagnt: Refresh"
+      }
+    ],
+    "languages": [
+      {
+        "id": "yaml",
+        "extensions": [".yaml", ".yml"]
+      }
+    ],
+    "snippets": [
+      {
+        "language": "yaml",
+        "path": "./snippets/workflow.json"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "unagnt-replay",
+        "label": "Unagnt Replay Debug",
+        "program": "${workspaceFolder}"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {}
+}

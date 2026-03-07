@@ -12,13 +12,14 @@ import (
 	"time"
 
 	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/abtest"
 	"github.com/NikoSokratous/unagnt/pkg/api"
 	"github.com/NikoSokratous/unagnt/pkg/cost"
 	"github.com/NikoSokratous/unagnt/pkg/monitoring"
 	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
 	"github.com/NikoSokratous/unagnt/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/replay"
 	"github.com/NikoSokratous/unagnt/pkg/risk"
-	"github.com/NikoSokratous/unagnt/pkg/abtest"
 	"github.com/gorilla/mux"
 	_ "modernc.org/sqlite"
 )
@@ -516,5 +517,145 @@ func TestHealthChecks(t *testing.T) {
 	// This validates server construction
 	if st == nil {
 		t.Error("Store not initialized")
+	}
+}
+
+// TestReplayTimeTravel tests ReplayCursor step forward/back and seek.
+func TestReplayTimeTravel(t *testing.T) {
+	snap := &replay.RunSnapshot{
+		ID:        "tt-1",
+		RunID:     "run-tt",
+		AgentName: "agent",
+		Goal:      "test",
+		ToolCalls: []replay.ToolExecution{
+			{Sequence: 1, ToolName: "echo"},
+			{Sequence: 2, ToolName: "calc"},
+		},
+	}
+	cursor := replay.NewReplayCursor(snap)
+	if cursor.Position() != 0 {
+		t.Errorf("initial position want 0, got %d", cursor.Position())
+	}
+	cursor.StepForward()
+	if cursor.Position() != 1 {
+		t.Errorf("after step want 1, got %d", cursor.Position())
+	}
+	st := cursor.GetStateAt(cursor.Position())
+	if st.CurrentAction == nil || st.CurrentAction.ToolName != "echo" {
+		t.Errorf("current action want echo, got %v", st.CurrentAction)
+	}
+	cursor.StepForward()
+	cursor.StepBack()
+	if cursor.Position() != 1 {
+		t.Errorf("after back want 1, got %d", cursor.Position())
+	}
+	cursor.SeekToSequence(2)
+	if cursor.Position() != 2 {
+		t.Errorf("after seek want 2, got %d", cursor.Position())
+	}
+}
+
+// TestReplayAPI tests the replay API endpoints.
+func TestReplayAPI(t *testing.T) {
+	store := api.NewMemoryReplayStore()
+	snap := &replay.RunSnapshot{
+		ID:        "snap-api",
+		RunID:     "run-1",
+		AgentName: "a",
+		Goal:      "g",
+		ToolCalls: []replay.ToolExecution{{Sequence: 1, ToolName: "echo"}},
+	}
+	store.Save(snap)
+
+	replayAPI := api.NewReplayAPI(store)
+	router := mux.NewRouter()
+	replayAPI.RegisterRoutes(router)
+
+	// List
+	req := httptest.NewRequest("GET", "/v1/replay/snapshots", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("list: got %d", w.Code)
+	}
+
+	// Get
+	req = httptest.NewRequest("GET", "/v1/replay/snapshots/snap-api", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("get: got %d", w.Code)
+	}
+
+	// Seek
+	req = httptest.NewRequest("POST", "/v1/replay/snapshots/snap-api/seek",
+		strings.NewReader(`{"sequence":1}`))
+	req.Header.Set("Content-Type", "application/json")
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("seek: got %d", w.Code)
+	}
+}
+
+// TestSyncAPI tests sync push/pull endpoints.
+func TestSyncAPI(t *testing.T) {
+	tmpDB := t.TempDir() + "/sync-server.db"
+	st, err := store.NewSQLite(tmpDB)
+	if err != nil {
+		t.Fatalf("create store: %v", err)
+	}
+	defer st.Close()
+
+	// Create a run
+	run := &store.RunMeta{
+		RunID:     "sync-run-1",
+		AgentName: "a",
+		Goal:      "g",
+		State:     "completed",
+		StepCount: 1,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	if err := st.SaveRun(context.Background(), run); err != nil {
+		t.Fatal(err)
+	}
+
+	syncAPI := api.NewSyncAPI(st)
+	router := mux.NewRouter()
+	syncAPI.RegisterRoutes(router)
+
+	// Pull (server returns its runs)
+	req := httptest.NewRequest("POST", "/v1/sync/pull", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("pull: got %d", w.Code)
+	}
+	var bundle struct {
+		Runs []struct {
+			RunID string `json:"run_id"`
+		} `json:"runs"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&bundle); err != nil {
+		t.Fatal(err)
+	}
+	if len(bundle.Runs) < 1 {
+		t.Errorf("expected at least 1 run, got %d", len(bundle.Runs))
+	}
+
+	// Push (client sends bundle)
+	pushBody := `{"runs":[{"run_id":"pushed-1","agent_name":"b","goal":"h","state":"pending","step_count":0,"created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-01T00:00:00Z"}],"timestamp":"2024-01-01T00:00:00Z"}`
+	req = httptest.NewRequest("POST", "/v1/sync/push", strings.NewReader(pushBody))
+	req.Header.Set("Content-Type", "application/json")
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK && w.Code != http.StatusAccepted {
+		t.Errorf("push: got %d", w.Code)
+	}
+
+	r, _ := st.GetRun(context.Background(), "pushed-1")
+	if r == nil {
+		t.Error("run pushed-1 not found after push")
 	}
 }

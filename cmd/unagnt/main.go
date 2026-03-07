@@ -31,6 +31,7 @@ func main() {
 	root.AddCommand(newContextCmd()) // Context assembly commands
 	root.AddCommand(newCostsCmd())
 	root.AddCommand(newApprovalsCmd())
+	root.AddCommand(newSyncCmd())
 
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

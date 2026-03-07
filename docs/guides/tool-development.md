@@ -238,6 +238,8 @@ Permissions are checked against policies before execution.
 
 ## Testing
 
+See [Tool Testing Guide](tool-testing.md) for the testing harness, mocks, and assertion helpers.
+
 ### Unit Test Template
 
 ```go

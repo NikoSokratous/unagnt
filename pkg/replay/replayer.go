@@ -22,6 +22,17 @@ func NewReplayer(snapshot *RunSnapshot) *Replayer {
 	}
 }
 
+// Cursor returns a ReplayCursor for time-travel debugging.
+func (r *Replayer) Cursor() *ReplayCursor {
+	return NewReplayCursor(r.snapshot)
+}
+
+// GetStateAt returns the execution state at the given 1-based sequence.
+func (r *Replayer) GetStateAt(seq int) *StateAt {
+	c := NewReplayCursor(r.snapshot)
+	return c.GetStateAt(seq)
+}
+
 // Replay replays an execution with the given options.
 func (r *Replayer) Replay(ctx context.Context, options ReplayOptions) (*ReplayResult, error) {
 	result := &ReplayResult{

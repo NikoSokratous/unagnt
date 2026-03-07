@@ -477,12 +477,12 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 - Compliance report generation (`/v1/compliance/reports/*`, JSON/CSV/CEF export)
 - Agent A/B testing framework (`/v1/ab-tests`, selector, results API)
 
-### 📋 v5.0: Developer Experience (Backlog)
-- VS Code extension (local dev, workflow authoring, debugging)
-- Time-travel debugging for deterministic runs
-- Local-first development with cloud sync
-- TypeScript/Node SDK
-- Tool authoring test harness and mocks
+### v5.0: Developer Experience — Implemented
+- TypeScript/Node SDK (`sdk/typescript`, parity with Go/Python)
+- Tool authoring test harness and mocks (`pkg/tool/testing`)
+- Time-travel debugging (ReplayCursor, `unagnt replay debug`, API)
+- VS Code extension (workflow authoring, local run, Explorer)
+- Local-first development with cloud sync (`unagnt sync push|pull|status`)
 
 ### 📋 v6.0: Edge & Federated (Backlog)
 - Edge deployment (agents closer to data/sensors)

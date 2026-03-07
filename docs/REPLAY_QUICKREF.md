@@ -62,6 +62,15 @@ unagnt replay diff snap-old snap-new
 --verify-side-effects          # Execute side effects (dangerous!)
 ```
 
+## Time-Travel Debugging
+
+```bash
+unagnt replay debug <snapshot-id>          # Interactive step-through
+unagnt replay debug <snapshot-id> --file snapshot.json   # Load from file
+```
+
+Commands: `(s)tep` forward, `(b)ack`, `(g)oto <seq>`, `(p)rint`, `(q)uit`.
+
 ## Example Workflows
 
 ### Regression Test
