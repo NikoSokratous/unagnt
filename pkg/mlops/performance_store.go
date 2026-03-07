@@ -27,8 +27,8 @@ type DriftResult struct {
 	ModelID      string
 	Provider     string
 	Drifted      bool
-	LatencyDelta float64  // recent p99 vs baseline p99 (ratio)
-	ErrorDelta   float64  // recent error rate - baseline
+	LatencyDelta float64 // recent p99 vs baseline p99 (ratio)
+	ErrorDelta   float64 // recent error rate - baseline
 	Message      string
 }
 

@@ -17,7 +17,7 @@ import (
 type AnalyticsAPI struct {
 	costTracker *cost.CostTracker
 	slaMonitor  *monitoring.SLAMonitor
-	auditLogger *policy.AuditLogger   // optional
+	auditLogger *policy.AuditLogger     // optional
 	perfStore   *mlops.PerformanceStore // optional; enables model-performance and model-drift
 }
 
