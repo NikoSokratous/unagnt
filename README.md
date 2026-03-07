@@ -34,9 +34,9 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 |---------|--------|
 | Single-agent run (unagnt run) | Working |
 | Policy engine | Working |
-| DAG workflow (simulated) | Working |
+| DAG workflow (runtime-backed + checkpoint/resume) | Working |
 | Cost tracking | Partial |
-| Real workflow execution | Planned |
+| Real workflow execution | Working |
 | Visual designer | UI exists |
 | Kubernetes operator | Requires make generate |
 
@@ -177,6 +177,7 @@ cd web && npm install && npm run dev
 - **[API Integration](docs/API_INTEGRATION.md)** - SDK usage and examples
 
 ### For Operators
+- **[Release Notes v3.0](RELEASE_NOTES_V3.0.md)** - v3 runtime hardening and orchestration rollout
 - **[Release Notes v2.0](RELEASE_NOTES_V2.0.md)** - v1.1 through v2.0 changelog
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Kubernetes, Docker, bare metal
 - **[Air-Gapped Deployment](deploy/air-gapped/README.md)** - Offline / disconnected install
@@ -402,7 +403,7 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
-### 🎯 v3.0: Production Runtime & Agentic Orchestration (In Progress)
+### 🎯 v3.0: Production Runtime & Agentic Orchestration (Complete)
 
 **Goal:** Enable real production workloads and differentiate with intelligent orchestration.
 
@@ -475,7 +476,9 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ## ⚠️ Known Limitations
 
-- **Workflow execution**: Orchestration now uses a runtime-backed executor and async runner queue by default. Simulated execution remains available for tests/dev via explicit `SimulatedExecutor` wiring.
+- **Workflow execution model**: Orchestration now uses a runtime-backed executor and async runner queue by default. Simulated execution remains available for tests/dev via explicit `SimulatedExecutor` wiring.
+- **Dead-letter retention**: Dead-letter entries are persisted for diagnostics/replay, but retention and archival policies are operator-managed (no built-in TTL/pruner yet).
+- **Queue capacity**: Runner queue is in-memory and bounded; monitor `agentruntime_run_queue_depth` and `agentruntime_run_queue_rejected_total` and tune worker/queue settings per environment.
 - **Kubernetes operator**: Run `make generate-operator` (or `controller-gen` per [k8s/operator/BUILD_NOTES.md](k8s/operator/BUILD_NOTES.md)) before first build. Generated `zz_generated.deepcopy.go` is committed.
 - **Advanced features**: Plugin artifact download and replay side effects (Replayable `http_call` GET) are implemented. Core features are production-ready.
 
