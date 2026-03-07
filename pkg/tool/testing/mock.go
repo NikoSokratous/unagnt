@@ -43,8 +43,8 @@ func (m *MockTool) SetError(err error) {
 	m.Err = err
 }
 
-func (m *MockTool) Name() string      { return m.NameStr }
-func (m *MockTool) Version() string   { return m.VersionStr }
+func (m *MockTool) Name() string        { return m.NameStr }
+func (m *MockTool) Version() string     { return m.VersionStr }
 func (m *MockTool) Description() string { return m.DescStr }
 
 func (m *MockTool) InputSchema() ([]byte, error) {

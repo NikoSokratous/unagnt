@@ -66,7 +66,6 @@ func (api *ReplayAPI) GetSnapshot(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(snap)
 }
 
-
 // SeekSnapshot handles POST /v1/replay/snapshots/{id}/seek
 func (api *ReplayAPI) SeekSnapshot(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
