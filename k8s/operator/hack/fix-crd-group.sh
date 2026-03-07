@@ -9,11 +9,12 @@ for f in "$BASE"/_agents.yaml "$BASE"/_workflows.yaml "$BASE"/_policies.yaml; do
   sed -i.bak 's/group: ""/group: unagnt.io/' "$f"
   # Fix version name (versions list item: "  - name: """)
   sed -i.bak 's/^  - name: ""$/  - name: v1/' "$f"
-  # Fix metadata.name (agents., workflows., policies.)
+  # Fix metadata.name only when controller-gen outputs short form (e.g. workflows.)
+  # Use $ anchor so we don't double-apply when output is already workflows.unagnt.io
   case "$f" in
-    *_agents.yaml)   sed -i.bak 's/name: agents\./name: agents.unagnt.io/' "$f" ;;
-    *_workflows.yaml) sed -i.bak 's/name: workflows\./name: workflows.unagnt.io/' "$f" ;;
-    *_policies.yaml) sed -i.bak 's/name: policies\./name: policies.unagnt.io/' "$f" ;;
+    *_agents.yaml)   sed -i.bak 's/name: agents\.$/name: agents.unagnt.io/' "$f" ;;
+    *_workflows.yaml) sed -i.bak 's/name: workflows\.$/name: workflows.unagnt.io/' "$f" ;;
+    *_policies.yaml) sed -i.bak 's/name: policies\.$/name: policies.unagnt.io/' "$f" ;;
   esac
   rm -f "${f}.bak"
 done
