@@ -230,7 +230,7 @@ jobs:
     needs: [test, lint, build, test-integration, operator-codegen]
     steps:
     - name: All release gate checks passed
-      run: echo "Release gate: tests, lint, build, integration, operator-codegen passed."
+      run: 'echo "Release gate: tests, lint, build, integration, operator-codegen passed."'
 
   docker:
     name: Docker Build
