@@ -69,8 +69,21 @@ func (s *SQLite) migrate() error {
 			metadata TEXT,
 			FOREIGN KEY (run_id) REFERENCES runs(run_id)
 		);
+		CREATE TABLE IF NOT EXISTS dead_letters (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			run_id TEXT NOT NULL,
+			agent_name TEXT NOT NULL,
+			goal TEXT NOT NULL,
+			source TEXT NOT NULL,
+			error TEXT NOT NULL,
+			payload TEXT,
+			attempt INTEGER NOT NULL,
+			max_retries INTEGER NOT NULL,
+			failed_at TEXT NOT NULL
+		);
 		CREATE INDEX IF NOT EXISTS idx_events_run ON events(run_id);
 		CREATE INDEX IF NOT EXISTS idx_history_run ON history(run_id);
+		CREATE INDEX IF NOT EXISTS idx_dead_letters_failed_at ON dead_letters(failed_at DESC);
 	`)
 	return err
 }
@@ -245,4 +258,63 @@ func (s *SQLite) ListRuns(ctx context.Context, limit int) ([]string, error) {
 // Close closes the database.
 func (s *SQLite) Close() error {
 	return s.db.Close()
+}
+
+// SaveDeadLetter persists a terminal run failure for investigation.
+func (s *SQLite) SaveDeadLetter(ctx context.Context, dl *DeadLetter) error {
+	_, err := s.db.ExecContext(ctx,
+		`INSERT INTO dead_letters (run_id, agent_name, goal, source, error, payload, attempt, max_retries, failed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		dl.RunID, dl.AgentName, dl.Goal, dl.Source, dl.Error, dl.Payload, dl.Attempt, dl.MaxRetries, dl.FailedAt.Format(time.RFC3339),
+	)
+	return err
+}
+
+// ListDeadLetters returns recent terminal failures.
+func (s *SQLite) ListDeadLetters(ctx context.Context, limit int) ([]DeadLetter, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT run_id, agent_name, goal, source, error, payload, attempt, max_retries, failed_at FROM dead_letters ORDER BY failed_at DESC LIMIT ?`,
+		limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := make([]DeadLetter, 0, limit)
+	for rows.Next() {
+		var dl DeadLetter
+		var failedAt string
+		if err := rows.Scan(&dl.RunID, &dl.AgentName, &dl.Goal, &dl.Source, &dl.Error, &dl.Payload, &dl.Attempt, &dl.MaxRetries, &failedAt); err != nil {
+			return nil, err
+		}
+		dl.FailedAt, _ = time.Parse(time.RFC3339, failedAt)
+		out = append(out, dl)
+	}
+	return out, rows.Err()
+}
+
+// GetLatestDeadLetterByRunID returns the latest dead-letter entry for a run.
+func (s *SQLite) GetLatestDeadLetterByRunID(ctx context.Context, runID string) (*DeadLetter, error) {
+	row := s.db.QueryRowContext(ctx,
+		`SELECT run_id, agent_name, goal, source, error, payload, attempt, max_retries, failed_at
+		 FROM dead_letters
+		 WHERE run_id = ?
+		 ORDER BY failed_at DESC
+		 LIMIT 1`,
+		runID,
+	)
+
+	var dl DeadLetter
+	var failedAt string
+	if err := row.Scan(&dl.RunID, &dl.AgentName, &dl.Goal, &dl.Source, &dl.Error, &dl.Payload, &dl.Attempt, &dl.MaxRetries, &failedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	dl.FailedAt, _ = time.Parse(time.RFC3339, failedAt)
+	return &dl, nil
 }

@@ -36,3 +36,16 @@ type RunMeta struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+// DeadLetter captures terminal failures for later inspection/replay.
+type DeadLetter struct {
+	RunID      string    `json:"run_id"`
+	AgentName  string    `json:"agent_name"`
+	Goal       string    `json:"goal"`
+	Source     string    `json:"source"`
+	Error      string    `json:"error"`
+	Payload    string    `json:"payload,omitempty"`
+	Attempt    int       `json:"attempt"`
+	MaxRetries int       `json:"max_retries"`
+	FailedAt   time.Time `json:"failed_at"`
+}

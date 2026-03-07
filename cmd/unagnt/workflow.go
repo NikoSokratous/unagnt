@@ -38,6 +38,7 @@ func newWorkflowCmd() *cobra.Command {
 
 func newWorkflowRunCmd() *cobra.Command {
 	var resumeID string
+	var dbPath string
 
 	cmd := &cobra.Command{
 		Use:   "run <workflow-file>",
@@ -63,8 +64,14 @@ func newWorkflowRunCmd() *cobra.Command {
 				return fmt.Errorf("build DAG: %w", err)
 			}
 
-			// Create executor (without state store for now)
-			executor := workflow.NewExecutor(nil, nil)
+			db, err := openWorkflowDB(dbPath)
+			if err != nil {
+				return fmt.Errorf("open workflow db: %w", err)
+			}
+			defer db.Close()
+			stateStore := workflow.NewStateStore(db)
+			celEval, _ := workflow.NewCELEvaluator()
+			executor := workflow.NewExecutor(stateStore, celEval)
 
 			ctx := context.Background()
 			workflowID := fmt.Sprintf("wf-%d", time.Now().Unix())
@@ -72,8 +79,11 @@ func newWorkflowRunCmd() *cobra.Command {
 			if resumeID != "" {
 				// Resume from checkpoint
 				fmt.Printf("Resuming workflow: %s\n", resumeID)
-				// result, err := executor.Resume(ctx, resumeID, dag)
-				return fmt.Errorf("resume not yet implemented")
+				result, err := executor.Resume(ctx, resumeID, dag)
+				if err != nil {
+					return fmt.Errorf("resume workflow: %w", err)
+				}
+				printWorkflowResult(result)
 			} else {
 				// Execute new workflow
 				fmt.Printf("Starting workflow: %s\n", workflowID)
@@ -91,6 +101,7 @@ func newWorkflowRunCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&resumeID, "resume", "", "Resume workflow from checkpoint ID")
+	cmd.Flags().StringVar(&dbPath, "db", "agent.db", "Database path for workflow state/version store")
 
 	return cmd
 }
@@ -246,6 +257,34 @@ CREATE TABLE IF NOT EXISTS workflow_versions (
 CREATE INDEX IF NOT EXISTS idx_workflow_versions_name ON workflow_versions(workflow_name);
 `
 
+const workflowStateSchema = `
+CREATE TABLE IF NOT EXISTS workflow_states (
+    id TEXT PRIMARY KEY,
+    workflow_name TEXT NOT NULL,
+    status TEXT NOT NULL,
+    current_step TEXT,
+    outputs TEXT,
+    started_at TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_workflow_states_status ON workflow_states(status);
+CREATE INDEX IF NOT EXISTS idx_workflow_states_updated ON workflow_states(updated_at);
+
+CREATE TABLE IF NOT EXISTS workflow_step_states (
+    id TEXT PRIMARY KEY,
+    workflow_id TEXT NOT NULL,
+    step_name TEXT NOT NULL,
+    status TEXT NOT NULL,
+    output TEXT,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    FOREIGN KEY(workflow_id) REFERENCES workflow_states(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_workflow_step_states_workflow ON workflow_step_states(workflow_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_step_states_status ON workflow_step_states(status);
+CREATE INDEX IF NOT EXISTS idx_workflow_step_states_started ON workflow_step_states(started_at);
+`
+
 func openWorkflowDB(dbPath string) (*sql.DB, error) {
 	if dbPath == "" {
 		dbPath = "agent.db"
@@ -259,6 +298,10 @@ func openWorkflowDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 	if _, err := db.ExecContext(context.Background(), workflowVersionsSchema); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if _, err := db.ExecContext(context.Background(), workflowStateSchema); err != nil {
 		db.Close()
 		return nil, err
 	}

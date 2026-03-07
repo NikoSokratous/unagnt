@@ -655,7 +655,74 @@ See [Secrets Management](guides/secrets-management.md).
 
 ### Workflow Execution
 
-The workflow engine uses a pluggable `StepExecutor` interface. The default `SimulatedExecutor` is used for design-time and testing; wire a custom executor via `NewWorkflowEngineWithExecutor` for real agent runs. Webhook-triggered runs are marked completed without execution until runner integration (Phase 2–3).
+The workflow engine uses a pluggable `StepExecutor` interface and now defaults to a runtime-backed executor. A background runner queue executes API/webhook/scheduled/event-triggered runs asynchronously. `SimulatedExecutor` remains available when explicitly selected (design-time/testing). Workflow checkpoints and resume are backed by `workflow_states` and `workflow_step_states`.
+
+### Phase 1 Verification Checklist (v3)
+
+Use this checklist before release or when changing runtime/orchestration internals.
+
+- **Runtime-backed execution default**
+  - Confirm `WorkflowEngine` defaults to `RuntimeStepExecutor` (no simulated default path in production).
+- **Async runner path active**
+  - Submit `POST /v1/runs` and verify run lifecycle transitions (`pending -> running -> completed/failed`) through store and API.
+- **Webhook execution wiring**
+  - Trigger a configured webhook endpoint and verify it queues a `RunRequest`, executes via runner, and emits callback payload with output/error.
+- **Scheduler wiring**
+  - Register a cron job and verify scheduled runs are submitted through runner, not direct simulated execution.
+- **Event trigger wiring**
+  - Publish `POST /v1/triggers/events` and verify accepted events produce queued runs.
+- **Checkpoint + resume correctness**
+  - Execute a workflow with `--db`, confirm checkpoint rows in `workflow_states` and `workflow_step_states`, then resume with `unagnt workflow run <file> --resume <workflow-id> --db <path>`.
+  - Ensure node state rows are workflow-scoped (`workflowID:nodeID`) so workflows with identical node names do not collide.
+- **Regression tests**
+  - Run `go test ./pkg/workflow ./pkg/orchestrate`.
+  - Run full suite with integration-safe env: `OPENAI_API_KEY="" go test ./...`.
+
+### Phase 3 Runtime Hardening Runbook (v3)
+
+Use this checklist for production hardening validation and incident response drills.
+
+- **Retry/timeout controls**
+  - Submit `POST /v1/runs` with `max_retries`, `retry_backoff_ms`, and `timeout_ms`.
+  - Verify expected lifecycle outcomes (`completed`, `failed`, `interrupted`) and retry behavior under transient failures.
+- **Backpressure behavior**
+  - Saturate runner queue and verify rejected submissions return `503` and increment queue rejection metrics.
+  - Confirm queue depth trends using `agentruntime_run_queue_depth`.
+- **Dead-letter capture**
+  - Force terminal failures and verify entries are persisted in dead-letter storage and exposed via `GET /v1/runs/dead-letters`.
+- **Dead-letter replay**
+  - Replay a failed run using `POST /v1/runs/dead-letters/{id}/replay`.
+  - Validate optional overrides (`goal`, `payload`, `max_retries`, `retry_backoff_ms`, `timeout_ms`) are applied.
+- **Ops metrics baseline**
+  - Track and alert on:
+    - `agentruntime_run_retries_total`
+    - `agentruntime_run_dead_letters_total`
+    - `agentruntime_run_queue_depth`
+    - `agentruntime_run_queue_rejected_total`
+    - `agentruntime_run_failures_total{reason,source}`
+
+### Phase 3 Migration Notes (v3)
+
+- **API request updates**
+  - `POST /v1/runs` accepts optional hardening controls:
+    - `max_retries`
+    - `retry_backoff_ms`
+    - `timeout_ms`
+  - Values must be non-negative; invalid values return `400`.
+- **New diagnostics endpoints**
+  - `GET /v1/runs/{id}/events` for persisted run event history.
+  - `GET /v1/runs/dead-letters` with optional `limit` and `source` query filters.
+  - `POST /v1/runs/dead-letters/{id}/replay` to requeue failed runs with optional overrides.
+- **Operational behavior changes**
+  - Runner now supports bounded retries/backoff and per-attempt timeout.
+  - Terminal failures are persisted to dead-letter storage.
+  - Retry backoff is cancellation-aware (cancel during backoff interrupts run quickly).
+- **Metrics additions**
+  - `agentruntime_run_retries_total`
+  - `agentruntime_run_dead_letters_total`
+  - `agentruntime_run_queue_depth`
+  - `agentruntime_run_queue_rejected_total`
+  - `agentruntime_run_failures_total{reason,source}`
 
 ### Kubernetes Operator
 

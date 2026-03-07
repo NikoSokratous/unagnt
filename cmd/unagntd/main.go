@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/NikoSokratous/unagnt/internal/config"
 	"github.com/NikoSokratous/unagnt/internal/store"
 	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
 )
@@ -14,6 +15,7 @@ import (
 func main() {
 	addr := flag.String("addr", ":8080", "Listen address")
 	storePath := flag.String("store", "agent.db", "SQLite store path")
+	webhooksPath := flag.String("webhooks", "", "Path to webhooks yaml config")
 	flag.Parse()
 
 	st, err := store.NewSQLite(*storePath)
@@ -27,7 +29,20 @@ func main() {
 		apiKeys = parseAPIKeys(os.Getenv("AGENTD_API_KEYS"))
 	}
 
-	srv := orchestrate.NewServer(*addr, st, apiKeys)
+	serverCfg := orchestrate.ServerConfig{
+		Addr:    *addr,
+		Store:   st,
+		APIKeys: apiKeys,
+	}
+	if *webhooksPath != "" {
+		webhooks, err := config.LoadWebhooks(*webhooksPath)
+		if err != nil {
+			log.Fatalf("Failed to load webhooks: %v", err)
+		}
+		serverCfg.Webhooks = webhooks.Webhooks
+	}
+
+	srv := orchestrate.NewServerWithConfig(serverCfg)
 	fmt.Printf("unagntd listening on %s (store: %s)\n", *addr, *storePath)
 	if err := srv.Run(); err != nil {
 		log.Fatalf("Server error: %v", err)

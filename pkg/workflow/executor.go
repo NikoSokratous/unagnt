@@ -106,12 +106,16 @@ func (e *Executor) Execute(ctx context.Context, dag *DAG, workflowID string) (*E
 		if e.stateStore != nil {
 			state := &WorkflowState{
 				WorkflowID:  workflowID,
+				WorkflowName: workflowID,
 				Status:      "running",
 				CurrentStep: fmt.Sprintf("level-%d", levelIdx),
 				Outputs:     result.Outputs,
+				StartedAt:   result.StartedAt,
 				UpdatedAt:   time.Now(),
 			}
-			e.stateStore.SaveCheckpoint(ctx, state)
+			if err := e.stateStore.SaveCheckpoint(ctx, state); err != nil {
+				return result, fmt.Errorf("save checkpoint: %w", err)
+			}
 		}
 	}
 
@@ -190,6 +194,18 @@ func (e *Executor) executeLevel(ctx context.Context, dag *DAG, nodeIDs []string,
 			nodeResult.CompletedAt = time.Now()
 			nodeResult.Duration = nodeResult.CompletedAt.Sub(nodeResult.StartedAt)
 			mu.Unlock()
+
+			if e.stateStore != nil {
+				_ = e.stateStore.SaveNodeState(ctx, &NodeState{
+					NodeID:      id,
+					WorkflowID:  result.WorkflowID,
+					StepName:    node.Name,
+					Status:      nodeResult.Status,
+					Output:      nodeResult.Output,
+					StartedAt:   nodeResult.StartedAt,
+					CompletedAt: nodeResult.CompletedAt,
+				})
+			}
 		}(nodeID)
 	}
 

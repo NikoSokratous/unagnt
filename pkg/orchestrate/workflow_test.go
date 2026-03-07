@@ -31,7 +31,7 @@ func TestWorkflowEngineSequential(t *testing.T) {
 	}
 
 	// Create engine
-	engine := NewWorkflowEngine(nil)
+	engine := NewWorkflowEngineWithExecutor(nil, SimulatedExecutor{})
 
 	// Execute
 	ctx := context.Background()
@@ -78,7 +78,7 @@ func TestWorkflowEngineParallel(t *testing.T) {
 		OnError: "continue",
 	}
 
-	engine := NewWorkflowEngine(nil)
+	engine := NewWorkflowEngineWithExecutor(nil, SimulatedExecutor{})
 
 	ctx := context.Background()
 	result, err := engine.Execute(ctx, workflow)

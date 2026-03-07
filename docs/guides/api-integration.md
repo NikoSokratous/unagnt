@@ -69,9 +69,17 @@ Create a new agent run.
 ```json
 {
   "agent_name": "demo-agent",
-  "goal": "Calculate 5 + 5"
+  "goal": "Calculate 5 + 5",
+  "max_retries": 2,
+  "retry_backoff_ms": 500,
+  "timeout_ms": 30000
 }
 ```
+
+Optional fields:
+- `max_retries` (int): number of retries after first attempt.
+- `retry_backoff_ms` (int): base backoff between retries in milliseconds.
+- `timeout_ms` (int): per-attempt timeout in milliseconds.
 
 **Response (200 OK):**
 ```json
@@ -85,7 +93,7 @@ Create a new agent run.
 curl -X POST http://localhost:8080/v1/runs \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer your-key" \
-  -d '{"agent_name":"demo-agent","goal":"Calculate 5+5"}'
+  -d '{"agent_name":"demo-agent","goal":"Calculate 5+5","max_retries":2,"retry_backoff_ms":500,"timeout_ms":30000}'
 ```
 
 ---
@@ -156,6 +164,74 @@ Cancel a running agent.
 curl -X POST \
   -H "Authorization: Bearer your-key" \
   http://localhost:8080/v1/runs/550e8400-e29b-41d4-a716-446655440000/cancel
+```
+
+---
+
+### GET /v1/runs/dead-letters
+
+List recent terminal run failures captured by dead-letter storage.
+
+**Response (200 OK):**
+```json
+{
+  "dead_letters": [
+    {
+      "run_id": "550e8400-e29b-41d4-a716-446655440000",
+      "agent_name": "demo-agent",
+      "goal": "Process incoming ticket",
+      "source": "api",
+      "error": "execution failed",
+      "payload": "{\"ticket_id\":123}",
+      "attempt": 3,
+      "max_retries": 2,
+      "failed_at": "2026-03-02T10:30:00Z"
+    }
+  ]
+}
+```
+
+**Example:**
+```bash
+curl -H "Authorization: Bearer your-key" \
+  http://localhost:8080/v1/runs/dead-letters
+```
+
+---
+
+### POST /v1/runs/dead-letters/{id}/replay
+
+Replay a dead-lettered run by source run ID.
+
+**Request (all fields optional):**
+```json
+{
+  "goal": "Retry with narrowed scope",
+  "max_retries": 1,
+  "retry_backoff_ms": 200,
+  "timeout_ms": 15000,
+  "payload": {
+    "ticket_id": 123,
+    "priority": "high"
+  }
+}
+```
+
+**Response (202 Accepted):**
+```json
+{
+  "status": "accepted",
+  "source_run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "replayed_run_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/v1/runs/dead-letters/550e8400-e29b-41d4-a716-446655440000/replay \
+  -H "Authorization: Bearer your-key" \
+  -H "Content-Type: application/json" \
+  -d '{"max_retries":1,"timeout_ms":15000}'
 ```
 
 ---
@@ -363,7 +439,9 @@ except APIError as e:
 
 ## Webhook Integration (Planned)
 
-Future support for webhooks to trigger agents:
+Webhook-triggered runs are supported via configured webhook endpoints (see `docs/guides/webhooks.md`).
+
+Example config:
 
 ```yaml
 # agent-webhook.yaml
@@ -402,6 +480,16 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:8080']
 ```
+
+Key runner hardening metrics:
+
+| Metric | Meaning |
+|--------|---------|
+| `agentruntime_run_retries_total` | Total retry attempts across runs |
+| `agentruntime_run_dead_letters_total` | Total dead-lettered runs |
+| `agentruntime_run_queue_depth` | Current queued run requests |
+| `agentruntime_run_queue_rejected_total` | Rejected submissions when queue is full |
+| `agentruntime_run_failures_total{reason,source}` | Terminal failures split by reason/source |
 
 ### Health Checks in Kubernetes
 

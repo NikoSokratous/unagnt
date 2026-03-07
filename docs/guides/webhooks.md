@@ -121,7 +121,7 @@ unagnt webhook test \
 2. **Verify**: HMAC signature is validated (if configured)
 3. **Parse**: JSON payload is parsed
 4. **Render**: Goal template is rendered with payload data
-5. **Execute**: Agent run is launched asynchronously
+5. **Execute**: Agent run is queued and executed by the runtime runner service
 6. **Respond**: HTTP 202 Accepted returned immediately
 7. **Callback**: Results are POSTed to callback URL (if configured)
 
@@ -132,9 +132,11 @@ When a callback URL is configured, the runtime POSTs results after execution:
 ```json
 {
   "run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "agent": "code-review-bot",
   "state": "completed",
   "original_payload": { /* original webhook payload */ },
-  "output": { /* agent output */ }
+  "output": { /* agent output */ },
+  "error": null
 }
 ```
 

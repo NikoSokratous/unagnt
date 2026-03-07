@@ -74,7 +74,10 @@ func NewWorkflowEngine(server *Server) *WorkflowEngine {
 	return &WorkflowEngine{
 		server:       server,
 		celEvaluator: celEval,
-		executor:     SimulatedExecutor{},
+		executor: &RuntimeStepExecutor{
+			AllowSimulatedFallback: false,
+			StorePath:              "agent.db",
+		},
 	}
 }
 

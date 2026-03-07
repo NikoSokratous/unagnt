@@ -13,6 +13,7 @@ type AgentConfig struct {
 	Version         string                `yaml:"version"`
 	Description     string                `yaml:"description"`
 	Model           ModelConfig           `yaml:"model"`
+	ModelRouting    ModelRoutingConfig    `yaml:"model_routing"`
 	Autonomy        int                   `yaml:"autonomy_level"`
 	Tools           []ToolRef             `yaml:"tools"`
 	Policy          string                `yaml:"policy"`
@@ -48,6 +49,13 @@ type ModelConfig struct {
 	Provider    string  `yaml:"provider"`
 	Name        string  `yaml:"name"`
 	Temperature float64 `yaml:"temperature"`
+}
+
+// ModelRoutingConfig configures optional dynamic model routing.
+type ModelRoutingConfig struct {
+	Enabled    bool          `yaml:"enabled"`
+	Strategy   string        `yaml:"strategy"` // auto, cost, latency, capability
+	Candidates []ModelConfig `yaml:"candidates"`
 }
 
 // ToolRef references a tool by name and version.

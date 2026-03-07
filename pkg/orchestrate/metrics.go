@@ -43,4 +43,34 @@ var (
 		Name: "agentruntime_policy_denials_total",
 		Help: "Total number of policy denials",
 	}, []string{"rule"})
+
+	// RunRetries tracks retry attempts for failed runs.
+	RunRetries = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "agentruntime_run_retries_total",
+		Help: "Total number of run retry attempts",
+	})
+
+	// RunDeadLetters tracks terminal failures written to dead-letter storage.
+	RunDeadLetters = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "agentruntime_run_dead_letters_total",
+		Help: "Total number of dead-lettered runs",
+	})
+
+	// RunQueueDepth tracks runner queue depth.
+	RunQueueDepth = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "agentruntime_run_queue_depth",
+		Help: "Current number of queued run requests",
+	})
+
+	// RunQueueRejected tracks run submissions rejected due to full queue.
+	RunQueueRejected = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "agentruntime_run_queue_rejected_total",
+		Help: "Total run submissions rejected because queue was full",
+	})
+
+	// RunFailures tracks terminal run failures grouped by reason/source.
+	RunFailures = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "agentruntime_run_failures_total",
+		Help: "Total number of terminal run failures by reason and source",
+	}, []string{"reason", "source"})
 )

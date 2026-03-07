@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -122,7 +123,7 @@ func (s *StateStore) SaveNodeState(ctx context.Context, nodeState *NodeState) er
 	`
 
 	_, err = s.db.ExecContext(ctx, query,
-		nodeState.NodeID,
+		nodeStateRowID(nodeState.WorkflowID, nodeState.NodeID),
 		nodeState.WorkflowID,
 		nodeState.StepName,
 		nodeState.Status,
@@ -155,8 +156,9 @@ func (s *StateStore) LoadNodeStates(ctx context.Context, workflowID string) ([]N
 		var state NodeState
 		var outputJSON string
 
+		var rowID string
 		err := rows.Scan(
-			&state.NodeID,
+			&rowID,
 			&state.StepName,
 			&state.Status,
 			&outputJSON,
@@ -168,6 +170,7 @@ func (s *StateStore) LoadNodeStates(ctx context.Context, workflowID string) ([]N
 		}
 
 		state.WorkflowID = workflowID
+		state.NodeID = nodeIDFromRowID(workflowID, rowID)
 
 		// Unmarshal output
 		if outputJSON != "" && outputJSON != "null" {
@@ -181,6 +184,21 @@ func (s *StateStore) LoadNodeStates(ctx context.Context, workflowID string) ([]N
 	}
 
 	return states, nil
+}
+
+func nodeStateRowID(workflowID, nodeID string) string {
+	if workflowID == "" {
+		return nodeID
+	}
+	return workflowID + ":" + nodeID
+}
+
+func nodeIDFromRowID(workflowID, rowID string) string {
+	prefix := workflowID + ":"
+	if strings.HasPrefix(rowID, prefix) {
+		return strings.TrimPrefix(rowID, prefix)
+	}
+	return rowID
 }
 
 // ListWorkflows lists all workflow states.

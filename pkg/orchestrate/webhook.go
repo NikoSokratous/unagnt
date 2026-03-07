@@ -166,21 +166,52 @@ func (h *WebhookHandler) executeWebhookRun(runID string, wh *config.WebhookConfi
 		return
 	}
 
-	// Note: Actual agent execution would happen here
-	// For now, just mark as completed
-	// TODO: Integrate with runtime engine when available
-	meta.State = "completed"
+	if h.server.runner != nil {
+		err := h.server.runner.Submit(RunRequest{
+			RunID:     runID,
+			AgentName: wh.Agent,
+			Goal:      goal,
+			Source:    "webhook",
+			Outputs:   payload,
+			CallbackFn: func(runID string, status string, output interface{}, execErr error) {
+				if wh.CallbackURL != "" {
+					h.sendCallback(wh, runID, status, payload, output, execErr)
+				}
+			},
+		})
+		if err == nil {
+			return
+		}
+	}
+
+	// Fallback direct execution path if runner is unavailable.
+	exec := &RuntimeStepExecutor{
+		AllowSimulatedFallback: true,
+		StorePath:              "agent.db",
+	}
+	step, err := exec.ExecuteStep(ctx, wh.Agent, goal, payload)
+	if err != nil {
+		meta.State = "failed"
+		meta.UpdatedAt = time.Now()
+		_ = h.server.store.SaveRun(ctx, meta)
+		if wh.CallbackURL != "" {
+			h.sendCallback(wh, runID, meta.State, payload, nil, err)
+		}
+		return
+	}
+
+	meta.State = step.Status
 	meta.UpdatedAt = time.Now()
-	h.server.store.SaveRun(ctx, meta)
+	_ = h.server.store.SaveRun(ctx, meta)
 
 	// Send callback if configured
 	if wh.CallbackURL != "" {
-		h.sendCallback(wh, runID, meta.State, payload)
+		h.sendCallback(wh, runID, meta.State, payload, step.Output, nil)
 	}
 }
 
 // sendCallback sends a callback to the configured URL.
-func (h *WebhookHandler) sendCallback(wh *config.WebhookConfig, runID, state string, originalPayload map[string]any) {
+func (h *WebhookHandler) sendCallback(wh *config.WebhookConfig, runID, state string, originalPayload map[string]any, output interface{}, runErr error) {
 	// Render callback URL template if it contains variables
 	callbackURL := wh.CallbackURL
 	tmpl, err := template.New("callback").Parse(callbackURL)
@@ -193,9 +224,14 @@ func (h *WebhookHandler) sendCallback(wh *config.WebhookConfig, runID, state str
 
 	// Prepare callback payload
 	payload := map[string]any{
-		"run_id": runID,
-		"agent":  wh.Agent,
-		"state":  state,
+		"run_id":           runID,
+		"agent":            wh.Agent,
+		"state":            state,
+		"original_payload": originalPayload,
+		"output":           output,
+	}
+	if runErr != nil {
+		payload["error"] = runErr.Error()
 	}
 
 	body, _ := json.Marshal(payload)

@@ -113,6 +113,27 @@ export OPENAI_API_KEY=sk-...
 unagnt run --config examples/cli-assistant/agent.yaml --goal "List all files in current directory"
 ```
 
+### Optional: Model Routing (v3)
+
+Use `model_routing` to let runtime pick a model by strategy (`auto`, `cost`, `latency`, `capability`):
+
+```yaml
+# examples/cli-assistant/agent.yaml
+name: cli-assistant
+model:
+  provider: openai
+  name: gpt-4o
+
+model_routing:
+  enabled: true
+  strategy: auto
+  candidates:
+    - provider: openai
+      name: gpt-4o-mini
+    - provider: openai
+      name: gpt-4o
+```
+
 👉 **Try the full walkthrough in 2 minutes**: [docs/E2E_EXAMPLE.md](docs/E2E_EXAMPLE.md)
 
 ### Build from Source
@@ -381,30 +402,42 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
-### 🎯 v3.0: Production Runtime & Agentic Orchestration (Target: ~12–16 weeks)
+### 🎯 v3.0: Production Runtime & Agentic Orchestration (In Progress)
 
-**Goal:** Enable real production workloads and differentiate with intelligent orchestration. Addresses the primary barrier to first users: simulated execution.
+**Goal:** Enable real production workloads and differentiate with intelligent orchestration.
 
-**Rationale:** Without real workflow execution, users cannot run production agents. Agentic orchestration (multi-model routing, dynamic tool selection) differentiates Unagnt from generic workflow engines.
+**Status Overview:**
+- ✅ **Phase 1 complete**: Full runtime integration is implemented.
+- ✅ **Phase 2 complete**: Agentic orchestration primitives are implemented.
+- ✅ **Phase 3 complete**: Runtime hardening, rollout quality, and GA-readiness baseline are implemented.
 
-#### 1. Full Runtime Integration
-- **Problem:** Webhook-triggered and scheduled runs complete without real execution; `StepExecutor` default is simulated.
-- **Deliverables:**
-  - Wire webhook handlers to real agent runtime
-  - Scheduled/cron workflow execution
-  - Event-driven triggers (pub/sub, queues)
-  - Runner service for isolated workflow execution
-  - Long-running workflows with checkpointing and resumption
-- **Outcome:** Production workflows execute end-to-end; external systems can trigger agents reliably.
+#### Phase 1: Full Runtime Integration (✅ Done)
+- **Included:**
+  - Runtime-backed step execution via `RuntimeStepExecutor`
+  - Async runner queue/service for isolated execution
+  - Webhook-triggered runs wired to real runtime execution
+  - Scheduled cron-based execution
+  - Event-driven triggers and trigger endpoint
+  - Workflow checkpoint persistence + resume flow
+- **Outcome:** Production workflows now execute end-to-end; external systems can reliably trigger runs.
 
-#### 2. Agentic Orchestration
-- **Problem:** Static workflows; no intelligent routing or model selection.
-- **Deliverables:**
-  - Multi-model routing (route tasks to best LLM by cost, latency, capability)
-  - Dynamic tool/agent selection (LLM decides which tools to call)
-  - Guardrails layer (output constraints, topic control, safety filters)
-  - Streaming/incremental execution where applicable
-- **Outcome:** Smarter, more cost-efficient orchestration; clear differentiation from simple DAG runners.
+#### Phase 2: Agentic Orchestration (✅ Done)
+- **Included:**
+  - Multi-model routing for step execution
+  - Guardrails layer for goal/output safety controls
+  - Dynamic tool selection controls with policy awareness
+  - Incremental/streaming execution signals
+  - Supporting tests and docs updates
+- **Outcome:** Orchestration is smarter and more cost-aware than static DAG-only execution.
+
+#### Phase 3: Runtime Hardening and GA Readiness (✅ Done)
+- **Included scope:**
+  - End-to-end validation of runtime/webhook/scheduler/trigger paths under load (queue/backpressure and cancellation scenarios covered in tests)
+  - Failure-mode hardening (retries, per-attempt timeouts, dead-letter capture, replay, cancellation-safe backoff)
+  - Stronger observability for run lifecycle (persisted event history endpoint + runner hardening metrics)
+  - Contract/integration coverage for queue behavior, dead-letter replay, retry/cancel semantics, and API validation guards
+  - Final docs/runbooks and migration notes for rollout (`docs/ARCHITECTURE.md`, `docs/guides/api-integration.md`)
+- **Outcome:** v3 ships with a production-ready runtime hardening baseline and operational tooling.
 
 ---
 
@@ -442,7 +475,7 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ## ⚠️ Known Limitations
 
-- **Workflow execution**: Orchestration uses `StepExecutor`; default is simulated. For real agent runs, wire a custom executor via `NewWorkflowEngineWithExecutor`. Webhook-triggered runs still mark completed without execution until runner integration (Phase 2–3).
+- **Workflow execution**: Orchestration now uses a runtime-backed executor and async runner queue by default. Simulated execution remains available for tests/dev via explicit `SimulatedExecutor` wiring.
 - **Kubernetes operator**: Run `make generate-operator` (or `controller-gen` per [k8s/operator/BUILD_NOTES.md](k8s/operator/BUILD_NOTES.md)) before first build. Generated `zz_generated.deepcopy.go` is committed.
 - **Advanced features**: Plugin artifact download and replay side effects (Replayable `http_call` GET) are implemented. Core features are production-ready.
 
