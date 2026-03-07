@@ -247,6 +247,9 @@ type State struct {
 - **Parallel**: Steps run concurrently
 - **Conditional**: CEL-based branching
 
+**Durable Execution**:
+The DAG executor (`pkg/workflow/`) checkpoints after each execution level. On crash or restart, call `Resume(workflowID, dag)` to continue from the last checkpoint. Completed nodes are skipped; only pending nodes run. State is stored via `StateStore` (SQLite/Postgres).
+
 **Example**:
 ```go
 workflow := &Workflow{

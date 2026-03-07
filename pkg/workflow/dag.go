@@ -11,10 +11,19 @@ type DAG struct {
 	Edges map[string][]string // node -> dependencies
 }
 
+// NodeType is the type of workflow node.
+type NodeType string
+
+const (
+	NodeTypeAgent    NodeType = "agent"    // default: run agent
+	NodeTypeApproval NodeType = "approval" // human-in-the-loop: pause for approval
+)
+
 // Node represents a node in the DAG.
 type Node struct {
 	ID           string
 	Name         string
+	Type         NodeType // agent (default) or approval
 	Agent        string
 	Goal         string
 	Condition    string
@@ -23,6 +32,9 @@ type Node struct {
 	Retry        int
 	Dependencies []string
 	Metadata     map[string]interface{}
+	// Approval step fields (when Type == NodeTypeApproval)
+	Approvers       []string
+	ApprovalMessage string
 }
 
 // NewDAG creates a new DAG.

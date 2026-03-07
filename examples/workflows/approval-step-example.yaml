@@ -1,0 +1,36 @@
+# Example workflow with a native approval step (human-in-the-loop)
+# Run: unagnt workflow run examples/workflows/approval-step-example.yaml --auto-approve
+# Or without --auto-approve: workflow blocks until approved via /v1/approvals API
+name: deploy-with-approval
+description: Build, test, human sign-off, then deploy
+
+steps:
+  - name: build
+    agent: build-agent
+    goal: "Simulate build"
+    output_key: build_artifact
+
+  - name: test
+    agent: test-agent
+    goal: "Simulate tests"
+    depends_on:
+      - build
+    output_key: test_results
+
+  - name: human-sign-off
+    type: approval
+    agent: approval
+    goal: "Human sign-off before deploy"
+    approvers:
+      - release-manager
+      - ops
+    approval_message: "Review and approve deployment to production"
+    depends_on:
+      - test
+
+  - name: deploy
+    agent: deploy-agent
+    goal: "Simulate deploy"
+    depends_on:
+      - human-sign-off
+    output_key: deploy_result

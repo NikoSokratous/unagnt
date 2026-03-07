@@ -107,14 +107,17 @@ type WorkflowSpec struct {
 // WorkflowStep defines a step in the workflow
 // +kubebuilder:object:generate=true
 type WorkflowStep struct {
-	Name      string   `json:"name"`
-	Agent     string   `json:"agent"`
-	Goal      string   `json:"goal"`
-	OutputKey string   `json:"outputKey,omitempty"`
-	Condition string   `json:"condition,omitempty"`
-	DependsOn []string `json:"dependsOn,omitempty"`
-	Timeout   string   `json:"timeout,omitempty"`
-	Retry     int      `json:"retry,omitempty"`
+	Name            string   `json:"name"`
+	Type            string   `json:"type,omitempty"` // "agent" (default) or "approval"
+	Agent           string   `json:"agent"`
+	Goal            string   `json:"goal"`
+	OutputKey       string   `json:"outputKey,omitempty"`
+	Condition       string   `json:"condition,omitempty"`
+	DependsOn       []string `json:"dependsOn,omitempty"`
+	Timeout         string   `json:"timeout,omitempty"`
+	Retry           int      `json:"retry,omitempty"`
+	Approvers       []string `json:"approvers,omitempty"`       // for type=approval
+	ApprovalMessage string   `json:"approvalMessage,omitempty"` // for type=approval
 }
 
 // WorkflowStatus defines the observed state of Workflow

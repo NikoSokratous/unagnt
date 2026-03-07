@@ -10,6 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 	"github.com/NikoSokratous/unagnt/pkg/registry"
 	"github.com/NikoSokratous/unagnt/pkg/workflow"
 	"github.com/spf13/cobra"
@@ -39,6 +40,7 @@ func newWorkflowCmd() *cobra.Command {
 func newWorkflowRunCmd() *cobra.Command {
 	var resumeID string
 	var dbPath string
+	var autoApprove bool
 
 	cmd := &cobra.Command{
 		Use:   "run <workflow-file>",
@@ -71,7 +73,11 @@ func newWorkflowRunCmd() *cobra.Command {
 			defer db.Close()
 			stateStore := workflow.NewStateStore(db)
 			celEval, _ := workflow.NewCELEvaluator()
-			executor := workflow.NewExecutor(stateStore, celEval)
+			var approvalQueue policy.ApprovalQueue = policy.NewMemoryApprovalQueue()
+			if autoApprove {
+				approvalQueue = policy.NewAutoApprovalQueue()
+			}
+			executor := workflow.NewExecutorWithApproval(stateStore, celEval, approvalQueue)
 
 			ctx := context.Background()
 			workflowID := fmt.Sprintf("wf-%d", time.Now().Unix())
@@ -102,6 +108,7 @@ func newWorkflowRunCmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&resumeID, "resume", "", "Resume workflow from checkpoint ID")
 	cmd.Flags().StringVar(&dbPath, "db", "agent.db", "Database path for workflow state/version store")
+	cmd.Flags().BoolVar(&autoApprove, "auto-approve", false, "Auto-approve approval steps (for local dev)")
 
 	return cmd
 }
@@ -566,14 +573,22 @@ func buildDAGFromWorkflow(workflowDef map[string]interface{}) (*workflow.DAG, er
 		}
 
 		node := &workflow.Node{
-			ID:        name,
-			Name:      name,
-			Agent:     getString(stepMap, "agent"),
-			Goal:      getString(stepMap, "goal"),
-			Condition: getString(stepMap, "condition"),
-			OutputKey: getString(stepMap, "output_key"),
-			Timeout:   getString(stepMap, "timeout"),
-			Retry:     getInt(stepMap, "retry"),
+			ID:              name,
+			Name:            name,
+			Type:            workflow.NodeType(getString(stepMap, "type")),
+			Agent:           getString(stepMap, "agent"),
+			Goal:            getString(stepMap, "goal"),
+			Condition:       getString(stepMap, "condition"),
+			OutputKey:       getString(stepMap, "output_key"),
+			Timeout:         getString(stepMap, "timeout"),
+			Retry:           getInt(stepMap, "retry"),
+			ApprovalMessage: getString(stepMap, "approval_message"),
+			Approvers:       getStringSlice(stepMap, "approvers"),
+		}
+
+		// Default type to agent if not specified
+		if node.Type == "" {
+			node.Type = workflow.NodeTypeAgent
 		}
 
 		// Get dependencies
@@ -614,6 +629,22 @@ func getInt(m map[string]interface{}, key string) int {
 		return v
 	}
 	return 0
+}
+
+func getStringSlice(m map[string]interface{}, key string) []string {
+	switch v := m[key].(type) {
+	case []string:
+		return v
+	case []interface{}:
+		out := make([]string, 0, len(v))
+		for _, x := range v {
+			if s, ok := x.(string); ok {
+				out = append(out, s)
+			}
+		}
+		return out
+	}
+	return nil
 }
 
 func printWorkflowResult(result *workflow.ExecutionResult) {

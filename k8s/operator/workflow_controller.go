@@ -228,10 +228,19 @@ steps:
 `, workflow.Spec.Name, workflow.Spec.Description)
 
 	for _, step := range workflow.Spec.Steps {
+		stepType := step.Type
+		if stepType == "" {
+			stepType = "agent"
+		}
+		agent, goal := step.Agent, step.Goal
+		if stepType == "approval" && agent == "" {
+			agent, goal = "approval", "human sign-off"
+		}
 		workflowData += fmt.Sprintf(`  - name: %s
+    type: %s
     agent: %s
     goal: "%s"
-`, step.Name, step.Agent, step.Goal)
+`, step.Name, stepType, agent, goal)
 
 		if step.OutputKey != "" {
 			workflowData += fmt.Sprintf("    output_key: %s\n", step.OutputKey)
@@ -243,6 +252,17 @@ steps:
 			workflowData += "    depends_on:\n"
 			for _, dep := range step.DependsOn {
 				workflowData += fmt.Sprintf("      - %s\n", dep)
+			}
+		}
+		if step.Type == "approval" {
+			if len(step.Approvers) > 0 {
+				workflowData += "    approvers:\n"
+				for _, a := range step.Approvers {
+					workflowData += fmt.Sprintf("      - %s\n", a)
+				}
+			}
+			if step.ApprovalMessage != "" {
+				workflowData += fmt.Sprintf("    approval_message: \"%s\"\n", step.ApprovalMessage)
 			}
 		}
 	}

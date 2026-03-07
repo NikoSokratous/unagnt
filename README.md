@@ -62,7 +62,9 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 ### 🔄 Workflow Orchestration
 - **Visual Designer**: Drag-and-drop workflow builder
 - **DAG Execution**: Parallel agent coordination
+- **Durable Execution**: Checkpoints after each level; resume from last checkpoint after crash or restart
 - **Conditional Logic**: CEL-based branching
+- **Approval Steps**: Native human-in-the-loop steps in workflows (pause for approval, then continue)
 - **Template Marketplace**: Pre-built workflows for common tasks
 
 ### 📊 Observability

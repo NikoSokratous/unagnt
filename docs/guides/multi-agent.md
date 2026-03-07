@@ -76,6 +76,40 @@ on_error: continue
 - `on_error: continue` allows partial success
 - `aggregate: true` combines all outputs
 
+### Approval Steps (Human-in-the-Loop)
+
+Add a native approval step to pause for human sign-off before continuing:
+
+```yaml
+name: deploy-with-approval
+description: Build, test, then human approval before deploy
+
+steps:
+  - name: build
+    agent: build-agent
+    goal: "Build the application"
+    output_key: build_artifact
+
+  - name: test
+    agent: test-agent
+    goal: "Run tests"
+    depends_on: [build]
+    output_key: test_results
+
+  - name: human-sign-off
+    type: approval
+    approvers: [release-manager, ops]
+    approval_message: "Review and approve deployment to production"
+    depends_on: [test]
+
+  - name: deploy
+    agent: deploy-agent
+    goal: "Deploy to production"
+    depends_on: [human-sign-off]
+```
+
+**CLI:** Use `--auto-approve` for local testing. In production (unagntd), approvals are listed at `/v1/approvals/pending` and resolved via `/v1/approvals/{id}/approve` or `/v1/approvals/{id}/deny`.
+
 ## Agent Delegation
 
 Agents can delegate sub-tasks to other specialized agents:

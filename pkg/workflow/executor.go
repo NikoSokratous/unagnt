@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 )
 
 // ExecutionResult represents the result of a workflow execution.
@@ -33,8 +35,11 @@ type NodeResult struct {
 
 // Executor executes DAG-based workflows.
 type Executor struct {
-	stateStore    *StateStore
-	condEvaluator ConditionEvaluator
+	stateStore     *StateStore
+	condEvaluator  ConditionEvaluator
+	approvalQueue  policy.ApprovalQueue
+	approvalPoll   time.Duration
+	approvalExpiry time.Duration
 }
 
 // ConditionEvaluator evaluates conditional expressions.
@@ -45,9 +50,18 @@ type ConditionEvaluator interface {
 // NewExecutor creates a new DAG executor.
 func NewExecutor(stateStore *StateStore, condEvaluator ConditionEvaluator) *Executor {
 	return &Executor{
-		stateStore:    stateStore,
-		condEvaluator: condEvaluator,
+		stateStore:     stateStore,
+		condEvaluator:  condEvaluator,
+		approvalPoll:   5 * time.Second,
+		approvalExpiry: 24 * time.Hour,
 	}
+}
+
+// NewExecutorWithApproval creates a DAG executor with approval queue for human-in-the-loop steps.
+func NewExecutorWithApproval(stateStore *StateStore, condEvaluator ConditionEvaluator, approvalQueue policy.ApprovalQueue) *Executor {
+	e := NewExecutor(stateStore, condEvaluator)
+	e.approvalQueue = approvalQueue
+	return e
 }
 
 // Execute runs a DAG workflow.
@@ -173,14 +187,19 @@ func (e *Executor) executeLevel(ctx context.Context, dag *DAG, nodeIDs []string,
 			nodeResult.StartedAt = time.Now()
 			mu.Unlock()
 
-			// Execute the actual node (placeholder - would call agent runtime)
-			output, err := e.executeNode(ctx, node, result.Outputs)
+			var output interface{}
+			var execErr error
+			if node.Type == NodeTypeApproval {
+				output, execErr = e.executeApprovalNode(ctx, node, id, result.WorkflowID, result.Outputs)
+			} else {
+				output, execErr = e.executeNode(ctx, node, result.Outputs)
+			}
 
 			mu.Lock()
-			if err != nil {
+			if execErr != nil {
 				nodeResult.Status = "failed"
-				nodeResult.Error = err.Error()
-				errors = append(errors, err)
+				nodeResult.Error = execErr.Error()
+				errors = append(errors, execErr)
 			} else {
 				nodeResult.Status = "completed"
 				nodeResult.Output = output
@@ -217,6 +236,57 @@ func (e *Executor) executeLevel(ctx context.Context, dag *DAG, nodeIDs []string,
 	}
 
 	return nil
+}
+
+// executeApprovalNode runs a human-in-the-loop approval step.
+func (e *Executor) executeApprovalNode(ctx context.Context, node *Node, nodeID, workflowID string, outputs map[string]interface{}) (interface{}, error) {
+	if e.approvalQueue == nil {
+		return nil, fmt.Errorf("approval step requires ApprovalQueue; use NewExecutorWithApproval")
+	}
+	approvers := node.Approvers
+	if len(approvers) == 0 {
+		approvers = []string{"default"}
+	}
+	msg := node.ApprovalMessage
+	if msg == "" {
+		msg = fmt.Sprintf("Approve workflow step: %s", node.Name)
+	}
+	input := map[string]any{
+		"workflow_id": workflowID,
+		"step_id":     nodeID,
+		"message":     msg,
+		"outputs":     outputs,
+	}
+	id, err := e.approvalQueue.Enqueue(ctx, "workflow-approval", input, approvers, workflowID, nodeID)
+	if err != nil {
+		return nil, fmt.Errorf("enqueue approval: %w", err)
+	}
+	deadline := time.Now().Add(e.approvalExpiry)
+	ticker := time.NewTicker(e.approvalPoll)
+	defer ticker.Stop()
+	for {
+		req, err := e.approvalQueue.Get(ctx, id)
+		if err != nil {
+			return nil, fmt.Errorf("get approval: %w", err)
+		}
+		if req == nil {
+			return nil, fmt.Errorf("approval request %s not found", id)
+		}
+		if req.Status == "approved" {
+			return map[string]any{"approved": true, "approval_id": id}, nil
+		}
+		if req.Status == "denied" {
+			return nil, fmt.Errorf("approval denied for step %s", node.Name)
+		}
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-ticker.C:
+			if time.Now().After(deadline) {
+				return nil, fmt.Errorf("approval expired for step %s", node.Name)
+			}
+		}
+	}
 }
 
 // executeNode executes a single node (placeholder).
