@@ -124,10 +124,10 @@ func (e *RuntimeStepExecutor) ExecuteStep(ctx context.Context, agentName, goal s
 	}
 
 	return &StepResult{
-		Name:        agentName,
-		Agent:       cfg.Name,
-		Status:      "completed",
-		RunID:       state.RunID,
+		Name:   agentName,
+		Agent:  cfg.Name,
+		Status: "completed",
+		RunID:  state.RunID,
 		Output: map[string]interface{}{
 			"state":      state.Current,
 			"step_count": state.StepCount,

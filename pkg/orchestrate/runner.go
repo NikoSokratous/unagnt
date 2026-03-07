@@ -15,15 +15,15 @@ import (
 
 // RunRequest defines one asynchronous execution request handled by Runner.
 type RunRequest struct {
-	RunID      string
-	AgentName  string
-	Goal       string
-	Source     string
-	Outputs    map[string]interface{}
-	MaxRetries int
+	RunID        string
+	AgentName    string
+	Goal         string
+	Source       string
+	Outputs      map[string]interface{}
+	MaxRetries   int
 	RetryBackoff time.Duration
-	Timeout    time.Duration
-	CallbackFn func(runID string, status string, output interface{}, err error)
+	Timeout      time.Duration
+	CallbackFn   func(runID string, status string, output interface{}, err error)
 }
 
 // Runner executes queued runs with a step executor.

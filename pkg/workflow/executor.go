@@ -105,13 +105,13 @@ func (e *Executor) Execute(ctx context.Context, dag *DAG, workflowID string) (*E
 		// Save checkpoint after each level
 		if e.stateStore != nil {
 			state := &WorkflowState{
-				WorkflowID:  workflowID,
+				WorkflowID:   workflowID,
 				WorkflowName: workflowID,
-				Status:      "running",
-				CurrentStep: fmt.Sprintf("level-%d", levelIdx),
-				Outputs:     result.Outputs,
-				StartedAt:   result.StartedAt,
-				UpdatedAt:   time.Now(),
+				Status:       "running",
+				CurrentStep:  fmt.Sprintf("level-%d", levelIdx),
+				Outputs:      result.Outputs,
+				StartedAt:    result.StartedAt,
+				UpdatedAt:    time.Now(),
 			}
 			if err := e.stateStore.SaveCheckpoint(ctx, state); err != nil {
 				return result, fmt.Errorf("save checkpoint: %w", err)
