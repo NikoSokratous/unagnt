@@ -21,9 +21,9 @@ type RunRecord struct {
 
 // SyncStatus is the result of a sync status check.
 type SyncStatus struct {
-	LastPush   *time.Time `json:"last_push,omitempty"`
-	LastPull   *time.Time `json:"last_pull,omitempty"`
-	LocalRuns  int       `json:"local_runs"`
-	RemoteRuns int       `json:"remote_runs,omitempty"`
-	PendingPush int      `json:"pending_push,omitempty"`
+	LastPush    *time.Time `json:"last_push,omitempty"`
+	LastPull    *time.Time `json:"last_pull,omitempty"`
+	LocalRuns   int        `json:"local_runs"`
+	RemoteRuns  int        `json:"remote_runs,omitempty"`
+	PendingPush int        `json:"pending_push,omitempty"`
 }

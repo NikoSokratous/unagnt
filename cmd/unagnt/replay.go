@@ -271,8 +271,8 @@ func loadSnapshotForDebug(snapshotID, filePath string) (*replay.RunSnapshot, err
 			{Sequence: 1, ToolName: "echo", Input: json.RawMessage(`{"msg":"a"}`), Output: json.RawMessage(`{"echoed":"a"}`)},
 			{Sequence: 2, ToolName: "calc", Input: json.RawMessage(`{"op":"add","a":1,"b":2}`), Output: json.RawMessage(`{"result":3}`)},
 		},
-		StartTime: time.Now().Add(-time.Minute),
-		EndTime:   time.Now(),
+		StartTime:  time.Now().Add(-time.Minute),
+		EndTime:    time.Now(),
 		FinalState: "completed",
 	}, nil
 }

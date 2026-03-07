@@ -4,12 +4,12 @@ import "context"
 
 // StateAt represents the execution state at a given sequence position.
 type StateAt struct {
-	Position      int             // Current sequence (1-based)
-	ToolCalls     []ToolExecution // Tool calls up to and including Position
-	ModelCalls    []ModelCall     // Model calls up to and including Position
-	CurrentAction *ToolExecution  // The action at Position (if any)
+	Position       int             // Current sequence (1-based)
+	ToolCalls      []ToolExecution // Tool calls up to and including Position
+	ModelCalls     []ModelCall     // Model calls up to and including Position
+	CurrentAction  *ToolExecution  // The action at Position (if any)
 	CanStepForward bool
-	CanStepBack   bool
+	CanStepBack    bool
 }
 
 // ReplayCursor allows stepping forward and backward through a snapshot.
