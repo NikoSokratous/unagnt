@@ -92,7 +92,7 @@ func TestRunnerExecutesQueuedRun(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, fakeStepExecutor{}, 1, 4)
+	r := NewRunner(s, fakeStepExecutor{}, 1, NewMemoryQueue(4))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -129,7 +129,7 @@ func TestRunnerEmitsLifecycleEvents(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, fakeStepExecutor{}, 1, 4)
+	r := NewRunner(s, fakeStepExecutor{}, 1, NewMemoryQueue(4))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -191,7 +191,7 @@ func TestRunnerEmitsErrorEvent(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, failingStepExecutor{}, 1, 4)
+	r := NewRunner(s, failingStepExecutor{}, 1, NewMemoryQueue(4))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -234,7 +234,7 @@ func TestRunnerRetriesThenSucceeds(t *testing.T) {
 
 	exec := &flakyStepExecutor{failures: 2}
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, exec, 1, 4)
+	r := NewRunner(s, exec, 1, NewMemoryQueue(4))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -278,7 +278,7 @@ func TestRunnerPersistsDeadLetterOnTerminalFailure(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, failingStepExecutor{}, 1, 4)
+	r := NewRunner(s, failingStepExecutor{}, 1, NewMemoryQueue(4))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -343,7 +343,7 @@ func TestRunnerCancelDuringRetryBackoffInterruptsWithoutDeadLetter(t *testing.T)
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, failingStepExecutor{}, 1, 4)
+	r := NewRunner(s, failingStepExecutor{}, 1, NewMemoryQueue(4))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	r.Start(ctx)
@@ -425,7 +425,7 @@ func TestRunnerQueueBackpressureUnderLoad(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	r := NewRunner(s, slowStepExecutor{delay: 150 * time.Millisecond}, 1, 2)
+	r := NewRunner(s, slowStepExecutor{delay: 150 * time.Millisecond}, 1, NewMemoryQueue(2))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	r.Start(ctx)

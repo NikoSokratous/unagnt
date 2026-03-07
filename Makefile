@@ -1,4 +1,4 @@
-.PHONY: build test clean run-unagnt run-unagntd generate-operator
+.PHONY: build test clean run-unagnt run-unagntd generate-operator generate-operator-check generate-crds generate-crds-check build-operator
 
 BINARY_UNAGNT := bin/unagnt
 BINARY_UNAGNTD := bin/unagntd
@@ -46,6 +46,23 @@ lint: fmt vet
 
 generate-operator:
 	cd k8s/operator && controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./api/v1/..."
+
+generate-operator-check: generate-operator
+	@git diff --exit-code k8s/operator/api/v1/zz_generated.deepcopy.go || (echo "Operator codegen is stale. Run: make generate-operator and commit." && exit 1)
+
+generate-crds: generate-operator
+	cd k8s/operator && controller-gen crd:allowDangerousTypes=true paths="./api/v1/..." output:crd:dir=config/crd/bases
+	cd k8s/operator && bash hack/fix-crd-group.sh
+	@mkdir -p k8s/crds
+	@rm -f k8s/crds/*.yaml
+	@cp k8s/operator/config/crd/bases/*.yaml k8s/crds/
+
+generate-crds-check: generate-crds
+	@git diff --exit-code k8s/operator/config/crd/bases/ k8s/crds/ || (echo "CRD generation is stale. Run: make generate-crds and commit." && exit 1)
+
+build-operator: generate-crds
+	@mkdir -p bin
+	$(GO) build $(GOFLAGS) -o bin/unagnt-operator ./k8s/operator/cmd
 
 showcase-deploy: build-unagnt
 	@echo "Deploying showcase enterprise-compliance-bot..."

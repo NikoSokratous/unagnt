@@ -145,6 +145,8 @@ make build
 ./bin/unagntd   # Start the server
 ```
 
+To build the Kubernetes operator: `make build-operator` (requires controller-gen; see [k8s/operator/BUILD_NOTES.md](k8s/operator/BUILD_NOTES.md)).
+
 ### Visual Workflow Designer
 
 ```bash
@@ -442,6 +444,32 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
+### 🔒 v3.1: Pre-v4 Hardening Gate (Required Before v4) — Complete
+
+**Goal:** Resolve operational limitations from v3 and establish a release-quality reliability gate before v4 starts.
+
+**Status:** All four items implemented. See [docs/MIGRATION_V3.1.md](docs/MIGRATION_V3.1.md) and [docs/AUDIT_V3.1.md](docs/AUDIT_V3.1.md).
+
+#### 1. Dead-Letter Retention and Archival ✅
+- Configurable retention via `DEAD_LETTER_RETENTION_HOURS`; optional archival via `DEAD_LETTER_ARCHIVE_DIR`
+- Background pruner (hourly), optional dir archival before prune, metrics (`agentruntime_dead_letters_pruned_total`, `agentruntime_dead_letters_archived_total`)
+- Runbook: [docs/runbooks/dead-letter-retention.md](docs/runbooks/dead-letter-retention.md)
+
+#### 2. Durable Queue Backend ✅
+- Pluggable backend: memory (default) and Redis. Env: `QUEUE_BACKEND`, `QUEUE_REDIS_URL`, `QUEUE_SIZE`
+- Redis provides restart-resilient queuing
+- Migration notes: [docs/MIGRATION_V3.1.md](docs/MIGRATION_V3.1.md)
+
+#### 3. Kubernetes Operator Generation Automation ✅
+- CI job `operator-codegen` fails when `zz_generated.deepcopy.go` is stale
+- `make generate-operator-check` for local verification; controller-gen@v0.14.0 documented
+
+#### 4. Release Readiness Gate ✅
+- [docs/RELEASE_READINESS.md](docs/RELEASE_READINESS.md): required checks, SLO baseline, pre-release checklist
+- [docs/runbooks/incidents.md](docs/runbooks/incidents.md): queue saturation, dead-letter spikes, replay control
+
+---
+
 ### 📋 v4.0: Observability & Governance (Backlog)
 - Agent usage analytics (by tenant, workflow, model)
 - Model drift and performance monitoring
@@ -476,11 +504,14 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ## ⚠️ Known Limitations
 
-- **Workflow execution model**: Orchestration now uses a runtime-backed executor and async runner queue by default. Simulated execution remains available for tests/dev via explicit `SimulatedExecutor` wiring.
-- **Dead-letter retention**: Dead-letter entries are persisted for diagnostics/replay, but retention and archival policies are operator-managed (no built-in TTL/pruner yet).
-- **Queue capacity**: Runner queue is in-memory and bounded; monitor `agentruntime_run_queue_depth` and `agentruntime_run_queue_rejected_total` and tune worker/queue settings per environment.
-- **Kubernetes operator**: Run `make generate-operator` (or `controller-gen` per [k8s/operator/BUILD_NOTES.md](k8s/operator/BUILD_NOTES.md)) before first build. Generated `zz_generated.deepcopy.go` is committed.
-- **Advanced features**: Plugin artifact download and replay side effects (Replayable `http_call` GET) are implemented. Core features are production-ready.
+- **Dead-letter retention**: v3.1 adds configurable retention and optional archival (env: `DEAD_LETTER_RETENTION_HOURS`, `DEAD_LETTER_ARCHIVE_DIR`). Without these set, dead letters accumulate indefinitely; enable retention for production.
+- **Queue backend**: Default is in-memory (bounded); use `QUEUE_BACKEND=redis` and `QUEUE_REDIS_URL` for restart-resilient durable queuing. Monitor `agentruntime_run_queue_depth` and `agentruntime_run_queue_rejected_total`.
+- **Kubernetes operator**: Use `make build-operator` to build the operator (auto-runs codegen). CRDs are generated and committed to `k8s/crds/`. CI fails if deepcopy or CRDs are stale; run `make generate-crds` and commit before merge. See [k8s/operator/BUILD_NOTES.md](k8s/operator/BUILD_NOTES.md).
+
+### Implementation Notes
+
+- **Workflow execution model**: Orchestration uses a runtime-backed executor and async runner queue by default. Simulated execution remains available for tests/dev via explicit `SimulatedExecutor` wiring.
+- **Advanced runtime features**: Plugin artifact download and replay side effects (Replayable `http_call` GET) are implemented. Core features are production-ready.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#known-limitations--implementation-notes) for details.
 

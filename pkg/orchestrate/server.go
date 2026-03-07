@@ -17,6 +17,7 @@ import (
 	"github.com/NikoSokratous/unagnt/pkg/observe"
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
 )
 
 // Server is a simple HTTP API server for run management.
@@ -34,15 +35,42 @@ type Server struct {
 	triggerBus  *EventTriggerBus
 	scheduler   *Scheduler
 	webhooks    *WebhookHandler
+	pruner      *DeadLetterPruner
+}
+
+// QueueConfig configures the run queue backend.
+type QueueConfig struct {
+	Backend   string // "memory" (default) or "redis"
+	RedisURL  string
+	QueueSize int // for memory backend
 }
 
 // ServerConfig holds server configuration.
 type ServerConfig struct {
-	Addr      string
-	Store     *store.SQLite
-	APIKeys   []string
-	RateLimit RateLimitConfig
-	Webhooks  []config.WebhookConfig
+	Addr                string
+	Store               *store.SQLite
+	APIKeys             []string
+	RateLimit           RateLimitConfig
+	Webhooks            []config.WebhookConfig
+	DeadLetterRetention *DeadLetterRetentionConfig
+	Queue               QueueConfig
+}
+
+// buildQueue creates a queue backend from config.
+func buildQueue(cfg QueueConfig) QueueBackend {
+	if cfg.Backend == "redis" && cfg.RedisURL != "" {
+		opts, err := redis.ParseURL(cfg.RedisURL)
+		if err != nil {
+			return NewMemoryQueue(cfg.QueueSize)
+		}
+		client := redis.NewClient(opts)
+		return NewRedisQueue(client, "")
+	}
+	size := cfg.QueueSize
+	if size <= 0 {
+		size = 256
+	}
+	return NewMemoryQueue(size)
 }
 
 // NewServer creates an API server.
@@ -68,10 +96,11 @@ func NewServerWithConfig(config ServerConfig) *Server {
 		triggerBus: NewEventTriggerBus(256),
 	}
 
+	queue := buildQueue(config.Queue)
 	s.runner = NewRunner(s, &RuntimeStepExecutor{
 		AllowSimulatedFallback: true,
 		StorePath:              "agent.db",
-	}, 2, 256)
+	}, 2, queue)
 	s.scheduler = NewScheduler(func(ctx context.Context, agent, goal string) error {
 		if s.runner == nil {
 			return nil
@@ -104,6 +133,11 @@ func NewServerWithConfig(config ServerConfig) *Server {
 			s.rateLimitMw = NewRateLimitMiddleware(rateLimiter, config.RateLimit)
 		}
 		// If rate limiter setup fails, continue without rate limiting
+	}
+
+	// Setup dead-letter pruner if retention enabled
+	if config.DeadLetterRetention != nil && config.DeadLetterRetention.RetentionHours > 0 {
+		s.pruner = NewDeadLetterPruner(config.Store, *config.DeadLetterRetention)
 	}
 
 	return s
@@ -159,6 +193,10 @@ func (s *Server) Run() error {
 	defer cancel()
 	if s.runner != nil {
 		s.runner.Start(rootCtx)
+	}
+	if s.pruner != nil {
+		s.pruner.Start()
+		defer s.pruner.Stop()
 	}
 	if s.triggerBus != nil && s.runner != nil {
 		s.triggerBus.Start(rootCtx, func(ctx context.Context, evt TriggerEvent) error {

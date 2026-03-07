@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/NikoSokratous/unagnt/internal/config"
 	"github.com/NikoSokratous/unagnt/internal/store"
@@ -33,6 +35,10 @@ func main() {
 		Addr:    *addr,
 		Store:   st,
 		APIKeys: apiKeys,
+		Queue:   queueConfig(),
+	}
+	if dlRetention := deadLetterRetentionConfig(); dlRetention != nil {
+		serverCfg.DeadLetterRetention = dlRetention
 	}
 	if *webhooksPath != "" {
 		webhooks, err := config.LoadWebhooks(*webhooksPath)
@@ -61,4 +67,42 @@ func parseAPIKeys(v string) []string {
 		}
 	}
 	return keys
+}
+
+func queueConfig() orchestrate.QueueConfig {
+	backend := os.Getenv("QUEUE_BACKEND")
+	if backend == "" {
+		backend = "memory"
+	}
+	size := 256
+	if s := os.Getenv("QUEUE_SIZE"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil && n > 0 {
+			size = n
+		}
+	}
+	return orchestrate.QueueConfig{
+		Backend:   backend,
+		RedisURL:  os.Getenv("QUEUE_REDIS_URL"),
+		QueueSize: size,
+	}
+}
+
+func deadLetterRetentionConfig() *orchestrate.DeadLetterRetentionConfig {
+	hoursStr := os.Getenv("DEAD_LETTER_RETENTION_HOURS")
+	if hoursStr == "" {
+		return nil
+	}
+	hours, err := strconv.Atoi(hoursStr)
+	if err != nil || hours <= 0 {
+		return nil
+	}
+	cfg := &orchestrate.DeadLetterRetentionConfig{
+		RetentionHours: hours,
+		PruneInterval:  time.Hour,
+	}
+	if dir := os.Getenv("DEAD_LETTER_ARCHIVE_DIR"); dir != "" {
+		cfg.ArchiveBeforePrune = true
+		cfg.ArchiveDir = dir
+	}
+	return cfg
 }

@@ -296,6 +296,45 @@ func (s *SQLite) ListDeadLetters(ctx context.Context, limit int) ([]DeadLetter, 
 	return out, rows.Err()
 }
 
+// ListDeadLettersOlderThan returns dead letters with failed_at < olderThan, for archival before prune.
+func (s *SQLite) ListDeadLettersOlderThan(ctx context.Context, olderThan time.Time, limit int) ([]DeadLetter, error) {
+	if limit <= 0 {
+		limit = 1000
+	}
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT run_id, agent_name, goal, source, error, payload, attempt, max_retries, failed_at
+		 FROM dead_letters WHERE failed_at < ? ORDER BY failed_at ASC LIMIT ?`,
+		olderThan.Format(time.RFC3339), limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]DeadLetter, 0, limit)
+	for rows.Next() {
+		var dl DeadLetter
+		var failedAt string
+		if err := rows.Scan(&dl.RunID, &dl.AgentName, &dl.Goal, &dl.Source, &dl.Error, &dl.Payload, &dl.Attempt, &dl.MaxRetries, &failedAt); err != nil {
+			return nil, err
+		}
+		dl.FailedAt, _ = time.Parse(time.RFC3339, failedAt)
+		out = append(out, dl)
+	}
+	return out, rows.Err()
+}
+
+// PruneDeadLetters deletes rows with failed_at < olderThan and returns the count deleted.
+func (s *SQLite) PruneDeadLetters(ctx context.Context, olderThan time.Time) (int64, error) {
+	res, err := s.db.ExecContext(ctx,
+		`DELETE FROM dead_letters WHERE failed_at < ?`,
+		olderThan.Format(time.RFC3339),
+	)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}
+
 // GetLatestDeadLetterByRunID returns the latest dead-letter entry for a run.
 func (s *SQLite) GetLatestDeadLetterByRunID(ctx context.Context, runID string) (*DeadLetter, error) {
 	row := s.db.QueryRowContext(ctx,

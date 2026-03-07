@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -31,16 +30,17 @@ type Runner struct {
 	server   *Server
 	exec     StepExecutor
 	workers  int
-	queue    chan RunRequest
+	queue    QueueBackend
 	stopOnce sync.Once
 }
 
-func NewRunner(server *Server, exec StepExecutor, workers int, queueSize int) *Runner {
+// NewRunner creates a runner with a queue backend. Use NewMemoryQueue(size) or NewRedisQueue(client, key) for the queue.
+func NewRunner(server *Server, exec StepExecutor, workers int, queue QueueBackend) *Runner {
 	if workers <= 0 {
 		workers = 1
 	}
-	if queueSize <= 0 {
-		queueSize = 256
+	if queue == nil {
+		queue = NewMemoryQueue(256)
 	}
 	if exec == nil {
 		exec = SimulatedExecutor{}
@@ -49,7 +49,7 @@ func NewRunner(server *Server, exec StepExecutor, workers int, queueSize int) *R
 		server:  server,
 		exec:    exec,
 		workers: workers,
-		queue:   make(chan RunRequest, queueSize),
+		queue:   queue,
 	}
 }
 
@@ -61,19 +61,16 @@ func (r *Runner) Start(ctx context.Context) {
 
 func (r *Runner) Stop() {
 	r.stopOnce.Do(func() {
-		close(r.queue)
+		_ = r.queue.Close()
 	})
 }
 
 func (r *Runner) Submit(req RunRequest) error {
-	select {
-	case r.queue <- req:
-		RunQueueDepth.Set(float64(len(r.queue)))
-		return nil
-	default:
-		RunQueueRejected.Inc()
-		return fmt.Errorf("runner queue is full")
+	if err := r.queue.Enqueue(context.Background(), req); err != nil {
+		return err
 	}
+	RunQueueDepth.Set(float64(r.queue.Len()))
+	return nil
 }
 
 func (r *Runner) worker(ctx context.Context) {
@@ -81,11 +78,15 @@ func (r *Runner) worker(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case req, ok := <-r.queue:
+		default:
+			req, ok, err := r.queue.Dequeue(ctx)
+			if err != nil {
+				return
+			}
 			if !ok {
 				return
 			}
-			RunQueueDepth.Set(float64(len(r.queue)))
+			RunQueueDepth.Set(float64(r.queue.Len()))
 			r.execute(ctx, req)
 		}
 	}

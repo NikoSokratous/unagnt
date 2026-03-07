@@ -13,6 +13,8 @@ The Unagnt operator enables declarative management of:
 
 ### Install CRDs
 
+CRDs in `k8s/crds/` are generated from `api/v1/types.go`. After changing types, run `make generate-crds` and commit the updated YAMLs.
+
 ```bash
 kubectl apply -f k8s/crds/
 ```

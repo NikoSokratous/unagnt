@@ -726,7 +726,7 @@ Use this checklist for production hardening validation and incident response dri
 
 ### Kubernetes Operator
 
-Run `make generate-operator` (or `controller-gen` per [k8s/operator/BUILD_NOTES.md](../k8s/operator/BUILD_NOTES.md)) before first build. Generated `zz_generated.deepcopy.go` is committed.
+Use `make build-operator` to build the operator; it runs `generate-operator` and `generate-crds` first. CRDs are generated and committed to `k8s/operator/config/crd/bases/` and `k8s/crds/`. See [k8s/operator/BUILD_NOTES.md](../k8s/operator/BUILD_NOTES.md).
 
 ### Remaining Stubs
 

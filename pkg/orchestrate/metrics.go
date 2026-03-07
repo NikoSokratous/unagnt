@@ -73,4 +73,16 @@ var (
 		Name: "agentruntime_run_failures_total",
 		Help: "Total number of terminal run failures by reason and source",
 	}, []string{"reason", "source"})
+
+	// DeadLettersPruned tracks dead letters removed by retention pruner.
+	DeadLettersPruned = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "agentruntime_dead_letters_pruned_total",
+		Help: "Total number of dead letters pruned by retention",
+	})
+
+	// DeadLettersArchived tracks dead letters archived before prune.
+	DeadLettersArchived = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "agentruntime_dead_letters_archived_total",
+		Help: "Total number of dead letters archived to disk",
+	})
 )

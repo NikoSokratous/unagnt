@@ -59,6 +59,34 @@ curl -H "Authorization: Bearer secret-key-1" \
 - `GET /ready` - Readiness check
 - `GET /metrics` - Prometheus metrics
 
+### Queue Configuration
+
+Configure the run queue backend via environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `QUEUE_BACKEND` | `memory` or `redis` | `memory` |
+| `QUEUE_REDIS_URL` | Redis URL (required when backend is `redis`) | - |
+| `QUEUE_SIZE` | Queue capacity for memory backend | 256 |
+
+Example with Redis (durable queue):
+```bash
+export QUEUE_BACKEND=redis
+export QUEUE_REDIS_URL=redis://localhost:6379
+unagntd --addr :8080
+```
+
+### Dead-Letter Retention
+
+Configure dead-letter pruning and archival:
+
+| Variable | Description |
+|----------|-------------|
+| `DEAD_LETTER_RETENTION_HOURS` | Hours to keep before prune (e.g. 168 = 7 days) |
+| `DEAD_LETTER_ARCHIVE_DIR` | Directory to archive dead letters before prune |
+
+See [docs/runbooks/dead-letter-retention.md](../runbooks/dead-letter-retention.md) for details.
+
 ## Endpoints
 
 ### POST /v1/runs

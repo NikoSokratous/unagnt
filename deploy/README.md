@@ -26,3 +26,11 @@ docker-compose -f docker-compose.yml -f docker-compose.production.yml --profile 
 docker build -f deploy/Dockerfile -t unagnt .
 docker run -p 8080:8080 unagnt
 ```
+
+### Kubernetes operator image
+
+Build the operator for containerized Kubernetes deployments. Ensure `make generate-crds` has been run (committed generated files are used):
+
+```bash
+docker build -f deploy/Dockerfile.operator -t unagnt-operator .
+```

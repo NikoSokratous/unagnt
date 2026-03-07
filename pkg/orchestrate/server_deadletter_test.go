@@ -21,7 +21,7 @@ func TestHandleReplayDeadLetterQueuesNewRun(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	s.runner = NewRunner(s, fakeStepExecutor{}, 1, 8)
+	s.runner = NewRunner(s, fakeStepExecutor{}, 1, NewMemoryQueue(8))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	s.runner.Start(ctx)
@@ -78,7 +78,7 @@ func TestHandleReplayDeadLetterAppliesOverrides(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	s.runner = NewRunner(s, fakeStepExecutor{}, 1, 8)
+	s.runner = NewRunner(s, fakeStepExecutor{}, 1, NewMemoryQueue(8))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	s.runner.Start(ctx)
@@ -149,7 +149,7 @@ func TestHandleReplayDeadLetterRejectsNegativeOverrides(t *testing.T) {
 	defer st.Close()
 
 	s := NewServer("localhost:0", st, nil)
-	s.runner = NewRunner(s, fakeStepExecutor{}, 1, 8)
+	s.runner = NewRunner(s, fakeStepExecutor{}, 1, NewMemoryQueue(8))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	s.runner.Start(ctx)
