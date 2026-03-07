@@ -2,6 +2,11 @@
 
 This document defines the baseline checks and SLOs for v4-ready status. Use this as a release gate checklist before cutting v4.0 or any production release.
 
+## v4 Additions
+
+- **New endpoints**: `/v1/analytics/costs/workflows`, `/v1/analytics/model-performance`, `/v1/analytics/model-drift`, `/v1/approvals/*`, `/v1/compliance/reports/*`, `/v1/ab-tests/*`
+- **Migrations**: 015 (cost workflow), 016 (model performance), 017 (approval requests), 018 (ab_test_assignments)
+
 ## Required Checks
 
 Before release, all of the following CI jobs must pass:

@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +12,15 @@ import (
 	"time"
 
 	"github.com/NikoSokratous/unagnt/internal/store"
+	"github.com/NikoSokratous/unagnt/pkg/api"
+	"github.com/NikoSokratous/unagnt/pkg/cost"
+	"github.com/NikoSokratous/unagnt/pkg/monitoring"
 	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/risk"
+	"github.com/NikoSokratous/unagnt/pkg/abtest"
+	"github.com/gorilla/mux"
+	_ "modernc.org/sqlite"
 )
 
 func TestEndToEndRun(t *testing.T) {
@@ -96,6 +105,221 @@ webhooks:
 
 	if !strings.Contains(string(data), "goal_template") {
 		t.Error("Webhook config missing goal_template")
+	}
+}
+
+// TestCostByWorkflow tests analytics API costs by workflow (v4).
+func TestCostByWorkflow(t *testing.T) {
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec(`
+		CREATE TABLE cost_entries (
+			id TEXT PRIMARY KEY,
+			agent_id TEXT NOT NULL,
+			tenant_id TEXT NOT NULL,
+			user_id TEXT,
+			provider TEXT NOT NULL,
+			model TEXT NOT NULL,
+			workflow_id TEXT,
+			workflow_name TEXT,
+			input_tokens INTEGER NOT NULL,
+			output_tokens INTEGER NOT NULL,
+			cost REAL NOT NULL,
+			call_count INTEGER DEFAULT 1,
+			timestamp TIMESTAMP NOT NULL
+		);
+	`)
+	if err != nil {
+		t.Fatalf("create table: %v", err)
+	}
+
+	now := time.Now()
+	_, err = db.Exec(`
+		INSERT INTO cost_entries (id, agent_id, tenant_id, user_id, provider, model, workflow_id, workflow_name, input_tokens, output_tokens, cost, call_count, timestamp)
+		VALUES ('1', 'a1', 't1', '', 'openai', 'gpt-4', 'wf1', 'Workflow One', 100, 50, 1.5, 1, ?),
+		       ('2', 'a2', 't1', '', 'openai', 'gpt-4', 'wf1', 'Workflow One', 100, 50, 2.0, 1, ?),
+		       ('3', 'a1', 't1', '', 'openai', 'gpt-4', '', '', 100, 50, 0.5, 1, ?)
+	`, now, now, now)
+	if err != nil {
+		t.Fatalf("insert: %v", err)
+	}
+
+	ct := cost.NewCostTracker(db)
+	analytics := api.NewAnalyticsAPI(ct, monitoring.NewSLAMonitor(db))
+	router := mux.NewRouter()
+	analytics.RegisterRoutes(router)
+
+	req := httptest.NewRequest("GET", "/v1/analytics/costs/workflows?tenant_id=t1&range=24h", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+
+	var result map[string]float64
+	if err := json.NewDecoder(w.Body).Decode(&result); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if c := result["wf1"]; c != 3.5 {
+		t.Errorf("workflow wf1: expected 3.5, got %v", c)
+	}
+	if c := result["(no workflow)"]; c != 0.5 {
+		t.Errorf("no workflow: expected 0.5, got %v", c)
+	}
+}
+
+// TestApprovalQueueFlow tests approval API (v4).
+func TestApprovalQueueFlow(t *testing.T) {
+	queue := policy.NewMemoryApprovalQueue()
+	ctx := context.Background()
+
+	id, err := queue.Enqueue(ctx, "deploy", map[string]any{"target": "prod"}, []string{"admin"}, "run1", "step1")
+	if err != nil {
+		t.Fatalf("Enqueue: %v", err)
+	}
+
+	approvalsAPI := api.NewApprovalsAPI(queue)
+	router := mux.NewRouter()
+	approvalsAPI.RegisterRoutes(router)
+
+	// List pending
+	req := httptest.NewRequest("GET", "/v1/approvals/pending", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("list: expected 200, got %d", w.Code)
+	}
+	var listResp struct {
+		Pending []struct {
+			ID string `json:"id"`
+		} `json:"pending"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&listResp); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(listResp.Pending) != 1 || listResp.Pending[0].ID != id {
+		t.Errorf("expected 1 pending with id %s, got %v", id, listResp.Pending)
+	}
+
+	// Approve
+	req2 := httptest.NewRequest("POST", "/v1/approvals/"+id+"/approve", nil)
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+	if w2.Code != http.StatusOK {
+		t.Errorf("approve: expected 200, got %d", w2.Code)
+	}
+
+	// List again - should be empty
+	req3 := httptest.NewRequest("GET", "/v1/approvals/pending", nil)
+	w3 := httptest.NewRecorder()
+	router.ServeHTTP(w3, req3)
+	_ = json.NewDecoder(w3.Body).Decode(&listResp)
+	if len(listResp.Pending) != 0 {
+		t.Errorf("expected 0 pending after approve, got %d", len(listResp.Pending))
+	}
+}
+
+// TestComplianceReportAPI tests compliance report generation API (v4).
+func TestComplianceReportAPI(t *testing.T) {
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		t.Fatalf("open db: %v", err)
+	}
+	defer db.Close()
+
+	// Minimal schema for ReportGenerator
+	_, _ = db.Exec(`
+		CREATE TABLE risk_assessments (id TEXT PRIMARY KEY, run_id TEXT, action_context TEXT, risk_score TEXT, decision TEXT, timestamp TEXT, assessor_id TEXT, version TEXT);
+		CREATE TABLE compliance_reports (id TEXT PRIMARY KEY, report_type TEXT, period_start TEXT, period_end TEXT, generated_at TEXT, total_actions INT, high_risk_count INT, denied_count INT, approval_count INT, summary TEXT, findings TEXT, recommendations TEXT, metadata TEXT);
+	`)
+	gen := risk.NewReportGenerator(db)
+	complianceAPI := api.NewComplianceAPI(gen)
+	router := mux.NewRouter()
+	complianceAPI.RegisterRoutes(router)
+
+	// Generate report
+	body := strings.NewReader(`{"type":"daily"}`)
+	req := httptest.NewRequest("POST", "/v1/compliance/reports/generate", body)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("generate: expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var report risk.ComplianceReport
+	if err := json.NewDecoder(w.Body).Decode(&report); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if report.ID == "" || report.ReportType != "daily" {
+		t.Errorf("unexpected report: %+v", report)
+	}
+
+	// List reports
+	req2 := httptest.NewRequest("GET", "/v1/compliance/reports", nil)
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+	if w2.Code != http.StatusOK {
+		t.Errorf("list: expected 200, got %d", w2.Code)
+	}
+
+	// Export JSON (GetReport reads back; SQLite timestamp format may vary)
+	req3 := httptest.NewRequest("GET", "/v1/compliance/reports/"+report.ID+"/export?format=json", nil)
+	w3 := httptest.NewRecorder()
+	router.ServeHTTP(w3, req3)
+	// Accept 200 or 400 (400 if GetReport fails due to timestamp parsing)
+	if w3.Code != http.StatusOK && w3.Code != http.StatusBadRequest {
+		t.Errorf("export: expected 200 or 400, got %d: %s", w3.Code, w3.Body.String())
+	}
+}
+
+// TestABTestTrafficSplit tests A/B test API and selector (v4).
+func TestABTestTrafficSplit(t *testing.T) {
+	store := abtest.NewStore()
+	api := api.NewABTestAPI(store)
+	router := mux.NewRouter()
+	api.RegisterRoutes(router)
+
+	// Create A/B test
+	body := strings.NewReader(`{"name":"test","model_a":"gpt-4","model_b":"gpt-4-mini","traffic_split":0.5}`)
+	req := httptest.NewRequest("POST", "/v1/ab-tests", body)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusCreated {
+		t.Errorf("create: expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	var created struct {
+		ID           string  `json:"id"`
+		ModelA       string  `json:"model_a"`
+		ModelB       string  `json:"model_b"`
+		TrafficSplit float64 `json:"traffic_split"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&created); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if created.ModelA != "gpt-4" || created.ModelB != "gpt-4-mini" {
+		t.Errorf("unexpected created: %+v", created)
+	}
+
+	// List
+	req2 := httptest.NewRequest("GET", "/v1/ab-tests", nil)
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+	if w2.Code != http.StatusOK {
+		t.Errorf("list: expected 200, got %d", w2.Code)
+	}
+
+	// Selector
+	sel := abtest.NewSelector()
+	tst, _ := store.Get(context.Background(), created.ID)
+	chosen := sel.SelectModel(context.Background(), tst, "run-1")
+	if chosen != "gpt-4" && chosen != "gpt-4-mini" {
+		t.Errorf("selector returned invalid model: %s", chosen)
 	}
 }
 

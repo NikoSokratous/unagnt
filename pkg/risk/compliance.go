@@ -366,6 +366,7 @@ type ExportFormat string
 const (
 	ExportFormatJSON ExportFormat = "json"
 	ExportFormatCSV  ExportFormat = "csv"
+	ExportFormatCEF  ExportFormat = "cef"
 	ExportFormatPDF  ExportFormat = "pdf"
 )
 
@@ -382,6 +383,9 @@ func (g *ReportGenerator) ExportReport(ctx context.Context, reportID string, for
 
 	case ExportFormatCSV:
 		return g.exportCSV(report)
+
+	case ExportFormatCEF:
+		return g.exportCEF(report)
 
 	case ExportFormatPDF:
 		return nil, fmt.Errorf("PDF export not yet implemented")
@@ -406,4 +410,13 @@ func (g *ReportGenerator) exportCSV(report *ComplianceReport) ([]byte, error) {
 	)
 
 	return []byte(csv), nil
+}
+
+// exportCEF exports report in CEF format for SIEM
+func (g *ReportGenerator) exportCEF(report *ComplianceReport) ([]byte, error) {
+	// CEF: CEF:Version|Device Vendor|Device Product|Device Version|Signature ID|Name|Severity|Extension
+	cef := "CEF:0|Unagnt|AgentRuntime|1.0|compliance_report|" + report.ReportType + "|" + fmt.Sprintf("%.0f", report.Summary.ComplianceRate*10) + "|"
+	cef += "rt=" + fmt.Sprintf("%d", report.GeneratedAt.UnixMilli()) + " "
+	cef += "msg=" + fmt.Sprintf("Compliance report %s: %d actions, %.1f%% compliant", report.ID, report.TotalActions, report.Summary.ComplianceRate*100)
+	return []byte(cef), nil
 }

@@ -25,6 +25,8 @@ type CostAccumulator struct {
 	UserID       string
 	Provider     string
 	Model        string
+	WorkflowID   string
+	WorkflowName string
 	InputTokens  int64
 	OutputTokens int64
 	TotalCost    float64
@@ -40,6 +42,8 @@ type CostEntry struct {
 	UserID       string
 	Provider     string
 	Model        string
+	WorkflowID   string
+	WorkflowName string
 	InputTokens  int64
 	OutputTokens int64
 	Cost         float64
@@ -91,16 +95,17 @@ func (ct *CostTracker) Stop() {
 	close(ct.stopChan)
 }
 
-// TrackLLMCall tracks the cost of an LLM API call
-func (ct *CostTracker) TrackLLMCall(ctx context.Context, agentID, tenantID, userID, provider, model string, inputTokens, outputTokens int64) error {
+// TrackLLMCall tracks the cost of an LLM API call.
+// workflowID and workflowName are optional; pass "" when not in a workflow.
+func (ct *CostTracker) TrackLLMCall(ctx context.Context, agentID, tenantID, userID, provider, model string, inputTokens, outputTokens int64, workflowID, workflowName string) error {
 	// Calculate cost
 	cost, err := ct.calculateCost(provider, model, inputTokens, outputTokens)
 	if err != nil {
 		return fmt.Errorf("calculate cost: %w", err)
 	}
 
-	// Create accumulator key
-	key := fmt.Sprintf("%s:%s:%s:%s:%s", agentID, tenantID, userID, provider, model)
+	// Create accumulator key (include workflow for granularity)
+	key := fmt.Sprintf("%s:%s:%s:%s:%s:%s", agentID, tenantID, userID, provider, model, workflowID)
 
 	ct.mu.Lock()
 	defer ct.mu.Unlock()
@@ -109,12 +114,14 @@ func (ct *CostTracker) TrackLLMCall(ctx context.Context, agentID, tenantID, user
 	acc, exists := ct.currentCosts[key]
 	if !exists {
 		acc = &CostAccumulator{
-			AgentID:     agentID,
-			TenantID:    tenantID,
-			UserID:      userID,
-			Provider:    provider,
-			Model:       model,
-			LastUpdated: time.Now(),
+			AgentID:      agentID,
+			TenantID:     tenantID,
+			UserID:       userID,
+			Provider:     provider,
+			Model:        model,
+			WorkflowID:   workflowID,
+			WorkflowName: workflowName,
+			LastUpdated:  time.Now(),
 		}
 		ct.currentCosts[key] = acc
 	}
@@ -186,8 +193,9 @@ func (ct *CostTracker) flush() {
 	stmt, err := tx.Prepare(`
 		INSERT INTO cost_entries (
 			id, agent_id, tenant_id, user_id, provider, model,
+			workflow_id, workflow_name,
 			input_tokens, output_tokens, cost, call_count, timestamp
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		fmt.Printf("Failed to prepare statement: %v\n", err)
@@ -200,6 +208,7 @@ func (ct *CostTracker) flush() {
 		_, err := stmt.Exec(
 			id, acc.AgentID, acc.TenantID, acc.UserID,
 			acc.Provider, acc.Model,
+			acc.WorkflowID, acc.WorkflowName,
 			acc.InputTokens, acc.OutputTokens,
 			acc.TotalCost, acc.CallCount,
 			acc.LastUpdated,
@@ -319,17 +328,70 @@ func (ct *CostTracker) GetTotalCost(ctx context.Context, tenantID string, start,
 	return totalCost, nil
 }
 
-// GetCostBreakdown returns detailed cost breakdown
-func (ct *CostTracker) GetCostBreakdown(ctx context.Context, tenantID string, start, end time.Time) ([]*CostEntry, error) {
+// GetCostsByWorkflow returns costs grouped by workflow
+func (ct *CostTracker) GetCostsByWorkflow(ctx context.Context, tenantID string, start, end time.Time) (map[string]float64, error) {
 	query := `
-		SELECT id, agent_id, tenant_id, user_id, provider, model,
-		       input_tokens, output_tokens, cost, call_count, timestamp
+		SELECT COALESCE(workflow_id, '') as wf_id, SUM(cost) as total_cost
 		FROM cost_entries
 		WHERE tenant_id = ? AND timestamp BETWEEN ? AND ?
-		ORDER BY timestamp DESC
+		GROUP BY COALESCE(workflow_id, '')
 	`
 
 	rows, err := ct.db.QueryContext(ctx, query, tenantID, start, end)
+	if err != nil {
+		return nil, fmt.Errorf("query costs by workflow: %w", err)
+	}
+	defer rows.Close()
+
+	costs := make(map[string]float64)
+	for rows.Next() {
+		var wfID string
+		var totalCost float64
+		if err := rows.Scan(&wfID, &totalCost); err != nil {
+			return nil, fmt.Errorf("scan row: %w", err)
+		}
+		key := wfID
+		if key == "" {
+			key = "(no workflow)"
+		}
+		costs[key] = totalCost
+	}
+
+	return costs, rows.Err()
+}
+
+// CostBreakdownFilter optionally filters GetCostBreakdown by workflow or model
+type CostBreakdownFilter struct {
+	WorkflowID string
+	Model      string // provider:model or exact model name
+}
+
+// GetCostBreakdown returns detailed cost breakdown.
+// Pass nil filter for no filtering.
+func (ct *CostTracker) GetCostBreakdown(ctx context.Context, tenantID string, start, end time.Time, filter *CostBreakdownFilter) ([]*CostEntry, error) {
+	query := `
+		SELECT id, agent_id, tenant_id, user_id, provider, model,
+		       COALESCE(workflow_id, ''), COALESCE(workflow_name, ''),
+		       input_tokens, output_tokens, cost, call_count, timestamp
+		FROM cost_entries
+		WHERE tenant_id = ? AND timestamp BETWEEN ? AND ?
+	`
+	args := []interface{}{tenantID, start, end}
+
+	if filter != nil {
+		if filter.WorkflowID != "" {
+			query += ` AND (workflow_id = ? OR (workflow_id IS NULL AND ? = ''))`
+			args = append(args, filter.WorkflowID, filter.WorkflowID)
+		}
+		if filter.Model != "" {
+			query += ` AND (model = ? OR (provider || ':' || model) = ?)`
+			args = append(args, filter.Model, filter.Model)
+		}
+	}
+
+	query += ` ORDER BY timestamp DESC`
+
+	rows, err := ct.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("query cost breakdown: %w", err)
 	}
@@ -338,14 +400,18 @@ func (ct *CostTracker) GetCostBreakdown(ctx context.Context, tenantID string, st
 	var entries []*CostEntry
 	for rows.Next() {
 		entry := &CostEntry{}
+		var wfID, wfName string
 		if err := rows.Scan(
 			&entry.ID, &entry.AgentID, &entry.TenantID, &entry.UserID,
 			&entry.Provider, &entry.Model,
+			&wfID, &wfName,
 			&entry.InputTokens, &entry.OutputTokens,
 			&entry.Cost, &entry.CallCount, &entry.Timestamp,
 		); err != nil {
 			return nil, fmt.Errorf("scan row: %w", err)
 		}
+		entry.WorkflowID = wfID
+		entry.WorkflowName = wfName
 		entries = append(entries, entry)
 	}
 

@@ -470,12 +470,12 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
-### 📋 v4.0: Observability & Governance (Backlog)
-- Agent usage analytics (by tenant, workflow, model)
-- Model drift and performance monitoring
-- Human review queues and approval flows
-- Compliance report generation
-- Agent A/B testing framework
+### v4.0: Observability & Governance — Implemented
+- Agent usage analytics by tenant, workflow, and model (`GET /v1/analytics/costs/workflows`, breakdown filters)
+- Model drift and performance monitoring (Collector, PerformanceStore, `GET /v1/analytics/model-performance`, `model-drift`)
+- Human review queues and approval flows (`/v1/approvals/*`, `unagnt approvals list|approve|deny`)
+- Compliance report generation (`/v1/compliance/reports/*`, JSON/CSV/CEF export)
+- Agent A/B testing framework (`/v1/ab-tests`, selector, results API)
 
 ### 📋 v5.0: Developer Experience (Backlog)
 - VS Code extension (local dev, workflow authoring, debugging)

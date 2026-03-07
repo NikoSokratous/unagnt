@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/NikoSokratous/unagnt/pkg/cost"
+	"github.com/NikoSokratous/unagnt/pkg/mlops"
 	"github.com/NikoSokratous/unagnt/pkg/monitoring"
 	"github.com/NikoSokratous/unagnt/pkg/policy"
 	"github.com/gorilla/mux"
@@ -16,7 +17,8 @@ import (
 type AnalyticsAPI struct {
 	costTracker *cost.CostTracker
 	slaMonitor  *monitoring.SLAMonitor
-	auditLogger *policy.AuditLogger // optional
+	auditLogger *policy.AuditLogger   // optional
+	perfStore   *mlops.PerformanceStore // optional; enables model-performance and model-drift
 }
 
 // NewAnalyticsAPI creates a new analytics API
@@ -36,6 +38,11 @@ func NewAnalyticsAPIWithAudit(costTracker *cost.CostTracker, slaMonitor *monitor
 	}
 }
 
+// SetModelPerformanceStore enables model performance and drift endpoints
+func (api *AnalyticsAPI) SetModelPerformanceStore(store *mlops.PerformanceStore) {
+	api.perfStore = store
+}
+
 // RegisterRoutes registers analytics API routes
 func (api *AnalyticsAPI) RegisterRoutes(router *mux.Router) {
 	// Cost endpoints
@@ -43,11 +50,16 @@ func (api *AnalyticsAPI) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/v1/analytics/costs/agents", api.GetCostsByAgent).Methods("GET")
 	router.HandleFunc("/v1/analytics/costs/tenants", api.GetCostsByTenant).Methods("GET")
 	router.HandleFunc("/v1/analytics/costs/breakdown", api.GetCostBreakdown).Methods("GET")
+	router.HandleFunc("/v1/analytics/costs/workflows", api.GetCostsByWorkflow).Methods("GET")
 
 	// SLA endpoints
 	router.HandleFunc("/v1/analytics/sla", api.GetSLA).Methods("GET")
 	router.HandleFunc("/v1/analytics/sla/report", api.GenerateSLAReport).Methods("GET")
 	router.HandleFunc("/v1/analytics/sla/targets", api.SetSLATarget).Methods("POST")
+
+	// Model performance and drift (v4)
+	router.HandleFunc("/v1/analytics/model-performance", api.GetModelPerformance).Methods("GET")
+	router.HandleFunc("/v1/analytics/model-drift", api.GetModelDrift).Methods("GET")
 
 	// Performance endpoints
 	router.HandleFunc("/v1/analytics/performance", api.GetPerformance).Methods("GET")
@@ -134,13 +146,21 @@ func (api *AnalyticsAPI) GetCostsByTenant(w http.ResponseWriter, r *http.Request
 }
 
 // GetCostBreakdown handles GET /v1/analytics/costs/breakdown
+// Query params: tenant_id, range, workflow_id, model (optional filters)
 func (api *AnalyticsAPI) GetCostBreakdown(w http.ResponseWriter, r *http.Request) {
 	tenantID := r.URL.Query().Get("tenant_id")
 	timeRange := r.URL.Query().Get("range")
+	workflowID := r.URL.Query().Get("workflow_id")
+	model := r.URL.Query().Get("model")
 
 	start, end := parseTimeRange(timeRange)
 
-	breakdown, err := api.costTracker.GetCostBreakdown(r.Context(), tenantID, start, end)
+	var filter *cost.CostBreakdownFilter
+	if workflowID != "" || model != "" {
+		filter = &cost.CostBreakdownFilter{WorkflowID: workflowID, Model: model}
+	}
+
+	breakdown, err := api.costTracker.GetCostBreakdown(r.Context(), tenantID, start, end, filter)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -148,6 +168,102 @@ func (api *AnalyticsAPI) GetCostBreakdown(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(breakdown)
+}
+
+// GetCostsByWorkflow handles GET /v1/analytics/costs/workflows
+func (api *AnalyticsAPI) GetCostsByWorkflow(w http.ResponseWriter, r *http.Request) {
+	tenantID := r.URL.Query().Get("tenant_id")
+	timeRange := r.URL.Query().Get("range")
+
+	start, end := parseTimeRange(timeRange)
+
+	costs, err := api.costTracker.GetCostsByWorkflow(r.Context(), tenantID, start, end)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(costs)
+}
+
+// GetModelPerformance handles GET /v1/analytics/model-performance
+func (api *AnalyticsAPI) GetModelPerformance(w http.ResponseWriter, r *http.Request) {
+	if api.perfStore == nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{"snapshots": []interface{}{}, "message": "model performance store not configured"})
+		return
+	}
+	provider := r.URL.Query().Get("provider")
+	modelID := r.URL.Query().Get("model_id")
+	limitStr := r.URL.Query().Get("limit")
+	limit := 10
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+	if provider == "" {
+		provider = "openai"
+	}
+	if modelID == "" {
+		modelID = "gpt-4"
+	}
+
+	snapshots, err := api.perfStore.GetRecentSnapshots(r.Context(), provider, modelID, limit)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	out := make([]map[string]interface{}, 0, len(snapshots))
+	for _, s := range snapshots {
+		out = append(out, map[string]interface{}{
+			"model_id":       s.ModelID,
+			"provider":       s.Provider,
+			"latency_p50_ms": s.LatencyP50Ms,
+			"latency_p95_ms": s.LatencyP95Ms,
+			"latency_p99_ms": s.LatencyP99Ms,
+			"error_rate":     s.ErrorRate,
+			"throughput":     s.Throughput,
+			"sample_count":   s.SampleCount,
+			"timestamp":      s.Timestamp.Format(time.RFC3339),
+		})
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"snapshots": out})
+}
+
+// GetModelDrift handles GET /v1/analytics/model-drift
+func (api *AnalyticsAPI) GetModelDrift(w http.ResponseWriter, r *http.Request) {
+	if api.perfStore == nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{"drifted": false, "message": "model performance store not configured"})
+		return
+	}
+	provider := r.URL.Query().Get("provider")
+	modelID := r.URL.Query().Get("model_id")
+	if provider == "" {
+		provider = "openai"
+	}
+	if modelID == "" {
+		modelID = "gpt-4"
+	}
+
+	result, err := api.perfStore.DetectDrift(r.Context(), provider, modelID, 1.5, 0.05)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"model_id":      result.ModelID,
+		"provider":      result.Provider,
+		"drifted":       result.Drifted,
+		"latency_delta": result.LatencyDelta,
+		"error_delta":   result.ErrorDelta,
+		"message":       result.Message,
+	})
 }
 
 // GetSLA handles GET /v1/analytics/sla
