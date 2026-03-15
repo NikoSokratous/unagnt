@@ -112,22 +112,22 @@ type ReplayOptions struct {
 type ReplayStepTrace struct {
 	Seq        int    `json:"seq"`
 	Tool       string `json:"tool"`
-	Source     string `json:"source"`  // "recorded" | "live" | "breakpoint"
+	Source     string `json:"source"` // "recorded" | "live" | "breakpoint"
 	InputSum   string `json:"input_summary"`
 	OutputSum  string `json:"output_summary"`
-	Result     string `json:"result"`  // "ok" | "match" | "diverged" | ""
+	Result     string `json:"result"` // "ok" | "match" | "diverged" | ""
 	Duration   string `json:"duration,omitempty"`
 	Divergence string `json:"divergence,omitempty"` // when Result=diverged
 }
 
 // ReplayResult contains the outcome of a replay.
 type ReplayResult struct {
-	Success     bool              `json:"success"`
-	SnapshotID  string            `json:"snapshot_id"`
-	Mode        ReplayMode        `json:"mode"`
-	StartedAt   time.Time         `json:"started_at"`
-	CompletedAt time.Time         `json:"completed_at"`
-	Duration    time.Duration     `json:"duration"`
+	Success     bool          `json:"success"`
+	SnapshotID  string        `json:"snapshot_id"`
+	Mode        ReplayMode    `json:"mode"`
+	StartedAt   time.Time     `json:"started_at"`
+	CompletedAt time.Time     `json:"completed_at"`
+	Duration    time.Duration `json:"duration"`
 
 	// Step-by-step trace for developer output
 	Trace []ReplayStepTrace `json:"trace,omitempty"`

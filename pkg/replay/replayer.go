@@ -282,9 +282,9 @@ func (r *Replayer) replayDebug(ctx context.Context, options ReplayOptions, resul
 
 		result.Trace = append(result.Trace, ReplayStepTrace{
 			Seq: action.Sequence, Tool: action.ToolName, Source: src,
-			InputSum: truncate(string(action.Input), 60),
+			InputSum:  truncate(string(action.Input), 60),
 			OutputSum: truncate(string(action.Output), 60),
-			Result: "ok",
+			Result:    "ok",
 		})
 
 		result.ActionsRerun++

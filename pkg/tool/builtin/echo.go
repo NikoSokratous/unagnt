@@ -10,9 +10,11 @@ import (
 // Echo is a built-in tool that echoes back input (useful for testing).
 type Echo struct{}
 
-func (Echo) Name() string        { return "echo" }
-func (Echo) Version() string     { return "1" }
-func (Echo) Description() string { return "Echo back a message. Use when asked to output, repeat, or display text." }
+func (Echo) Name() string    { return "echo" }
+func (Echo) Version() string { return "1" }
+func (Echo) Description() string {
+	return "Echo back a message. Use when asked to output, repeat, or display text."
+}
 func (Echo) Permissions() []tool.Permission {
 	return nil
 }
