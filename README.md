@@ -42,24 +42,24 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 
 ### Highlights
 
-✅ **Production-Ready**: Policy enforcement, audit logs, and security by default  
-✅ **Observable**: Full tracing, metrics, and replay capabilities  
-✅ **Scalable**: Kubernetes-native with auto-scaling and multi-tenancy  
-✅ **Developer-Friendly**: CLI tools, SDKs, visual workflow designer  
-✅ **Provider-Agnostic**: OpenAI, Anthropic, Ollama, or any LLM  
+ **Production-Ready**: Policy enforcement, audit logs, and security by default  
+ **Observable**: Full tracing, metrics, and replay capabilities  
+ **Scalable**: Kubernetes-native with auto-scaling and multi-tenancy  
+ **Developer-Friendly**: CLI tools, SDKs, visual workflow designer  
+ **Provider-Agnostic**: OpenAI, Anthropic, Ollama, or any LLM  
 
 ---
 
-## 🎯 Key Features
+## Key Features
 
-### 🔐 Security & Governance
+### Security & Governance
 - **Policy Engine**: YAML-based policies with CEL expressions
 - **Risk Scoring**: Real-time risk assessment across 7 categories
 - **Audit Logs**: Encrypted, tamper-proof execution logs; SIEM export (JSON/CSV/CEF)
 - **RBAC**: Role-based access control; SSO/SAML/OIDC; advanced RBAC (templates, delegation)
 - **Secrets**: Vault, AWS/GCP backends; `secret:ref:` in config
 
-### 🔄 Workflow Orchestration
+### Workflow Orchestration
 - **Visual Designer**: Drag-and-drop workflow builder
 - **DAG Execution**: Parallel agent coordination
 - **Durable Execution**: Checkpoints after each level; resume from last checkpoint after crash or restart
@@ -67,13 +67,13 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 - **Approval Steps**: Native human-in-the-loop steps in workflows (pause for approval, then continue)
 - **Template Marketplace**: Pre-built workflows for common tasks
 
-### 📊 Observability
+### Observability
 - **Distributed Tracing**: OpenTelemetry integration
 - **Real-time Metrics**: Prometheus-compatible metrics
 - **Cost Attribution**: Per-agent/tenant cost tracking
 - **SLA Monitoring**: Uptime, latency, and error tracking
 
-### 🚀 Enterprise Scale
+### Enterprise Scale
 - **Kubernetes Operator**: Custom resources for agents and workflows
 - **Helm Charts**: Production-ready deployments
 - **Air-Gapped**: Offline bundle, local LLMs (Ollama), compliance configs included
@@ -81,7 +81,7 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 - **Service Mesh**: Istio/Linkerd integration with mTLS
 - **Auto-Scaling**: Queue depth and custom metrics-based scaling
 
-### 🧠 Agent Capabilities
+### Agent Capabilities
 - **Memory Systems**: Working, persistent, semantic, and event log
 - **Context Assembly**: Automatic retrieval of policies, memory, workflow state, and knowledge
 - **RAG (Retrieval Augmented Generation)**: Ingest documents, semantic search, ground responses in your knowledge base
@@ -93,7 +93,7 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation (Zero Dependencies)
 
@@ -136,7 +136,7 @@ model_routing:
       name: gpt-4o
 ```
 
-👉 **Try the full walkthrough in 2 minutes**: [docs/E2E_EXAMPLE.md](docs/E2E_EXAMPLE.md)
+ **Try the full walkthrough in 2 minutes**: [docs/E2E_EXAMPLE.md](docs/E2E_EXAMPLE.md)
 
 ### Build from Source
 
@@ -159,11 +159,11 @@ cd web && npm install && npm run dev
 # Navigate to Workflow Designer to build workflows visually
 ```
 
-👉 **See [QUICKSTART.md](QUICKSTART.md) for detailed getting started guide**
+ **See [QUICKSTART.md](QUICKSTART.md) for detailed getting started guide**
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### For Users
 - **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
@@ -193,7 +193,7 @@ cd web && npm install && npm run dev
 
 ---
 
-## 🎨 Examples
+## Examples
 
 ### Code Review Bot
 ```yaml
@@ -248,11 +248,11 @@ context_assembly:
 ```
 Ingest docs, then run: `unagnt context ingest ./docs`
 
-👉 **See [examples/](examples/) for 20+ ready-to-use examples**
+ **See [examples/](examples/) for 20+ ready-to-use examples**
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -303,11 +303,11 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 - **Deployment**: Kubernetes, air-gapped, local LLMs (Ollama)
 - **Observability**: Tracing, metrics, logs, and replay
 
-👉 **See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for deep dive**
+ **See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for deep dive**
 
 ---
 
-## 🌟 Showcase
+## Showcase
 
 ### Workflow Designer
 ![Workflow Designer](docs/images/workflow-designer.png)
@@ -323,20 +323,20 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
-## 📈 Use Cases
+## Use Cases
 
-- **🤖 Autonomous Agents**: Production agents with safety guarantees
-- **📊 Data Pipelines**: ETL workflows with AI-powered transformation
-- **🔍 Code Review**: Automated PR reviews with multiple checks
-- **📝 Content Generation**: SEO-optimized content creation at scale
-- **💬 Customer Support**: Intelligent ticket routing and responses
-- **🔬 Research**: Multi-source research with synthesis
-- **💡 Support with RAG**: Ground agents in docs; ingest markdown/text, semantic search, grounded responses
-- **🚀 DevOps**: Deployment automation with testing and rollback
+- ** Autonomous Agents**: Production agents with safety guarantees
+- ** Data Pipelines**: ETL workflows with AI-powered transformation
+- ** Code Review**: Automated PR reviews with multiple checks
+- ** Content Generation**: SEO-optimized content creation at scale
+- ** Customer Support**: Intelligent ticket routing and responses
+- ** Research**: Multi-source research with synthesis
+- ** Support with RAG**: Ground agents in docs; ingest markdown/text, semantic search, grounded responses
+- ** DevOps**: Deployment automation with testing and rollback
 
 ---
 
-## 📊 Project Stats
+## Project Stats
 
 - **Language**: Go 1.22
 - **LOC**: ~50,000 lines of production code
@@ -347,9 +347,9 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
-### ✅ v1.0 (Complete)
+### v1.0 (Complete)
 - [x] Visual workflow designer
 - [x] Kubernetes operator
 - [x] Cost attribution and SLA monitoring
@@ -360,38 +360,38 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 - [x] Context assembly with embeddings (OpenAI + local)
 - [x] Semantic memory search and local storage (SQLite, in-memory)
 
-### ✅ v1.1: Pitch Readiness (Complete)
+### v1.1: Pitch Readiness (Complete)
 - [x] Safety-First Demo (showcase/safety-first-demo/)
 - [x] Showcase App: Enterprise Compliance Bot (showcase/enterprise-compliance-bot/)
 - [x] Policy Playground (Web UI)
 - [x] Policy denials API and Analytics UI
 - [x] ROI methodology (docs/ROI_BENCHMARK.md or equivalent)
 
-### ✅ v1.2: Ecosystem and Governance (Complete)
+### v1.2: Ecosystem and Governance (Complete)
 - [x] MCP (Model Context Protocol) Support
 - [x] HITL Demo Flow
 - [x] Budget Caps and Alerts (pkg/cost/budget.go)
 - [x] GitOps for Policies (unagnt policy apply)
 - [x] Workflow Versioning
 
-### ✅ v1.3: Enterprise Foundations (Complete)
+### v1.3: Enterprise Foundations (Complete)
 - [x] SSO / SAML / OIDC
 - [x] Multi-Region / HA
 - [x] Secrets Management (Vault, AWS/GCP Secrets Manager)
 - [x] Enterprise Integrations (Slack, Teams, Jira/ServiceNow)
 - [x] Advanced RBAC
 
-### 🚀 v2.0: Enterprise Platform and Commercialization (Target: ~12–16 weeks)
+### v2.0: Enterprise Platform and Commercialization (Target: ~12–16 weeks)
 
 **Goal:** Compliance packaging, air-gapped deployment, and clear commercial offer.
 
-#### 1. Compliance Pack ✅
+#### 1. Compliance Pack 
 - **Deliverable:** `configs/compliance/soc2/`, `configs/compliance/hipaa/`, `GET /v1/compliance/audit/export?format=json|csv|cef` for SIEM.
 
-#### 2. Air-Gapped Deployment ✅
+#### 2. Air-Gapped Deployment 
 - **Deliverable:** `deploy/air-gapped/`, `scripts/offline-install.sh` (bundle + install); optional Ollama/local model config.
 
-#### 3. Open-Core Structure ✅
+#### 3. Open-Core Structure 
 - **Deliverable:** `pkg/license/` feature gating (OSS core vs enterprise features); packaging for enterprise binary.
 
 #### 4. Hosted Tier (Optional)
@@ -402,21 +402,21 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 - **What:** Public or private marketplace for workflows/tools; paid listings with revenue share.
 - **Deliverable:** Marketplace UI, listing/purchase flow (extend `pkg/registry/workflow_marketplace.go`, `pkg/tool/marketplace.go`).
 
-#### 6. Support and Documentation ✅
+#### 6. Support and Documentation 
 - **Deliverable:** [SUPPORT.md](SUPPORT.md), [docs/PRICING.md](docs/PRICING.md), [docs/SOW_TEMPLATE.md](docs/SOW_TEMPLATE.md).
 
 ---
 
-### 🎯 v3.0: Production Runtime & Agentic Orchestration (Complete)
+### v3.0: Production Runtime & Agentic Orchestration (Complete)
 
 **Goal:** Enable real production workloads and differentiate with intelligent orchestration.
 
 **Status Overview:**
-- ✅ **Phase 1 complete**: Full runtime integration is implemented.
-- ✅ **Phase 2 complete**: Agentic orchestration primitives are implemented.
-- ✅ **Phase 3 complete**: Runtime hardening, rollout quality, and GA-readiness baseline are implemented.
+- **Phase 1 complete**: Full runtime integration is implemented.
+- **Phase 2 complete**: Agentic orchestration primitives are implemented.
+- **Phase 3 complete**: Runtime hardening, rollout quality, and GA-readiness baseline are implemented.
 
-#### Phase 1: Full Runtime Integration (✅ Done)
+#### Phase 1: Full Runtime Integration (Done)
 - **Included:**
   - Runtime-backed step execution via `RuntimeStepExecutor`
   - Async runner queue/service for isolated execution
@@ -426,7 +426,7 @@ Ingest docs, then run: `unagnt context ingest ./docs`
   - Workflow checkpoint persistence + resume flow
 - **Outcome:** Production workflows now execute end-to-end; external systems can reliably trigger runs.
 
-#### Phase 2: Agentic Orchestration (✅ Done)
+#### Phase 2: Agentic Orchestration (Done)
 - **Included:**
   - Multi-model routing for step execution
   - Guardrails layer for goal/output safety controls
@@ -435,7 +435,7 @@ Ingest docs, then run: `unagnt context ingest ./docs`
   - Supporting tests and docs updates
 - **Outcome:** Orchestration is smarter and more cost-aware than static DAG-only execution.
 
-#### Phase 3: Runtime Hardening and GA Readiness (✅ Done)
+#### Phase 3: Runtime Hardening and GA Readiness (Done)
 - **Included scope:**
   - End-to-end validation of runtime/webhook/scheduler/trigger paths under load (queue/backpressure and cancellation scenarios covered in tests)
   - Failure-mode hardening (retries, per-attempt timeouts, dead-letter capture, replay, cancellation-safe backoff)
@@ -446,7 +446,7 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 
 ---
 
-### 🔒 v3.1: Pre-v4 Hardening Gate (Required Before v4) — Complete
+### v3.1: Pre-v4 Hardening Gate (Required Before v4) — Complete
 
 **Goal:** Resolve operational limitations from v3 and establish a release-quality reliability gate before v4 starts.
 
@@ -486,25 +486,25 @@ Ingest docs, then run: `unagnt context ingest ./docs`
 - VS Code extension (workflow authoring, local run, Explorer)
 - Local-first development with cloud sync (`unagnt sync push|pull|status`)
 
-### 📋 v6.0: Edge & Federated (Backlog)
+### v6.0: Edge & Federated (Backlog)
 - Edge deployment (agents closer to data/sensors)
 - Federated learning patterns for cross-org models
 - Hybrid orchestration (central control + edge execution)
 - Resource-constrained device support (ARM, low memory)
 
-### 📋 v7.0: Natural Language Workflows (Backlog)
+### v7.0: Natural Language Workflows (Backlog)
 - Natural language workflow definitions
 - Conversational policy configuration
 - No-code branching and routing
 - “Explain this workflow” in plain language
 
-### 📋 v8.0+: Hosted & Marketplace (Backlog)
+### v8.0+: Hosted & Marketplace (Backlog)
 - **Hosted Tier:** Managed Unagnt; multi-tenant SaaS; usage-based pricing.
 - **Agent Marketplace:** Private/public marketplace; paid listings; discovery and curation.
 
 ---
 
-## ⚠️ Known Limitations
+## Known Limitations
 
 - **Dead-letter retention**: v3.1 adds configurable retention and optional archival (env: `DEAD_LETTER_RETENTION_HOURS`, `DEAD_LETTER_ARCHIVE_DIR`). Without these set, dead letters accumulate indefinitely; enable retention for production.
 - **Queue backend**: Default is in-memory (bounded); use `QUEUE_BACKEND=redis` and `QUEUE_REDIS_URL` for restart-resilient durable queuing. Monitor `agentruntime_run_queue_depth` and `agentruntime_run_queue_rejected_total`.
@@ -519,13 +519,13 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#known-limitations--implementatio
 
 ---
 
-## 📄 License
+## License
 
 Unagnt is open source software licensed under the [MIT License](LICENSE).
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with:
 - [OpenTelemetry](https://opentelemetry.io/) for observability
@@ -536,22 +536,6 @@ Built with:
 
 ---
 
-## 💬 Community
-
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/NikoSokratous/unagnt/discussions)
-- **Discord**: [Join our community](https://discord.gg/Unagnt)
-- **Twitter**: [@Unagnt](https://twitter.com/Unagnt)
-- **Blog**: [blog.Unagnt.io](https://blog.Unagnt.io)
-
----
-
-## 📞 Support
-
-- **Documentation**: [docs.Unagnt.io](https://docs.Unagnt.io)
-- **Issues**: [GitHub Issues](https://github.com/NikoSokratous/unagnt/issues)
-- **Commercial Support**: [contact@Unagnt.io](mailto:contact@Unagnt.io)
-
----
 
 <div align="center">
 
