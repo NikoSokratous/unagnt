@@ -10,6 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
 	"github.com/NikoSokratous/unagnt/pkg/policy"
 	"github.com/NikoSokratous/unagnt/pkg/registry"
 	"github.com/NikoSokratous/unagnt/pkg/workflow"
@@ -77,7 +78,12 @@ func newWorkflowRunCmd() *cobra.Command {
 			if autoApprove {
 				approvalQueue = policy.NewAutoApprovalQueue()
 			}
-			executor := workflow.NewExecutorWithApproval(stateStore, celEval, approvalQueue)
+			agentExec := &orchestrate.RuntimeStepExecutor{
+				AllowSimulatedFallback: true,
+				StorePath:              dbPath,
+			}
+			executor := workflow.NewExecutorWithApproval(stateStore, celEval, approvalQueue).
+				WithAgentNodeExecutor(&workflowAgentAdapter{inner: agentExec})
 
 			ctx := context.Background()
 			workflowID := fmt.Sprintf("wf-%d", time.Now().Unix())
@@ -615,6 +621,22 @@ func buildDAGFromWorkflow(workflowDef map[string]interface{}) (*workflow.DAG, er
 	}
 
 	return dag, nil
+}
+
+// workflowAgentAdapter adapts orchestrate.RuntimeStepExecutor to workflow.AgentNodeExecutor.
+type workflowAgentAdapter struct {
+	inner *orchestrate.RuntimeStepExecutor
+}
+
+func (a *workflowAgentAdapter) Execute(ctx context.Context, agentName, goal string, outputs map[string]interface{}) (interface{}, error) {
+	res, err := a.inner.ExecuteStep(ctx, agentName, goal, outputs)
+	if err != nil {
+		return nil, err
+	}
+	if res == nil {
+		return map[string]interface{}{"status": "completed"}, nil
+	}
+	return res.Output, nil
 }
 
 func getString(m map[string]interface{}, key string) string {

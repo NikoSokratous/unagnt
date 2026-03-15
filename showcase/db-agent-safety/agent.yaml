@@ -1,6 +1,6 @@
-name: hitl-demo-agent
+name: db-agent-safety
 version: "1.0"
-description: HITL demo - policy requires approval for non-GET HTTP
+description: DB agent with policy - blocks destructive ops, restricts sensitive data
 
 model:
   provider: openai
@@ -10,9 +10,9 @@ model:
 autonomy_level: 2
 
 tools:
-  - name: echo
+  - name: sql_query
     version: "1"
-  - name: http_request
+  - name: echo
     version: "1"
 
 policy: ./policy.yaml
@@ -22,4 +22,4 @@ memory:
   semantic: false
 
 max_steps: 10
-timeout: 5m   # allows time for human approval via webhook
+timeout: 60s

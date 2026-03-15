@@ -73,28 +73,30 @@ func (r *Replayer) replayExact(ctx context.Context, options ReplayOptions, resul
 		stopSeq = len(r.snapshot.ToolCalls)
 	}
 
-	// Replay each action using recorded data
+	if result.Trace == nil {
+		result.Trace = make([]ReplayStepTrace, 0)
+	}
+
+	// Replay each action using recorded data — no tool execution
 	for i := startSeq - 1; i < stopSeq && i < len(r.snapshot.ToolCalls); i++ {
 		action := r.snapshot.ToolCalls[i]
 
-		// Check for breakpoints
+		src := "recorded"
 		if contains(options.Breakpoints, action.Sequence) {
-			// In a real implementation, this would pause and wait for user input
-			fmt.Printf("Breakpoint at sequence %d\n", action.Sequence)
+			src = "breakpoint"
 		}
+		result.Trace = append(result.Trace, ReplayStepTrace{
+			Seq: action.Sequence, Tool: action.ToolName, Source: src,
+			InputSum: truncate(string(action.Input), 60), OutputSum: truncate(string(action.Output), 60), Result: "ok",
+		})
 
-		// Use recorded output
 		result.ActionsRerun++
 		result.Metrics.TotalActions++
-		result.Metrics.ActionsMatched++ // In exact mode, everything matches
+		result.Metrics.ActionsMatched++
 
-		// Execute side effects if requested
 		if options.ExecuteSideEffects && len(action.SideEffects) > 0 {
 			for _, se := range action.SideEffects {
-				if err := r.executeSideEffect(se); err != nil {
-					// Log error but continue
-					fmt.Printf("Side effect error: %v\n", err)
-				}
+				_ = r.executeSideEffect(se)
 			}
 		}
 	}
@@ -117,10 +119,11 @@ func (r *Replayer) replayExact(ctx context.Context, options ReplayOptions, resul
 
 // replayLive re-executes with live APIs (non-deterministic).
 func (r *Replayer) replayLive(ctx context.Context, options ReplayOptions, result *ReplayResult) (*ReplayResult, error) {
-	// In production, this would actually call the live APIs
-	// For now, simulate by comparing inputs
+	if result.Trace == nil {
+		result.Trace = make([]ReplayStepTrace, 0)
+	}
 
-	for i, action := range r.snapshot.ToolCalls {
+	for _, action := range r.snapshot.ToolCalls {
 		if options.StartFromSequence > 0 && action.Sequence < options.StartFromSequence {
 			continue
 		}
@@ -128,36 +131,51 @@ func (r *Replayer) replayLive(ctx context.Context, options ReplayOptions, result
 			break
 		}
 
-		// Simulate live execution
-		// In reality, you'd call the actual tool
-		liveOutput, _ := r.simulateLiveExecution(action)
+		t0 := time.Now()
+		liveOutput, execErr := r.executeLive(ctx, action, options.LiveToolExecutor)
+		dur := time.Since(t0)
 
 		result.ActionsRerun++
 		result.Metrics.TotalActions++
 
-		// Compare with recorded output
-		if options.VerifyOutputs {
+		step := ReplayStepTrace{
+			Seq: action.Sequence, Tool: action.ToolName, Source: "live",
+			InputSum: truncate(string(action.Input), 50),
+			Duration: dur.String(),
+		}
+
+		if execErr != nil {
+			step.OutputSum = fmt.Sprintf("error: %v", execErr)
+			step.Result = "diverged"
+			step.Divergence = execErr.Error()
+			result.Divergences = append(result.Divergences, Divergence{
+				Sequence: action.Sequence, Type: "error", Component: action.ToolName,
+				Description: execErr.Error(), Impact: ImpactCritical, Timestamp: time.Now(),
+			})
+			result.Metrics.ActionsDiverged++
+		} else if options.VerifyOutputs {
 			if err := r.compareOutputs(action.Output, liveOutput); err != nil {
-				divergence := Divergence{
-					Sequence:    action.Sequence,
-					Type:        "output",
-					Component:   action.ToolName,
-					Expected:    string(action.Output),
-					Actual:      string(liveOutput),
-					Impact:      r.assessImpact(err),
-					Description: err.Error(),
-					Timestamp:   time.Now(),
-				}
-				result.Divergences = append(result.Divergences, divergence)
+				step.OutputSum = truncate(string(liveOutput), 60)
+				step.Result = "diverged"
+				step.Divergence = "output mismatch"
+				result.Divergences = append(result.Divergences, Divergence{
+					Sequence: action.Sequence, Type: "output", Component: action.ToolName,
+					Expected: string(action.Output), Actual: string(liveOutput),
+					Impact: ImpactMajor, Description: err.Error(), Timestamp: time.Now(),
+				})
 				result.Metrics.ActionsDiverged++
 			} else {
+				step.OutputSum = truncate(string(liveOutput), 60)
+				step.Result = "match"
 				result.Matches++
 				result.Metrics.ActionsMatched++
 			}
+		} else {
+			step.OutputSum = truncate(string(liveOutput), 60)
+			step.Result = "ok"
 		}
 
-		// Handle i to avoid unused variable warning
-		_ = i
+		result.Trace = append(result.Trace, step)
 	}
 
 	result.Success = len(result.Divergences) == 0
@@ -177,9 +195,9 @@ func (r *Replayer) replayLive(ctx context.Context, options ReplayOptions, result
 
 // replayMixed uses recorded models but executes tools live.
 func (r *Replayer) replayMixed(ctx context.Context, options ReplayOptions, result *ReplayResult) (*ReplayResult, error) {
-	// Model calls use recorded responses
-	// Tool calls execute live
-	// This is useful for testing tool changes while keeping model responses consistent
+	if result.Trace == nil {
+		result.Trace = make([]ReplayStepTrace, 0)
+	}
 
 	for _, action := range r.snapshot.ToolCalls {
 		if options.StartFromSequence > 0 && action.Sequence < options.StartFromSequence {
@@ -189,27 +207,45 @@ func (r *Replayer) replayMixed(ctx context.Context, options ReplayOptions, resul
 			break
 		}
 
-		// Execute tool live
-		liveOutput, _ := r.simulateLiveExecution(action)
+		t0 := time.Now()
+		liveOutput, execErr := r.executeLive(ctx, action, options.LiveToolExecutor)
+		dur := time.Since(t0)
 
 		result.ActionsRerun++
 		result.Metrics.TotalActions++
 
-		// Verify if requested
-		if options.VerifyOutputs {
+		step := ReplayStepTrace{
+			Seq: action.Sequence, Tool: action.ToolName, Source: "live",
+			InputSum: truncate(string(action.Input), 50), Duration: dur.String(),
+		}
+
+		if execErr != nil {
+			step.OutputSum = fmt.Sprintf("error: %v", execErr)
+			step.Result = "diverged"
+			result.Divergences = append(result.Divergences, Divergence{
+				Sequence: action.Sequence, Type: "error", Component: action.ToolName, Impact: ImpactCritical,
+			})
+			result.Metrics.ActionsDiverged++
+		} else if options.VerifyOutputs {
 			if err := r.compareOutputs(action.Output, liveOutput); err != nil {
+				step.OutputSum = truncate(string(liveOutput), 60)
+				step.Result = "diverged"
 				result.Divergences = append(result.Divergences, Divergence{
-					Sequence:  action.Sequence,
-					Type:      "output",
-					Component: action.ToolName,
-					Impact:    ImpactMajor,
+					Sequence: action.Sequence, Type: "output", Component: action.ToolName, Impact: ImpactMajor,
 				})
 				result.Metrics.ActionsDiverged++
 			} else {
+				step.OutputSum = truncate(string(liveOutput), 60)
+				step.Result = "match"
 				result.Matches++
 				result.Metrics.ActionsMatched++
 			}
+		} else {
+			step.OutputSum = truncate(string(liveOutput), 60)
+			step.Result = "ok"
 		}
+
+		result.Trace = append(result.Trace, step)
 	}
 
 	result.Success = true
@@ -226,13 +262,9 @@ func (r *Replayer) replayMixed(ctx context.Context, options ReplayOptions, resul
 
 // replayDebug enables step-through debugging.
 func (r *Replayer) replayDebug(ctx context.Context, options ReplayOptions, result *ReplayResult) (*ReplayResult, error) {
-	// Debug mode pauses at breakpoints and allows inspection
-	// This would integrate with a debugger UI in production
-
-	fmt.Println("=== Debug Replay Mode ===")
-	fmt.Printf("Snapshot: %s\n", r.snapshot.ID)
-	fmt.Printf("Total Actions: %d\n", len(r.snapshot.ToolCalls))
-	fmt.Printf("Breakpoints: %v\n", options.Breakpoints)
+	if result.Trace == nil {
+		result.Trace = make([]ReplayStepTrace, 0)
+	}
 
 	for _, action := range r.snapshot.ToolCalls {
 		if options.StartFromSequence > 0 && action.Sequence < options.StartFromSequence {
@@ -242,14 +274,18 @@ func (r *Replayer) replayDebug(ctx context.Context, options ReplayOptions, resul
 			break
 		}
 
-		// Check breakpoint
-		if contains(options.Breakpoints, action.Sequence) {
-			fmt.Printf("\n[BREAKPOINT] Sequence %d\n", action.Sequence)
-			fmt.Printf("Tool: %s\n", action.ToolName)
-			fmt.Printf("Input: %s\n", string(action.Input))
-			fmt.Printf("Output: %s\n", string(action.Output))
-			// In production, wait for user command (continue, step, inspect, etc.)
+		atBreak := contains(options.Breakpoints, action.Sequence)
+		src := "step"
+		if atBreak {
+			src = "breakpoint"
 		}
+
+		result.Trace = append(result.Trace, ReplayStepTrace{
+			Seq: action.Sequence, Tool: action.ToolName, Source: src,
+			InputSum: truncate(string(action.Input), 60),
+			OutputSum: truncate(string(action.Output), 60),
+			Result: "ok",
+		})
 
 		result.ActionsRerun++
 		result.Metrics.TotalActions++
@@ -261,6 +297,10 @@ func (r *Replayer) replayDebug(ctx context.Context, options ReplayOptions, resul
 	result.CompletedAt = time.Now()
 	result.Duration = result.CompletedAt.Sub(result.StartedAt)
 	result.Metrics.ReplayDuration = result.Duration
+
+	if result.Metrics.TotalActions > 0 {
+		result.Metrics.Accuracy = float64(result.Metrics.ActionsMatched) / float64(result.Metrics.TotalActions)
+	}
 
 	return result, nil
 }
@@ -317,10 +357,15 @@ func (r *Replayer) replayValidation(ctx context.Context, options ReplayOptions, 
 	return result, nil
 }
 
-// simulateLiveExecution simulates executing a tool (placeholder).
-func (r *Replayer) simulateLiveExecution(action ToolExecution) (json.RawMessage, error) {
-	// In production, this would actually call the tool
-	// For now, return the recorded output with slight variation
+// executeLive runs the tool via LiveToolExecutor if set; otherwise returns recorded output.
+func (r *Replayer) executeLive(ctx context.Context, action ToolExecution, exec LiveToolExecutor) (json.RawMessage, error) {
+	if exec != nil {
+		liveOut, err := exec.Execute(ctx, action.ToolName, "1", action.Input)
+		if err != nil {
+			return nil, err
+		}
+		return liveOut, nil
+	}
 	return action.Output, nil
 }
 
@@ -387,6 +432,13 @@ func (r *Replayer) verifyChecksums() error {
 	}
 
 	return nil
+}
+
+func truncate(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max-3] + "..."
 }
 
 // contains checks if a slice contains a value.

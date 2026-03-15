@@ -2,17 +2,23 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
 
 	"github.com/NikoSokratous/unagnt/pkg/replay"
+	"github.com/NikoSokratous/unagnt/pkg/runtime"
+	"github.com/NikoSokratous/unagnt/pkg/tool"
+	"github.com/NikoSokratous/unagnt/pkg/tool/builtin"
 	"github.com/chzyer/readline"
 	"github.com/spf13/cobra"
+	_ "modernc.org/sqlite"
 )
 
 func newReplayCmd() *cobra.Command {
@@ -38,6 +44,7 @@ func newReplayRunCmd() *cobra.Command {
 	var startSeq, stopSeq int
 	var breakpoints []int
 	var verifySideEffects bool
+	var storePath string
 
 	cmd := &cobra.Command{
 		Use:   "run <snapshot-id>",
@@ -52,19 +59,37 @@ func newReplayRunCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			snapshotID := args[0]
 
-			// Load snapshot (placeholder)
 			fmt.Printf("Loading snapshot %s...\n", snapshotID)
 
-			// Create mock snapshot for demonstration
-			snapshot := &replay.RunSnapshot{
-				ID:        snapshotID,
-				RunID:     "run-123",
-				AgentName: "test-agent",
-				Goal:      "test goal",
+			var snapshot *replay.RunSnapshot
+			if storePath != "" {
+				absPath, _ := filepath.Abs(storePath)
+				db, err := sql.Open("sqlite", absPath)
+				if err == nil {
+					snapStore := replay.NewSQLiteSnapshotStore(db)
+					snap, err := snapStore.LoadSnapshot(context.Background(), snapshotID)
+					db.Close()
+					if err == nil {
+						snapshot = snap
+					}
+				}
+			}
+			if snapshot == nil {
+				return fmt.Errorf("snapshot %q not found (use --store to specify database)", snapshotID)
 			}
 
 			// Create replayer
 			replayer := replay.NewReplayer(snapshot)
+
+			// For live/mixed modes, wire up real tool execution
+			var liveExec replay.LiveToolExecutor
+			if mode == "live" || mode == "mixed" {
+				reg := tool.NewRegistry()
+				for _, t := range builtin.All() {
+					reg.Register(t)
+				}
+				liveExec = &liveToolExecutorAdapter{inner: tool.NewExecutor(reg)}
+			}
 
 			// Configure options
 			options := replay.ReplayOptions{
@@ -75,6 +100,7 @@ func newReplayRunCmd() *cobra.Command {
 				Breakpoints:        breakpoints,
 				ExecuteSideEffects: verifySideEffects,
 				VerifyOutputs:      true,
+				LiveToolExecutor:   liveExec,
 			}
 
 			// Replay
@@ -92,6 +118,7 @@ func newReplayRunCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&mode, "mode", "exact", "Replay mode (exact, live, mixed, debug, validation)")
+	cmd.Flags().StringVar(&storePath, "store", "agent.db", "SQLite store path (contains run_snapshots)")
 	cmd.Flags().IntVar(&startSeq, "start", 0, "Start from sequence number")
 	cmd.Flags().IntVar(&stopSeq, "stop", 0, "Stop at sequence number")
 	cmd.Flags().IntSliceVar(&breakpoints, "breakpoint", []int{}, "Breakpoint at sequence numbers")
@@ -103,6 +130,7 @@ func newReplayRunCmd() *cobra.Command {
 func newReplayListCmd() *cobra.Command {
 	var runID string
 	var limit int
+	var storePath string
 
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -110,38 +138,32 @@ func newReplayListCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fmt.Printf("Listing snapshots...\n")
 
-			// Mock snapshots for demonstration
-			snapshots := []replay.SnapshotMetadata{
-				{
-					ID:         "snap-001",
-					RunID:      "run-123",
-					AgentName:  "agent-1",
-					Goal:       "Process data",
-					SizeBytes:  1024 * 100,
-					ModelCalls: 5,
-					ToolCalls:  10,
-					FinalState: "completed",
-				},
-				{
-					ID:         "snap-002",
-					RunID:      "run-124",
-					AgentName:  "agent-2",
-					Goal:       "Analyze logs",
-					SizeBytes:  1024 * 250,
-					ModelCalls: 8,
-					ToolCalls:  15,
-					FinalState: "completed",
-				},
+			var snapshots []replay.SnapshotMetadata
+			if storePath != "" {
+				absPath, err := filepath.Abs(storePath)
+				if err != nil {
+					absPath = storePath
+				}
+				db, err := sql.Open("sqlite", absPath)
+				if err == nil {
+					snapStore := replay.NewSQLiteSnapshotStore(db)
+					list, err := snapStore.ListSnapshots(context.Background(), runID, limit)
+					if err == nil {
+						snapshots = list
+					}
+					_ = db.Close()
+				}
+			}
+
+			if len(snapshots) == 0 {
+				fmt.Println("No snapshots found. Run agents with --store to record snapshots.")
+				return nil
 			}
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 			fmt.Fprintln(w, "SNAPSHOT ID\tRUN ID\tAGENT\tMODEL CALLS\tTOOL CALLS\tSTATE\tSIZE")
 
 			for _, snap := range snapshots {
-				if runID != "" && snap.RunID != runID {
-					continue
-				}
-
 				size := formatSize(snap.SizeBytes)
 				fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%d\t%s\t%s\n",
 					snap.ID,
@@ -160,6 +182,7 @@ func newReplayListCmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&runID, "run", "", "Filter by run ID")
 	cmd.Flags().IntVar(&limit, "limit", 50, "Maximum number of snapshots")
+	cmd.Flags().StringVar(&storePath, "store", "agent.db", "SQLite store path (contains run_snapshots)")
 
 	return cmd
 }
@@ -323,43 +346,81 @@ func newReplayDiffCmd() *cobra.Command {
 }
 
 func printReplayResult(result *replay.ReplayResult) {
-	fmt.Printf("\n=== Replay Results ===\n")
-	fmt.Printf("Snapshot: %s\n", result.SnapshotID)
-	fmt.Printf("Mode: %s\n", result.Mode)
-	fmt.Printf("Duration: %s\n", result.Duration)
-	fmt.Printf("Success: %v\n\n", result.Success)
+	// Mode-specific header
+	switch result.Mode {
+	case replay.ReplayModeExact:
+		fmt.Println("\n--- exact: using recorded outputs (no tool execution) ---")
+	case replay.ReplayModeLive:
+		fmt.Println("\n--- live: re-executing tools, comparing to recording ---")
+	case replay.ReplayModeMixed:
+		fmt.Println("\n--- mixed: re-executing tools with recorded model context ---")
+	case replay.ReplayModeDebug:
+		fmt.Println("\n--- debug: step-through trace ---")
+	case replay.ReplayModeValidation:
+		fmt.Println("\n--- validation: integrity check ---")
+	}
 
-	fmt.Printf("Actions Rerun: %d\n", result.ActionsRerun)
-	fmt.Printf("Matches: %d\n", result.Matches)
-	fmt.Printf("Divergences: %d\n\n", len(result.Divergences))
-
-	if len(result.Divergences) > 0 {
-		fmt.Println("Divergence Details:")
-		for i, div := range result.Divergences {
-			fmt.Printf("%d. Seq %d (%s): %s [%s]\n",
-				i+1,
-				div.Sequence,
-				div.Type,
-				div.Description,
-				div.Impact)
-
-			if div.Expected != nil {
-				expectedJSON, _ := json.MarshalIndent(div.Expected, "   ", "  ")
-				fmt.Printf("   Expected: %s\n", string(expectedJSON))
+	// Execution trace — what actually happened
+	if len(result.Trace) > 0 {
+		fmt.Println()
+		for _, t := range result.Trace {
+			src := ""
+			switch t.Source {
+			case "recorded":
+				src = "[recorded]"
+			case "live":
+				src = "[live]"
+			case "breakpoint":
+				src = "[breakpoint]"
+			case "step":
+				src = "[step]"
 			}
-			if div.Actual != nil {
-				actualJSON, _ := json.MarshalIndent(div.Actual, "   ", "  ")
-				fmt.Printf("   Actual: %s\n", string(actualJSON))
+			line := fmt.Sprintf("  %d. %s %s  in=%s", t.Seq, t.Tool, src, t.InputSum)
+			if t.OutputSum != "" {
+				line += fmt.Sprintf("  → %s", t.OutputSum)
+			}
+			if t.Result != "" && t.Result != "ok" {
+				line += fmt.Sprintf("  %s", t.Result)
+				if t.Result == "match" {
+					line += " ✓"
+				} else if t.Result == "diverged" {
+					line += " ✗"
+				}
+			}
+			if t.Duration != "" && t.Duration != "0s" {
+				line += fmt.Sprintf("  (%s)", t.Duration)
+			}
+			fmt.Println(line)
+		}
+	}
+
+	// Divergences (when live/mixed find mismatches)
+	if len(result.Divergences) > 0 {
+		fmt.Println("\n  Divergences:")
+		for _, div := range result.Divergences {
+			fmt.Printf("    seq %d %s: %s\n", div.Sequence, div.Component, div.Description)
+			if s, ok := div.Expected.(string); ok && len(s) < 120 {
+				fmt.Printf("      expected: %s\n", s)
+			}
+			if s, ok := div.Actual.(string); ok && len(s) < 120 {
+				fmt.Printf("      actual:   %s\n", s)
 			}
 		}
 	}
 
-	fmt.Printf("\n=== Metrics ===\n")
-	fmt.Printf("Accuracy: %.1f%%\n", result.Metrics.Accuracy*100)
-	fmt.Printf("Original Duration: %s\n", result.Metrics.OriginalDuration)
-	fmt.Printf("Replay Duration: %s\n", result.Metrics.ReplayDuration)
-	if result.Metrics.SpeedupFactor > 0 {
-		fmt.Printf("Speedup Factor: %.2fx\n", result.Metrics.SpeedupFactor)
+	// Summary
+	fmt.Printf("\n--- Summary ---\n")
+	fmt.Printf("  Success: %v  |  Actions: %d  |  Matches: %d  |  Divergences: %d\n",
+		result.Success, result.ActionsRerun, result.Matches, len(result.Divergences))
+	if result.Metrics.TotalActions > 0 {
+		fmt.Printf("  Accuracy: %.1f%%  |  Original: %s  |  Replay: %s",
+			result.Metrics.Accuracy*100, result.Metrics.OriginalDuration, result.Metrics.ReplayDuration)
+		if result.Metrics.SpeedupFactor > 0 && result.Metrics.SpeedupFactor < 1e9 {
+			fmt.Printf("  |  Speedup: %.1fx", result.Metrics.SpeedupFactor)
+		} else if result.Metrics.ReplayDuration == 0 {
+			fmt.Print("  |  Speedup: ∞")
+		}
+		fmt.Println()
 	}
 }
 
@@ -374,4 +435,23 @@ func formatSize(bytes int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+}
+
+// liveToolExecutorAdapter adapts runtime.ToolExecutor to replay.LiveToolExecutor.
+type liveToolExecutorAdapter struct {
+	inner runtime.ToolExecutor
+}
+
+func (a *liveToolExecutorAdapter) Execute(ctx context.Context, toolName, version string, input json.RawMessage) (json.RawMessage, error) {
+	res, err := a.inner.Execute(ctx, toolName, version, input)
+	if err != nil {
+		return nil, err
+	}
+	if res.Error != "" {
+		return nil, fmt.Errorf("tool %s: %s", toolName, res.Error)
+	}
+	if res.Output == nil {
+		return json.RawMessage(`{}`), nil
+	}
+	return json.Marshal(res.Output)
 }

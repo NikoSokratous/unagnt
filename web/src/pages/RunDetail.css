@@ -55,6 +55,18 @@
 .goal-section { margin-bottom: var(--space-8); }
 .goal-section h2 { font-size: 1.125rem; color: var(--color-text); margin-bottom: var(--space-4); }
 
+.result-section { margin-bottom: var(--space-8); }
+.result-section h2 { font-size: 1.125rem; color: var(--color-text); margin-bottom: var(--space-4); }
+.result-box {
+  background: var(--color-success-muted);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
 .goal-box {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -82,6 +94,92 @@
 }
 
 .streaming-indicator svg { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+.step-chain {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.step-item:last-child { border-bottom: none; }
+
+.step-connector {
+  width: 2px;
+  min-height: 24px;
+  background: var(--color-accent);
+  border-radius: 1px;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.step-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.step-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: var(--color-accent-muted);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.step-label {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.step-time {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-text-dim);
+}
+
+.raw-events-toggle { margin-top: var(--space-4); }
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.raw-events {
+  margin-top: var(--space-4);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  max-height: 400px;
+  overflow-y: auto;
+}
 
 .timeline {
   background: var(--color-bg-card);

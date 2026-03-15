@@ -100,7 +100,7 @@ Unagnt is Go-native, ships as a single binary, and runs with zero external infra
 ```bash
 # One-liner: install and run
 go install github.com/NikoSokratous/unagnt/cmd/unagnt@latest
-unagnt run --config examples/cli-assistant/agent.yaml --goal "List files"
+unagnt run --config examples/cli-assistant/agent.yaml --goal "Echo hello world"
 ```
 
 Zero dependencies: SQLite + in-memory by default. No Postgres, Redis, or Qdrant required.
@@ -112,7 +112,7 @@ Zero dependencies: SQLite + in-memory by default. No Postgres, Redis, or Qdrant 
 export OPENAI_API_KEY=sk-...
 
 # Run the CLI assistant example
-unagnt run --config examples/cli-assistant/agent.yaml --goal "List all files in current directory"
+unagnt run --config examples/cli-assistant/agent.yaml --goal "Echo hello world"
 ```
 
 ### Optional: Model Routing (v3)

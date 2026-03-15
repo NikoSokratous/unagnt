@@ -4,7 +4,7 @@ rules:
   - name: require-approval-mutations
     match:
       tool: http_request
-      condition: "input.method != 'GET' && input.method != 'get'"
+      condition: 'input["method"] != "GET" && input["method"] != "get"'
     action: require_approval
     message: "Non-GET HTTP requests require human approval"
     approvers:

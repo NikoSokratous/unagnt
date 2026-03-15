@@ -9,6 +9,11 @@ import (
 	"github.com/NikoSokratous/unagnt/pkg/policy"
 )
 
+// AgentNodeExecutor executes an agent node (runs a real agent). When nil, executeNode uses a placeholder.
+type AgentNodeExecutor interface {
+	Execute(ctx context.Context, agentName, goal string, outputs map[string]interface{}) (interface{}, error)
+}
+
 // ExecutionResult represents the result of a workflow execution.
 type ExecutionResult struct {
 	WorkflowID  string                 `json:"workflow_id"`
@@ -38,6 +43,7 @@ type Executor struct {
 	stateStore     *StateStore
 	condEvaluator  ConditionEvaluator
 	approvalQueue  policy.ApprovalQueue
+	agentNodeExec  AgentNodeExecutor
 	approvalPoll   time.Duration
 	approvalExpiry time.Duration
 }
@@ -61,6 +67,12 @@ func NewExecutor(stateStore *StateStore, condEvaluator ConditionEvaluator) *Exec
 func NewExecutorWithApproval(stateStore *StateStore, condEvaluator ConditionEvaluator, approvalQueue policy.ApprovalQueue) *Executor {
 	e := NewExecutor(stateStore, condEvaluator)
 	e.approvalQueue = approvalQueue
+	return e
+}
+
+// WithAgentNodeExecutor sets the executor for agent nodes (replaces placeholder).
+func (e *Executor) WithAgentNodeExecutor(exec AgentNodeExecutor) *Executor {
+	e.agentNodeExec = exec
 	return e
 }
 
@@ -289,16 +301,17 @@ func (e *Executor) executeApprovalNode(ctx context.Context, node *Node, nodeID, 
 	}
 }
 
-// executeNode executes a single node (placeholder).
+// executeNode executes a single node (agent or simulated).
 func (e *Executor) executeNode(ctx context.Context, node *Node, outputs map[string]interface{}) (interface{}, error) {
-	// In production, this would:
-	// 1. Create agent runtime
-	// 2. Execute with goal (rendered with outputs)
-	// 3. Return result
-
-	// Placeholder: simulate execution
+	if e.agentNodeExec != nil && node.Agent != "" {
+		goal := node.Goal
+		if goal == "" {
+			goal = "Complete the assigned task"
+		}
+		return e.agentNodeExec.Execute(ctx, node.Agent, goal, outputs)
+	}
+	// Fallback: simulate execution
 	time.Sleep(50 * time.Millisecond)
-
 	return map[string]interface{}{
 		"node":   node.ID,
 		"agent":  node.Agent,

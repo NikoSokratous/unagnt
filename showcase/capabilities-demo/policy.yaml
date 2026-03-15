@@ -1,0 +1,36 @@
+# Capabilities Demo Policy - Showcase for video
+# Highlights: deny, require_approval, CEL conditions
+version: "1"
+rules:
+  # 1. DENY: Block external HTTP (data exfiltration prevention)
+  - name: block-external-http
+    match:
+      tool: http_request
+      condition: |
+        !input.url.startsWith('http://localhost') &&
+        !input.url.startsWith('http://127.0.0.1') &&
+        !input.url.startsWith('https://internal.')
+    action: deny
+    message: "External API access blocked - data exfiltration prevented"
+
+  # 2. DENY: Block known exfil / risky domains
+  - name: block-exfil-domains
+    match:
+      tool: http_request
+      condition: |
+        input.url.contains('evil.com') ||
+        input.url.contains('exfil.') ||
+        input.url.contains('pastebin.com') ||
+        input.url.contains('transfer.sh')
+    action: deny
+    message: "Request to blocked domain"
+
+  # 3. REQUIRE_APPROVAL: Non-GET HTTP to internal URLs
+  - name: require-approval-mutations
+    match:
+      tool: http_request
+      condition: 'input.method != "GET" && input.method != "get"'
+    action: require_approval
+    message: "Non-GET HTTP requests require human approval"
+    approvers:
+      - human

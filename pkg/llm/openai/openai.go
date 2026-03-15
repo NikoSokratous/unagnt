@@ -118,13 +118,23 @@ func toOpenAIMessages(msgs []llm.Message) []openAIMessage {
 func toOpenAITools(tools []llm.ToolDef) []map[string]any {
 	out := make([]map[string]any, len(tools))
 	for i, t := range tools {
+		fn := map[string]any{
+			"name":        t.Name,
+			"description": t.Description,
+		}
+		if len(t.Schema) > 0 {
+			var params map[string]any
+			if err := json.Unmarshal(t.Schema, &params); err == nil {
+				fn["parameters"] = params
+			} else {
+				fn["parameters"] = t.Parameters
+			}
+		} else {
+			fn["parameters"] = t.Parameters
+		}
 		out[i] = map[string]any{
-			"type": "function",
-			"function": map[string]any{
-				"name":        t.Name,
-				"description": t.Description,
-				"parameters":  t.Parameters,
-			},
+			"type":     "function",
+			"function": fn,
 		}
 	}
 	return out

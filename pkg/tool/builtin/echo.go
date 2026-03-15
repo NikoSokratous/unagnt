@@ -12,7 +12,7 @@ type Echo struct{}
 
 func (Echo) Name() string        { return "echo" }
 func (Echo) Version() string     { return "1" }
-func (Echo) Description() string { return "Echo back the input (for testing)" }
+func (Echo) Description() string { return "Echo back a message. Use when asked to output, repeat, or display text." }
 func (Echo) Permissions() []tool.Permission {
 	return nil
 }
@@ -21,8 +21,9 @@ func (Echo) InputSchema() ([]byte, error) {
 	return json.Marshal(map[string]any{
 		"type": "object",
 		"properties": map[string]any{
-			"message": map[string]string{"type": "string", "description": "Message to echo"},
+			"message": map[string]any{"type": "string", "description": "The text to echo back"},
 		},
+		"required": []string{"message"},
 	})
 }
 

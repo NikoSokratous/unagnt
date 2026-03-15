@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/NikoSokratous/unagnt/pkg/runtime"
 )
@@ -13,6 +14,7 @@ type ToolInfo struct {
 	Name        string
 	Version     string
 	Description string
+	InputSchema []byte // JSON Schema for tool parameters (passed to LLM for function calling)
 }
 
 // PlannerAdapter bridges an LLM Provider to runtime.LLMPlanner.
@@ -69,9 +71,30 @@ func (p *PlannerAdapter) buildMessagesWithContext(ctx context.Context, input run
 
 // buildMessagesSimple builds messages without context engine (backward compatible).
 func (p *PlannerAdapter) buildMessagesSimple(input runtime.StepInput) []Message {
+	systemContent := `You are an autonomous agent. Given a goal and prior steps, choose ONE action:
+
+1. Call a tool: Use the appropriate tool(s) for the goal. Provide valid JSON arguments matching each tool's schema.
+   - For echoing/outputting text: use echo with {"message": "..."}
+   - For calculations: use calc
+   - For HTTP: use http_request
+   - Use whatever tool fits the goal.
+
+2. Complete: Respond with text only (no tool call) when the goal is achieved.
+
+RULES:
+- You MUST use tools to accomplish the goal—do not complete without calling a tool when the goal requires tool output.
+- Complete ONLY when ALL parts of the goal are achieved. If the goal says "fetch and echo" or "calculate and output", you MUST call each required tool. Stating "I will echo" in reasoning is NOT enough—you must actually call the echo tool.
+- For multi-step goals: call tools in sequence (e.g. http_request first, then echo with the result). One tool per step.
+- Once every part of the goal is satisfied (e.g. both fetch and echo have run), then complete. Do not complete if any requested action is missing from the history.`
+
+	userContent := "Goal: " + input.Goal + "\n\nHistory:\n" + formatHistory(input.History)
+	if len(input.History) > 0 {
+		userContent += "\n\nIf the goal is satisfied by the history above, respond with completion (text only, no tool call)."
+	}
+
 	msgs := []Message{
-		{Role: RoleSystem, Content: "You are an autonomous agent. Given a goal and prior steps, choose the next tool to call or indicate completion."},
-		{Role: RoleUser, Content: "Goal: " + input.Goal + "\n\nHistory:\n" + formatHistory(input.History)},
+		{Role: RoleSystem, Content: systemContent},
+		{Role: RoleUser, Content: userContent},
 	}
 	return msgs
 }
@@ -85,8 +108,13 @@ func formatHistory(h []runtime.StepRecord) string {
 		s += fmt.Sprintf("Step %d: ", i+1)
 		if r.Action != nil {
 			s += "Called " + r.Action.Tool + " with " + stringify(r.Action.Input)
-			if r.Result != nil {
-				s += " -> " + stringify(r.Result.Output)
+			if r.Result != nil && r.Result.Output != nil {
+				// Show echoed output clearly so model can see goal was achieved
+				if echoed, ok := r.Result.Output["echoed"]; ok {
+					s += " -> output: " + stringify(echoed)
+				} else {
+					s += " -> " + stringify(r.Result.Output)
+				}
 			}
 		}
 		if r.Reasoning != "" {
@@ -112,10 +140,13 @@ func (p *PlannerAdapter) buildToolDefs(input runtime.StepInput) []ToolDef {
 		if desc == "" {
 			desc = "Tool: " + t.Name
 		}
-		defs = append(defs, ToolDef{
-			Name:        t.Name + "@" + t.Version,
-			Description: desc,
-		})
+		// OpenAI requires tool names to match ^[a-zA-Z0-9_-]+$ (no @)
+		name := t.Name + "_v" + t.Version
+		def := ToolDef{Name: name, Description: desc}
+		if len(t.InputSchema) > 0 {
+			def.Schema = t.InputSchema
+		}
+		defs = append(defs, def)
 	}
 	return defs
 }
@@ -127,12 +158,9 @@ func (p *PlannerAdapter) toPlannedAction(r *ChatResponse) (*runtime.PlannedActio
 		_ = json.Unmarshal([]byte(tc.Arguments), &input)
 		name := tc.Name
 		ver := "1"
-		// parse name@version if present
-		for i := 0; i < len(name); i++ {
-			if name[i] == '@' {
-				name, ver = name[:i], name[i+1:]
-				break
-			}
+		// parse name_vX format (OpenAI-safe; @ not allowed in tool names)
+		if idx := strings.LastIndex(name, "_v"); idx >= 0 {
+			name, ver = name[:idx], name[idx+2:]
 		}
 		return &runtime.PlannedAction{
 			Type:      "tool_call",

@@ -146,12 +146,18 @@ func (r *Runner) execute(parent context.Context, req RunRequest) {
 			meta.UpdatedAt = time.Now()
 			_ = r.saveRunWithRetry(persistCtx, meta)
 			RunDuration.Observe(time.Since(startedAt).Seconds())
-			r.emitEvent(persistCtx, req.RunID, req.AgentName, observe.EventCompleted, map[string]any{
+			evtData := map[string]any{
 				"status":      "completed",
 				"durationMs":  stepResult.Duration.Milliseconds(),
 				"attempt":     attempt,
 				"maxAttempts": maxAttempts,
-			})
+			}
+			if out, ok := stepResult.Output.(map[string]interface{}); ok && out != nil {
+				if lr, has := out["last_result"]; has && lr != nil {
+					evtData["last_result"] = lr
+				}
+			}
+			r.emitEvent(persistCtx, req.RunID, req.AgentName, observe.EventCompleted, evtData)
 			if req.CallbackFn != nil {
 				req.CallbackFn(req.RunID, meta.State, finalOutput, nil)
 			}

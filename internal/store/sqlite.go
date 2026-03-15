@@ -81,9 +81,29 @@ func (s *SQLite) migrate() error {
 			max_retries INTEGER NOT NULL,
 			failed_at TEXT NOT NULL
 		);
+		CREATE TABLE IF NOT EXISTS run_snapshots (
+			id TEXT PRIMARY KEY,
+			run_id TEXT NOT NULL,
+			version TEXT NOT NULL,
+			created_at TEXT NOT NULL,
+			agent_name TEXT NOT NULL,
+			goal TEXT,
+			agent_config TEXT,
+			model_calls TEXT NOT NULL,
+			tool_calls TEXT NOT NULL,
+			environment TEXT,
+			start_time TEXT NOT NULL,
+			end_time TEXT NOT NULL,
+			final_state TEXT NOT NULL,
+			checksums TEXT,
+			compressed INTEGER DEFAULT 0,
+			encrypted INTEGER DEFAULT 0,
+			size_bytes INTEGER
+		);
 		CREATE INDEX IF NOT EXISTS idx_events_run ON events(run_id);
 		CREATE INDEX IF NOT EXISTS idx_history_run ON history(run_id);
 		CREATE INDEX IF NOT EXISTS idx_dead_letters_failed_at ON dead_letters(failed_at DESC);
+		CREATE INDEX IF NOT EXISTS idx_snapshots_run ON run_snapshots(run_id);
 	`)
 	return err
 }
@@ -258,6 +278,11 @@ func (s *SQLite) ListRuns(ctx context.Context, limit int) ([]string, error) {
 // Close closes the database.
 func (s *SQLite) Close() error {
 	return s.db.Close()
+}
+
+// DB returns the underlying *sql.DB for use by replay and other packages that need direct access.
+func (s *SQLite) DB() *sql.DB {
+	return s.db
 }
 
 // SaveDeadLetter persists a terminal run failure for investigation.

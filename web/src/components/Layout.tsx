@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Activity, Settings, GitBranch, Store, BarChart3, Shield } from 'lucide-react'
+import { Activity, Settings, GitBranch, Store, BarChart3, Shield, CheckSquare } from 'lucide-react'
 import './Layout.css'
 
 interface LayoutProps {
@@ -16,6 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { to: '/workflows/marketplace', icon: Store, label: 'Marketplace' },
     { to: '/analytics', icon: BarChart3, label: 'Analytics' },
     { to: '/policy-playground', icon: Shield, label: 'Policy Playground' },
+    { to: '/approvals', icon: CheckSquare, label: 'Approvals' },
   ]
 
   return (

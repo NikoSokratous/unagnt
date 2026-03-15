@@ -4,13 +4,15 @@ description: AI assistant for terminal command help
 
 model:
   provider: openai
-  name: gpt-4o-mini
+  name: gpt-4.1-nano
   temperature: 0.3
 
 autonomy_level: 1  # Cautious - requires approval for risky commands
 
 tools:
   - name: echo
+    version: "1"
+  - name: calc
     version: "1"
   - name: http_request
     version: "1"

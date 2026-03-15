@@ -29,6 +29,7 @@ type RuntimeStepExecutor struct {
 	AllowSimulatedFallback bool
 	StorePath              string
 	ApprovalWebhook        string
+	ApprovalQueue          policy.ApprovalQueue
 }
 
 // ExecuteStep runs a real agent runtime from an agent config path/name.
@@ -88,11 +89,15 @@ func (e *RuntimeStepExecutor) ExecuteStep(ctx context.Context, agentName, goal s
 		if loadErr != nil {
 			return nil, fmt.Errorf("load policy: %w", loadErr)
 		}
+		approvalCb := webhookApprovalCallback(e.ApprovalWebhook)
+		if e.ApprovalQueue != nil {
+			approvalCb = queueApprovalCallback(e.ApprovalQueue)
+		}
 		exec = &tool.PolicyExecutor{
 			Inner:       baseExec,
 			Policy:      pol,
 			RiskScorer:  policy.NewDefaultRiskScorer(),
-			Approval:    policy.NewApprovalGate(webhookApprovalCallback(e.ApprovalWebhook)),
+			Approval:    policy.NewApprovalGate(approvalCb),
 			Environment: "production",
 		}
 	}
@@ -201,7 +206,8 @@ func listToolInfos(cfg *config.AgentConfig, reg *tool.Registry) []llm.ToolInfo {
 				}
 			}
 			if t, ok := reg.Get(name, version); ok {
-				out = append(out, llm.ToolInfo{Name: t.Name(), Version: t.Version(), Description: t.Description()})
+				schema, _ := t.InputSchema()
+				out = append(out, llm.ToolInfo{Name: t.Name(), Version: t.Version(), Description: t.Description(), InputSchema: schema})
 			}
 		}
 		return out
@@ -210,10 +216,12 @@ func listToolInfos(cfg *config.AgentConfig, reg *tool.Registry) []llm.ToolInfo {
 	out := make([]llm.ToolInfo, 0, len(cfg.Tools))
 	for _, tr := range cfg.Tools {
 		desc := ""
+		var schema []byte
 		if t, ok := reg.Get(tr.Name, tr.Version); ok {
 			desc = t.Description()
+			schema, _ = t.InputSchema()
 		}
-		out = append(out, llm.ToolInfo{Name: tr.Name, Version: tr.Version, Description: desc})
+		out = append(out, llm.ToolInfo{Name: tr.Name, Version: tr.Version, Description: desc, InputSchema: schema})
 	}
 	return out
 }
@@ -248,6 +256,37 @@ CREATE TABLE IF NOT EXISTS runs (
 		state.RunID, state.AgentName, state.Goal, string(state.Current), state.StepCount, state.CreatedAt, state.UpdatedAt,
 	)
 	return err
+}
+
+func queueApprovalCallback(q policy.ApprovalQueue) policy.ApprovalCallback {
+	return func(ctx context.Context, tool string, input map[string]any, approvers []string) (bool, error) {
+		id, err := q.Enqueue(ctx, tool, input, approvers, "", "")
+		if err != nil {
+			return false, err
+		}
+		ticker := time.NewTicker(500 * time.Millisecond)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return false, ctx.Err()
+			case <-ticker.C:
+				req, err := q.Get(ctx, id)
+				if err != nil {
+					return false, err
+				}
+				if req == nil {
+					return false, nil
+				}
+				switch req.Status {
+				case "approved":
+					return true, nil
+				case "denied":
+					return false, nil
+				}
+			}
+		}
+	}
 }
 
 func webhookApprovalCallback(url string) policy.ApprovalCallback {

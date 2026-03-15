@@ -12,6 +12,7 @@ import (
 	"github.com/NikoSokratous/unagnt/internal/config"
 	"github.com/NikoSokratous/unagnt/internal/store"
 	"github.com/NikoSokratous/unagnt/pkg/orchestrate"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 )
 
 func main() {
@@ -32,10 +33,11 @@ func main() {
 	}
 
 	serverCfg := orchestrate.ServerConfig{
-		Addr:    *addr,
-		Store:   st,
-		APIKeys: apiKeys,
-		Queue:   queueConfig(),
+		Addr:          *addr,
+		Store:         st,
+		APIKeys:       apiKeys,
+		ApprovalQueue: policy.NewMemoryApprovalQueue(),
+		Queue:         queueConfig(),
 	}
 	if dlRetention := deadLetterRetentionConfig(); dlRetention != nil {
 		serverCfg.DeadLetterRetention = dlRetention

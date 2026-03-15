@@ -10,5 +10,6 @@ func All() []tool.Tool {
 		&HTTPRequest{},
 		&Echo{},
 		&Calc{},
+		&SQLQuery{},
 	}
 }

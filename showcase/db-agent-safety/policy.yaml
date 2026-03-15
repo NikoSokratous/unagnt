@@ -1,0 +1,40 @@
+# DB Agent Safety Policy - Developer demo
+# Blocks destructive ops, restricts sensitive tables, requires approval for mutations
+version: "1"
+rules:
+  # 1. DENY: Destructive operations (DROP, TRUNCATE, schema changes)
+  # CEL: check for SQL keywords (case-sensitive; LLMs often emit uppercase)
+  - name: block-destructive
+    match:
+      tool: sql_query
+      condition: |
+        input.query.contains("DROP") || input.query.contains("drop") ||
+        input.query.contains("TRUNCATE") || input.query.contains("truncate") ||
+        input.query.contains("ALTER TABLE") || input.query.contains("CREATE TABLE") ||
+        input.query.contains("DELETE FROM") || input.query.contains("delete from")
+    action: deny
+    message: "Destructive SQL operations are blocked (DROP, TRUNCATE, DELETE, DDL)"
+
+  # 2. DENY: Access to sensitive/restricted tables and columns
+  - name: block-restricted-data
+    match:
+      tool: sql_query
+      condition: |
+        input.query.contains("users") || input.query.contains("USERS") ||
+        input.query.contains("password") || input.query.contains("PASSWORD") ||
+        input.query.contains("credentials") || input.query.contains("CREDENTIALS")
+    action: deny
+    message: "Access to users, passwords, and credentials is restricted"
+
+  # 3. REQUIRE_APPROVAL: Mutations (INSERT, UPDATE)
+  - name: require-approval-mutations
+    match:
+      tool: sql_query
+      condition: |
+        input.query.contains("INSERT") || input.query.contains("insert") ||
+        input.query.contains("UPDATE") || input.query.contains("update")
+    action: require_approval
+    message: "INSERT and UPDATE require human approval"
+    approvers:
+      - dba
+      - human

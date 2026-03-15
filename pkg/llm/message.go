@@ -1,5 +1,7 @@
 package llm
 
+import "encoding/json"
+
 // Role identifies the speaker in a conversation turn.
 type Role string
 
@@ -25,9 +27,10 @@ type ChatRequest struct {
 
 // ToolDef describes a tool for function calling.
 type ToolDef struct {
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	Parameters  Parameters `json:"parameters,omitempty"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Parameters  Parameters      `json:"parameters,omitempty"`
+	Schema      json.RawMessage `json:"-"` // Optional: raw JSON Schema for parameters (used when non-nil)
 }
 
 // Parameters describes JSON Schema for tool input.

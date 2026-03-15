@@ -15,6 +15,7 @@ import (
 	"github.com/NikoSokratous/unagnt/internal/store"
 	"github.com/NikoSokratous/unagnt/pkg/api"
 	"github.com/NikoSokratous/unagnt/pkg/observe"
+	"github.com/NikoSokratous/unagnt/pkg/policy"
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
@@ -22,20 +23,21 @@ import (
 
 // Server is a simple HTTP API server for run management.
 type Server struct {
-	addr        string
-	store       *store.SQLite
-	mu          sync.Mutex
-	runs        map[string]context.CancelFunc
-	auth        *AuthMiddleware
-	apiKeys     []string
-	eventHub    *observe.EventHub
-	rateLimiter *RateLimiter
-	rateLimitMw *RateLimitMiddleware
-	runner      *Runner
-	triggerBus  *EventTriggerBus
-	scheduler   *Scheduler
-	webhooks    *WebhookHandler
-	pruner      *DeadLetterPruner
+	addr           string
+	store          *store.SQLite
+	approvalQueue  policy.ApprovalQueue
+	mu             sync.Mutex
+	runs           map[string]context.CancelFunc
+	auth           *AuthMiddleware
+	apiKeys        []string
+	eventHub       *observe.EventHub
+	rateLimiter    *RateLimiter
+	rateLimitMw    *RateLimitMiddleware
+	runner         *Runner
+	triggerBus     *EventTriggerBus
+	scheduler      *Scheduler
+	webhooks       *WebhookHandler
+	pruner         *DeadLetterPruner
 }
 
 // QueueConfig configures the run queue backend.
@@ -50,6 +52,7 @@ type ServerConfig struct {
 	Addr                string
 	Store               *store.SQLite
 	APIKeys             []string
+	ApprovalQueue       policy.ApprovalQueue
 	RateLimit           RateLimitConfig
 	Webhooks            []config.WebhookConfig
 	DeadLetterRetention *DeadLetterRetentionConfig
@@ -88,18 +91,20 @@ func NewServer(addr string, st *store.SQLite, apiKeys []string) *Server {
 // NewServerWithConfig creates an API server with full configuration.
 func NewServerWithConfig(config ServerConfig) *Server {
 	s := &Server{
-		addr:       config.Addr,
-		store:      config.Store,
-		runs:       make(map[string]context.CancelFunc),
-		apiKeys:    config.APIKeys,
-		eventHub:   observe.NewEventHub(100),
-		triggerBus: NewEventTriggerBus(256),
+		addr:          config.Addr,
+		store:         config.Store,
+		approvalQueue: config.ApprovalQueue,
+		runs:          make(map[string]context.CancelFunc),
+		apiKeys:       config.APIKeys,
+		eventHub:      observe.NewEventHub(100),
+		triggerBus:    NewEventTriggerBus(256),
 	}
 
 	queue := buildQueue(config.Queue)
 	s.runner = NewRunner(s, &RuntimeStepExecutor{
 		AllowSimulatedFallback: true,
 		StorePath:              "agent.db",
+		ApprovalQueue:          config.ApprovalQueue,
 	}, 2, queue)
 	s.scheduler = NewScheduler(func(ctx context.Context, agent, goal string) error {
 		if s.runner == nil {
@@ -167,6 +172,12 @@ func (s *Server) Run() error {
 	mux.HandleFunc("POST /v1/runs/{id}/cancel", s.handleCancelRun)
 	mux.HandleFunc("GET /v1/runs/{id}/stream", s.handleStream)
 	mux.HandleFunc("POST /v1/triggers/events", s.handlePublishEventTrigger)
+	if s.approvalQueue != nil {
+		mux.HandleFunc("GET /v1/approvals/pending", s.handleApprovalsPending)
+		mux.HandleFunc("GET /v1/approvals/{id}", s.handleApprovalGet)
+		mux.HandleFunc("POST /v1/approvals/{id}/approve", s.handleApprovalApprove)
+		mux.HandleFunc("POST /v1/approvals/{id}/deny", s.handleApprovalDeny)
+	}
 	if s.webhooks != nil {
 		for path := range s.webhooks.webhooks {
 			mux.HandleFunc("POST "+path, s.webhooks.HandleWebhook)
@@ -493,6 +504,79 @@ func (s *Server) clearRunCancel(runID string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.runs, runID)
+}
+
+func (s *Server) handleApprovalsPending(w http.ResponseWriter, r *http.Request) {
+	if s.approvalQueue == nil {
+		http.Error(w, "approvals not enabled", http.StatusServiceUnavailable)
+		return
+	}
+	list, err := s.approvalQueue.ListPending(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{"pending": list})
+}
+
+func (s *Server) handleApprovalGet(w http.ResponseWriter, r *http.Request) {
+	if s.approvalQueue == nil {
+		http.Error(w, "approvals not enabled", http.StatusServiceUnavailable)
+		return
+	}
+	id := r.PathValue("id")
+	if id == "" || id == "pending" {
+		http.NotFound(w, r)
+		return
+	}
+	req, err := s.approvalQueue.Get(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if req == nil {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(req)
+}
+
+func (s *Server) handleApprovalApprove(w http.ResponseWriter, r *http.Request) {
+	if s.approvalQueue == nil {
+		http.Error(w, "approvals not enabled", http.StatusServiceUnavailable)
+		return
+	}
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "id required", http.StatusBadRequest)
+		return
+	}
+	if err := s.approvalQueue.Approve(r.Context(), id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": "approved"})
+}
+
+func (s *Server) handleApprovalDeny(w http.ResponseWriter, r *http.Request) {
+	if s.approvalQueue == nil {
+		http.Error(w, "approvals not enabled", http.StatusServiceUnavailable)
+		return
+	}
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "id required", http.StatusBadRequest)
+		return
+	}
+	if err := s.approvalQueue.Deny(r.Context(), id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": "denied"})
 }
 
 // AddScheduledJob registers a cron-based scheduled execution routed through runner.

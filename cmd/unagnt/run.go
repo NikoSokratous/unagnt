@@ -6,9 +6,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/NikoSokratous/unagnt/internal/config"
@@ -20,15 +22,18 @@ import (
 	"github.com/NikoSokratous/unagnt/pkg/mcp"
 	"github.com/NikoSokratous/unagnt/pkg/observe"
 	"github.com/NikoSokratous/unagnt/pkg/policy"
+	"github.com/NikoSokratous/unagnt/pkg/replay"
 	"github.com/NikoSokratous/unagnt/pkg/runtime"
 	"github.com/NikoSokratous/unagnt/pkg/tool"
 	"github.com/NikoSokratous/unagnt/pkg/tool/builtin"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
 )
 
 func newRunCmd() *cobra.Command {
 	var configPath, goal, logFile, storePath, approvalWebhook, costDB string
+	var humanOutput bool
 	cmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run an agent with a goal",
@@ -36,7 +41,7 @@ func newRunCmd() *cobra.Command {
 			if goal == "" && len(args) > 0 {
 				goal = args[0]
 			}
-			return runRun(configPath, goal, logFile, storePath, approvalWebhook, costDB)
+			return runRun(configPath, goal, logFile, storePath, approvalWebhook, costDB, humanOutput)
 		},
 	}
 	cmd.Flags().StringVarP(&configPath, "config", "c", "", "Path to agent config YAML")
@@ -45,12 +50,13 @@ func newRunCmd() *cobra.Command {
 	cmd.Flags().StringVar(&storePath, "store", "agent.db", "SQLite store path (empty to disable persistence)")
 	cmd.Flags().StringVar(&approvalWebhook, "approval-webhook", "", "URL for HITL approval (POST request, blocks until approved/denied)")
 	cmd.Flags().StringVar(&costDB, "cost-db", "", "Path to cost DB for budget checks (defaults to --store when set)")
+	cmd.Flags().BoolVar(&humanOutput, "human", false, "Human-readable output (chain + final result) instead of raw JSON")
 	_ = cmd.MarkFlagRequired("config")
 	_ = cmd.MarkFlagRequired("goal")
 	return cmd
 }
 
-func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath string) error {
+func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath string, humanOutput bool) error {
 	cfg, policyPath, err := config.LoadWithPolicy(configPath)
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
@@ -108,10 +114,12 @@ func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath st
 		for _, tr := range cfg.Tools {
 			t, ok := reg.Get(tr.Name, tr.Version)
 			desc := ""
+			var schema []byte
 			if ok {
 				desc = t.Description()
+				schema, _ = t.InputSchema()
 			}
-			toolInfos = append(toolInfos, llm.ToolInfo{Name: tr.Name, Version: tr.Version, Description: desc})
+			toolInfos = append(toolInfos, llm.ToolInfo{Name: tr.Name, Version: tr.Version, Description: desc, InputSchema: schema})
 		}
 	} else {
 		for _, key := range reg.List() {
@@ -129,7 +137,8 @@ func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath st
 			}
 			t, ok := reg.Get(name, ver)
 			if ok {
-				toolInfos = append(toolInfos, llm.ToolInfo{Name: t.Name(), Version: t.Version(), Description: t.Description()})
+				schema, _ := t.InputSchema()
+				toolInfos = append(toolInfos, llm.ToolInfo{Name: t.Name(), Version: t.Version(), Description: t.Description(), InputSchema: schema})
 			}
 		}
 	}
@@ -164,7 +173,12 @@ func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath st
 		}
 	}
 
-	logger := observe.NewLogger(cfg.Name, os.Stdout)
+	// When --human, suppress JSON to stdout; log file still gets JSON if set
+	logWriters := []io.Writer{}
+	if !humanOutput {
+		logWriters = append(logWriters, os.Stdout)
+	}
+	logger := observe.NewLogger(cfg.Name, logWriters...)
 	if logFile != "" {
 		if _, err := logger.WithFile(logFile); err != nil {
 			return fmt.Errorf("open log file: %w", err)
@@ -238,10 +252,16 @@ func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath st
 
 	logger.LogCompleted(state.RunID)
 
+	if humanOutput {
+		printHumanOutput(state)
+		if result := extractFinalResult(state); result != "" {
+			fmt.Fprintf(os.Stdout, "\n--- Result ---\n%s\n", result)
+		}
+	}
+
 	if storePath != "" {
 		s, err := store.NewSQLite(storePath)
 		if err == nil {
-			defer s.Close()
 			ctx := context.Background()
 			_ = s.SaveRun(ctx, &store.RunMeta{
 				RunID:     state.RunID,
@@ -253,15 +273,194 @@ func runRun(configPath, goal, logFile, storePath, approvalWebhook, costDBPath st
 				UpdatedAt: state.UpdatedAt,
 			})
 			_ = s.SaveHistory(ctx, state.RunID, state.History)
+			// Save snapshot for replay using same DB connection
+			if snap := buildSnapshotFromState(state); snap != nil {
+				snapStore := replay.NewSQLiteSnapshotStore(s.DB())
+				if err := snapStore.SaveSnapshot(ctx, snap); err != nil {
+					fmt.Fprintf(os.Stderr, "warning: failed to save replay snapshot: %v\n", err)
+				}
+			}
+			s.Close()
 		}
 	}
 
-	_ = json.NewEncoder(os.Stdout).Encode(map[string]any{
-		"run_id":     state.RunID,
-		"state":      state.Current,
-		"step_count": state.StepCount,
-	})
+	if !humanOutput {
+		summary := map[string]any{
+			"run_id":     state.RunID,
+			"state":      state.Current,
+			"step_count": state.StepCount,
+		}
+		if result := extractFinalResult(state); result != "" {
+			summary["result"] = result
+		}
+		_ = json.NewEncoder(os.Stdout).Encode(summary)
+	} else {
+		fmt.Fprintf(os.Stdout, "\nRun %s completed (%s, %d steps)\n", state.RunID, state.Current, state.StepCount)
+	}
 	return nil
+}
+
+// buildSnapshotFromState builds a RunSnapshot from execution state for replay.
+func buildSnapshotFromState(state *runtime.AgentState) *replay.RunSnapshot {
+	startTime := time.Now()
+	endTime := time.Now()
+	if len(state.History) > 0 {
+		startTime = state.History[0].Timestamp
+		endTime = state.History[len(state.History)-1].Timestamp
+	}
+	toolCalls := make([]replay.ToolExecution, 0)
+	for i, rec := range state.History {
+		if rec.Action == nil {
+			continue
+		}
+		inputBytes, _ := json.Marshal(rec.Action.Input)
+		var outputBytes []byte
+		if rec.Result != nil && rec.Result.Output != nil {
+			outputBytes, _ = json.Marshal(rec.Result.Output)
+		}
+		toolCalls = append(toolCalls, replay.ToolExecution{
+			Sequence:  len(toolCalls) + 1,
+			Timestamp: rec.Timestamp,
+			ToolName:  rec.Action.Tool,
+			Input:     inputBytes,
+			Output:    outputBytes,
+			Error:     func() string { if rec.Result != nil { return rec.Result.Error }; return "" }(),
+			Duration:  func() time.Duration { if rec.Result != nil { return rec.Result.Duration }; return 0 }(),
+		})
+		_ = i
+	}
+	modelCalls := make([]replay.ModelCall, 0)
+	for i := 0; i < len(toolCalls)+1; i++ {
+		modelCalls = append(modelCalls, replay.ModelCall{
+			Sequence: i + 1,
+			Model:    "recorded",
+			Provider: "recorded",
+		})
+	}
+	return &replay.RunSnapshot{
+		ID:          "snap-" + uuid.New().String()[:8],
+		RunID:       state.RunID,
+		Version:     replay.SnapshotVersion,
+		CreatedAt:   time.Now(),
+		AgentName:   state.AgentName,
+		Goal:        state.Goal,
+		AgentConfig: nil,
+		ModelCalls:  modelCalls,
+		ToolCalls:   toolCalls,
+		Environment: map[string]string{},
+		StartTime:   startTime,
+		EndTime:     endTime,
+		FinalState:  string(state.Current),
+		Checksums:   map[string]string{},
+		SizeBytes:   0,
+	}
+}
+
+// extractFinalResult returns the last meaningful tool output (echo message, calc result, http body).
+func extractFinalResult(state *runtime.AgentState) string {
+	for i := len(state.History) - 1; i >= 0; i-- {
+		step := state.History[i]
+		if step.Result == nil || step.Result.Output == nil {
+			continue
+		}
+		out := step.Result.Output
+		if echoed, ok := out["echoed"].(map[string]any); ok {
+			if msg, ok := echoed["message"].(string); ok && msg != "" {
+				return msg
+			}
+		}
+		if result, ok := out["result"].(float64); ok {
+			return fmt.Sprintf("%v", result)
+		}
+		if result, ok := out["result"].(int); ok {
+			return fmt.Sprintf("%d", result)
+		}
+		if body, ok := out["body"].(string); ok && body != "" {
+			if len(body) > 500 {
+				return body[:500] + "..."
+			}
+			return body
+		}
+	}
+	return ""
+}
+
+// printHumanOutput prints a simplified, readable execution chain.
+func printHumanOutput(state *runtime.AgentState) {
+	fmt.Fprintf(os.Stdout, "\n--- Execution ---\n")
+	fmt.Fprintf(os.Stdout, "Goal: %s\n\n", state.Goal)
+	stepNum := 1
+	for _, rec := range state.History {
+		if rec.Action != nil {
+			tool := rec.Action.Tool
+			inputSum := summarizeInput(rec.Action.Input)
+			var outputSum string
+			if rec.Result != nil && rec.Result.Output != nil {
+				outputSum = summarizeOutput(rec.Result.Output, tool)
+			}
+			fmt.Fprintf(os.Stdout, "Step %d: %s %s\n", stepNum, tool, inputSum)
+			if outputSum != "" {
+				fmt.Fprintf(os.Stdout, "         -> %s\n", outputSum)
+			}
+			stepNum++
+		}
+	}
+}
+
+func summarizeInput(input map[string]any) string {
+	if input == nil {
+		return ""
+	}
+	parts := []string{}
+	for k, v := range input {
+		if s, ok := v.(string); ok && len(s) < 60 {
+			parts = append(parts, fmt.Sprintf("%s=%q", k, s))
+		} else if k == "message" {
+			if s, ok := v.(string); ok {
+				if len(s) > 50 {
+					s = s[:47] + "..."
+				}
+				parts = append(parts, fmt.Sprintf("message=%q", s))
+			}
+		} else if k == "url" {
+			if s, ok := v.(string); ok {
+				parts = append(parts, fmt.Sprintf("url=%s", s))
+			}
+		} else if k == "a" || k == "b" || k == "op" {
+			parts = append(parts, fmt.Sprintf("%s=%v", k, v))
+		}
+	}
+	if len(parts) == 0 {
+		return ""
+	}
+	return "(" + strings.Join(parts, ", ") + ")"
+}
+
+func summarizeOutput(out map[string]any, tool string) string {
+	if echoed, ok := out["echoed"].(map[string]any); ok {
+		if msg, ok := echoed["message"].(string); ok {
+			if len(msg) > 80 {
+				return msg[:77] + "..."
+			}
+			return msg
+		}
+	}
+	if result, ok := out["result"].(float64); ok {
+		return fmt.Sprintf("result=%v", result)
+	}
+	if result, ok := out["result"].(int); ok {
+		return fmt.Sprintf("result=%d", result)
+	}
+	if body, ok := out["body"].(string); ok {
+		if len(body) > 60 {
+			return body[:57] + "..."
+		}
+		return body
+	}
+	if status, ok := out["status"].(string); ok {
+		return status
+	}
+	return ""
 }
 
 func webhookApprovalCallback(url string) policy.ApprovalCallback {

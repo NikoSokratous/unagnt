@@ -1,6 +1,6 @@
-name: hitl-demo-agent
+name: capabilities-demo-agent
 version: "1.0"
-description: HITL demo - policy requires approval for non-GET HTTP
+description: Showcase agent for video demo - policy (deny, require_approval), HITL, multi-tool
 
 model:
   provider: openai
@@ -11,6 +11,8 @@ autonomy_level: 2
 
 tools:
   - name: echo
+    version: "1"
+  - name: calc
     version: "1"
   - name: http_request
     version: "1"
