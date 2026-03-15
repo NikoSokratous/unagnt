@@ -8,7 +8,7 @@ import (
 
 func TestReplayCursor_StepForwardBack(t *testing.T) {
 	snap := &RunSnapshot{
-		ID:      "s1",
+		ID: "s1",
 		ToolCalls: []ToolExecution{
 			{Sequence: 1, ToolName: "echo", Input: json.RawMessage(`{}`)},
 			{Sequence: 2, ToolName: "calc", Input: json.RawMessage(`{"op":"add"}`)},

@@ -324,8 +324,18 @@ func buildSnapshotFromState(state *runtime.AgentState) *replay.RunSnapshot {
 			ToolName:  rec.Action.Tool,
 			Input:     inputBytes,
 			Output:    outputBytes,
-			Error:     func() string { if rec.Result != nil { return rec.Result.Error }; return "" }(),
-			Duration:  func() time.Duration { if rec.Result != nil { return rec.Result.Duration }; return 0 }(),
+			Error: func() string {
+				if rec.Result != nil {
+					return rec.Result.Error
+				}
+				return ""
+			}(),
+			Duration: func() time.Duration {
+				if rec.Result != nil {
+					return rec.Result.Duration
+				}
+				return 0
+			}(),
 		})
 		_ = i
 	}

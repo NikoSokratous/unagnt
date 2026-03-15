@@ -15,8 +15,8 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		body, _ := io.ReadAll(r.Body)
 		json.NewEncoder(w).Encode(map[string]any{
-			"status": "healthy",
-			"method": r.Method,
+			"status":        "healthy",
+			"method":        r.Method,
 			"received_body": string(body),
 		})
 	})

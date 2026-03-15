@@ -35,10 +35,10 @@ func (failingStepExecutor) ExecuteStep(ctx context.Context, agentName, goal stri
 }
 
 type flakyStepExecutor struct {
-	mu          sync.Mutex
-	failures    int
-	attempts    int
-	resultGoal  string
+	mu         sync.Mutex
+	failures   int
+	attempts   int
+	resultGoal string
 }
 
 type slowStepExecutor struct {
@@ -449,4 +449,3 @@ func TestRunnerQueueBackpressureUnderLoad(t *testing.T) {
 		t.Fatalf("expected both accepted and rejected submissions; accepted=%d rejected=%d", accepted, rejected)
 	}
 }
-

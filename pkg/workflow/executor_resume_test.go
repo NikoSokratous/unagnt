@@ -66,4 +66,3 @@ func TestExecutorResumeFromCheckpoint(t *testing.T) {
 		t.Fatalf("expected completed, got %s", resumed.Status)
 	}
 }
-

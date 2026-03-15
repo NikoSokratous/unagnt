@@ -17,9 +17,11 @@ import (
 // Used for DB agent demos; policy should restrict dangerous operations.
 type SQLQuery struct{}
 
-func (SQLQuery) Name() string        { return "sql_query" }
-func (SQLQuery) Version() string     { return "1" }
-func (SQLQuery) Description() string { return "Execute a SQL query against a SQLite database. Use for SELECT, INSERT, UPDATE, DELETE. Database path is optional (default: demo.db in current directory)." }
+func (SQLQuery) Name() string    { return "sql_query" }
+func (SQLQuery) Version() string { return "1" }
+func (SQLQuery) Description() string {
+	return "Execute a SQL query against a SQLite database. Use for SELECT, INSERT, UPDATE, DELETE. Database path is optional (default: demo.db in current directory)."
+}
 func (SQLQuery) Permissions() []tool.Permission {
 	return []tool.Permission{{Scope: "db", Required: true}}
 }

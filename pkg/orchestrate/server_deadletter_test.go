@@ -99,11 +99,11 @@ func TestHandleReplayDeadLetterAppliesOverrides(t *testing.T) {
 	}
 
 	body := map[string]any{
-		"goal":            "override goal",
-		"max_retries":     2,
+		"goal":             "override goal",
+		"max_retries":      2,
 		"retry_backoff_ms": 5,
-		"timeout_ms":      200,
-		"payload":         map[string]any{"x": 2},
+		"timeout_ms":       200,
+		"payload":          map[string]any{"x": 2},
 	}
 	b, _ := json.Marshal(body)
 

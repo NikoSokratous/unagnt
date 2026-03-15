@@ -23,21 +23,21 @@ import (
 
 // Server is a simple HTTP API server for run management.
 type Server struct {
-	addr           string
-	store          *store.SQLite
-	approvalQueue  policy.ApprovalQueue
-	mu             sync.Mutex
-	runs           map[string]context.CancelFunc
-	auth           *AuthMiddleware
-	apiKeys        []string
-	eventHub       *observe.EventHub
-	rateLimiter    *RateLimiter
-	rateLimitMw    *RateLimitMiddleware
-	runner         *Runner
-	triggerBus     *EventTriggerBus
-	scheduler      *Scheduler
-	webhooks       *WebhookHandler
-	pruner         *DeadLetterPruner
+	addr          string
+	store         *store.SQLite
+	approvalQueue policy.ApprovalQueue
+	mu            sync.Mutex
+	runs          map[string]context.CancelFunc
+	auth          *AuthMiddleware
+	apiKeys       []string
+	eventHub      *observe.EventHub
+	rateLimiter   *RateLimiter
+	rateLimitMw   *RateLimitMiddleware
+	runner        *Runner
+	triggerBus    *EventTriggerBus
+	scheduler     *Scheduler
+	webhooks      *WebhookHandler
+	pruner        *DeadLetterPruner
 }
 
 // QueueConfig configures the run queue backend.
